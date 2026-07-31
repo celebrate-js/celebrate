@@ -1,0 +1,125 @@
+/* 「決まった瞬間」の演出のキーフレーム（@tools/celebrate）。
+   入力に対する一度きりのアニメーションのみ。ループする装飾は置かない。
+
+   ここは @keyframes 専用。通常のスタイルは JSX の Tailwind クラスで記述する
+   （docs/design-system.md §4）。移動量・回転角・色といった粒ごとの差は
+   `--celebrate-*` カスタムプロパティで JSX から注入する。 */
+
+/* 印影が上から押されて収まる（少し大きく・傾いた状態から定位置へ）。 */
+@keyframes celebrate-stamp-in {
+  from {
+    transform: scale(1.7) rotate(-14deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(-6deg);
+    opacity: 1;
+  }
+}
+
+/* 記録更新の帯が中央に飛び込んでくる（stamp より大きく・水平のまま）。 */
+@keyframes celebrate-record-in {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 紙吹雪の粒が中心から散って消える。 */
+@keyframes celebrate-confetti-burst {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--celebrate-cx), var(--celebrate-cy)) rotate(var(--celebrate-cr));
+    opacity: 0;
+  }
+}
+
+.celebrate-sparkle-particle {
+  animation: celebrate-sparkle-burst 1.05s ease-out forwards;
+}
+
+.celebrate-sparkle-flash {
+  width: 1rem;
+  height: 1rem;
+  margin: -0.5rem;
+  opacity: 0;
+  animation: celebrate-sparkle-flash 0.65s ease-out forwards;
+}
+
+@keyframes celebrate-sparkle-burst {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  16% {
+    opacity: 1;
+  }
+  72% {
+    transform:
+      translate(
+        calc(-50% + var(--celebrate-sparkle-x)),
+        calc(-50% + var(--celebrate-sparkle-y))
+      )
+      scale(1)
+      rotate(var(--celebrate-sparkle-rotate));
+    opacity: 1;
+  }
+  100% {
+    transform:
+      translate(
+        calc(-50% + var(--celebrate-sparkle-x)),
+        calc(-50% + var(--celebrate-sparkle-y))
+      )
+      scale(0.65)
+      rotate(var(--celebrate-sparkle-rotate));
+    opacity: 0;
+  }
+}
+
+@keyframes celebrate-sparkle-flash {
+  0% {
+    transform: scale(0.25);
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(4.5);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebrate-sparkle-particle {
+    animation: none;
+    opacity: 0;
+  }
+
+  .celebrate-sparkle-flash {
+    animation-duration: 0.15s;
+    animation-name: celebrate-sparkle-flash-reduced;
+  }
+}
+
+@keyframes celebrate-sparkle-flash-reduced {
+  from {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
