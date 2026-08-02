@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   createSeededSparkleRandom,
   createSparkleParticles,
-  SPARKLE_DURATION_MS,
   SPARKLE_PARTICLE_COUNT,
 } from "./sparkle";
 import {
@@ -10,11 +9,6 @@ import {
   sparkleSoundIndex,
   SPARKLE_SOUND_PRESETS,
 } from "./sparkleSound";
-import {
-  CELEBRATION_DURATIONS_MS,
-  durationForCelebration,
-} from "./variants";
-import { CELEBRATE_DURATION_MS } from "./pieces";
 
 describe("sparkle particles", () => {
   it("32個を生成し、IDが一意になる", () => {
@@ -32,11 +26,12 @@ describe("sparkle particles", () => {
 
   it("全方位へ散り、toneはパレット範囲内に収まる", () => {
     const particles = createSparkleParticles(createSeededSparkleRandom(99));
-    const value = (cssValue: string) => Number(cssValue.replace("rem", ""));
-    expect(particles.some((particle) => value(particle.x) < 0)).toBe(true);
-    expect(particles.some((particle) => value(particle.x) > 0)).toBe(true);
-    expect(particles.some((particle) => value(particle.y) < 0)).toBe(true);
-    expect(particles.some((particle) => value(particle.y) > 0)).toBe(true);
+    const x = (p: (typeof particles)[number]) => Math.cos(p.angleRad) * p.speed;
+    const y = (p: (typeof particles)[number]) => Math.sin(p.angleRad) * p.speed;
+    expect(particles.some((p) => x(p) < 0)).toBe(true);
+    expect(particles.some((p) => x(p) > 0)).toBe(true);
+    expect(particles.some((p) => y(p) < 0)).toBe(true);
+    expect(particles.some((p) => y(p) > 0)).toBe(true);
     expect(particles.every((particle) => particle.tone >= 0 && particle.tone <= 3)).toBe(true);
   });
 });
@@ -59,11 +54,3 @@ describe("sparkle sound", () => {
   });
 });
 
-describe("variant duration", () => {
-  it("sparkleだけ固有durationで、既存variantの時間は変わらない", () => {
-    expect(durationForCelebration("sparkle")).toBe(SPARKLE_DURATION_MS);
-    expect(CELEBRATION_DURATIONS_MS.stamp).toBe(CELEBRATE_DURATION_MS);
-    expect(CELEBRATION_DURATIONS_MS.confetti).toBe(CELEBRATE_DURATION_MS);
-    expect(CELEBRATION_DURATIONS_MS.record).toBe(CELEBRATE_DURATION_MS);
-  });
-});

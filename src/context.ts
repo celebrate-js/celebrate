@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import type { CelebrateTheme } from "./theme";
-import type { CelebrateVariant, CelebrateVariantOptions } from "./variants";
+import type { CelebrateVariant, CelebrateVariantOptions } from "./recipes";
 
 // Provider が配る中身を宣言的 <Celebrate> と命令的 useCelebrate() の両方から参照するため、
 // context だけを独立したファイルに置く（Provider と Celebrate の相互 import を避ける）。
@@ -14,8 +14,8 @@ export interface CelebrateOptions extends CelebrateVariantOptions {
   anchor?: RefObject<HTMLElement | null>;
 }
 
-/** 演出を発火する関数。 */
-export type CelebrateFn = (variant: CelebrateVariant, options?: CelebrateOptions) => void;
+/** 演出を発火する関数。登録済みの名前・生の ReactNode のどちらも渡せる。 */
+export type CelebrateFn = (content: CelebrateVariant | ReactNode, options?: CelebrateOptions) => void;
 
 export interface CelebrateContextValue {
   celebrate: CelebrateFn;
@@ -29,7 +29,7 @@ export const CelebrateContext = createContext<CelebrateContextValue | null>(null
  * 演出を発火する関数を返す。`CelebrateProvider` の内側でだけ使える。
  *
  *   const celebrate = useCelebrate();
- *   celebrate("stamp", { text: "正", confetti: true });        // 画面中央
+ *   celebrate("stamp", { text: "正", with: ["confetti"] });     // 画面中央
  *   celebrate("confetti", { anchor: tileRef });                 // その要素の位置
  */
 export function useCelebrate(): CelebrateFn {

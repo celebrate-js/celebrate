@@ -1,91 +1,196 @@
-/* 「決まった瞬間」の演出のキーフレーム（@tools/celebrate）。
-   入力に対する一度きりのアニメーションのみ。ループする装飾は置かない。
+/* 「決まった瞬間」の演出のレイアウト・キーフレーム（@celebrate-js/celebrate）。
+   Tailwind 等のビルド機構に依存しない、素の CSS だけで完結させる
+   （npm単体で配布するため、利用側のビルド設定に左右されてはいけない）。
+   移動量・回転角・色といった粒ごとの差は `--celebrate-*` カスタムプロパティで
+   コンポーネント側から注入する。 */
 
-   ここは @keyframes 専用。通常のスタイルは JSX の Tailwind クラスで記述する
-   （docs/design-system.md §4）。移動量・回転角・色といった粒ごとの差は
-   `--celebrate-*` カスタムプロパティで JSX から注入する。 */
+/* border-spin（useCelebrateBorder）が conic-gradient を回すための角度プロパティ。
+   @property は補間可能な型として登録しないとアニメーションできない
+   （文字列として扱われ、0deg→360deg のような滑らかな回転にならない）。 */
+@property --celebrate-border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
 
-/* 印影が上から押されて収まる（少し大きく・傾いた状態から定位置へ）。 */
-@keyframes celebrate-stamp-in {
+/* 発火位置の基準点（confetti / pop の親）。見た目を持たない大きさゼロの箱。 */
+.celebrate-anchor {
+  position: relative;
+  display: block;
+  width: 0;
+  height: 0;
+}
+
+/* CelebrateProvider が document.body へポータル描画するオーバーレイ容器。 */
+.celebrate-overlay-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* CelebrateProvider に container を渡した場合はこちら。viewport全体（fixed）ではなく
+   呼び出し側が指定した要素の内側（absolute）に閉じ込める。呼び出し側はcontainerに
+   position: relative（か absolute/fixed）を設定しておくこと。 */
+.celebrate-overlay-root--scoped {
+  position: absolute;
+  z-index: 1;
+}
+
+/* transform（中心寄せ＋intensityのscale）は CelebrateProvider が instance ごとに
+   inline style で設定する（intensity は呼び出しごとに変わる値のため class では表現できない）。 */
+.celebrate-overlay-anchor {
+  position: absolute;
+}
+
+/* rain のような「画面全体を覆う実体コンテンツ」を持つ variant 専用。
+   celebrate-overlay-anchor と違って中心寄せの transform を持たない
+   （overlay-root が既に viewport 全体・transform なしなので、absolute inset:0 で足りる）。 */
+.celebrate-fullscreen-layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* options.with による合成（renderers.tsx）。primary の中心に重ねる variant を
+   絶対配置で被せる。primary 自体の position は問わない（block/inline どちらでも可）。 */
+.celebrate-compose {
+  position: relative;
+  display: inline-block;
+}
+
+.celebrate-compose-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* ==== enter-settle（軸F：入って、そのまま残る。stamp/medal/recordが共有する構造。
+   enterSettle.ts の enterSettleStyle() でパラメータ化する。開始値・イージングは
+   variantごとに違うが、「scale/縦位置/回転がease-outで収まりopacityが0→1になり
+   そのまま留まる」という形自体は同じなので、keyframeとfill-modeはここで一本化する） ==== */
+
+.celebrate-enter-settle {
+  animation-name: celebrate-enter-settle;
+  animation-fill-mode: forwards;
+}
+
+@keyframes celebrate-enter-settle {
   from {
-    transform: scale(1.7) rotate(-14deg);
+    transform: translateY(var(--celebrate-enter-translate-y, 0)) scale(var(--celebrate-enter-scale-from, 1))
+      rotate(var(--celebrate-enter-rotate-from, 0deg));
     opacity: 0;
   }
   to {
-    transform: scale(1) rotate(-6deg);
+    transform: translateY(0) scale(var(--celebrate-enter-scale-to, 1)) rotate(var(--celebrate-enter-rotate-to, 0deg));
     opacity: 1;
   }
 }
 
-/* 記録更新の帯が中央に飛び込んでくる（stamp より大きく・水平のまま）。 */
-@keyframes celebrate-record-in {
-  from {
-    transform: scale(0.6);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.06);
-    opacity: 1;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+/* ==== stamp ==== */
+
+.celebrate-stamp {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: 0.19rem solid var(--celebrate-stamp-color);
+  color: var(--celebrate-stamp-color);
+  border-radius: var(--celebrate-stamp-radius);
 }
 
-/* 紙吹雪の粒が中心から散って消える。 */
-@keyframes celebrate-confetti-burst {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--celebrate-cx), var(--celebrate-cy)) rotate(var(--celebrate-cr));
-    opacity: 0;
-  }
+.celebrate-stamp--lg {
+  width: 4.75rem;
+  height: 4.75rem;
 }
 
-.celebrate-sparkle-particle {
-  animation: celebrate-sparkle-burst 1.05s ease-out forwards;
+.celebrate-stamp-text {
+  font-family: var(--celebrate-stamp-font);
+  font-weight: 700;
+  line-height: 1;
+  font-size: 1.1rem;
+}
+
+.celebrate-stamp-text--lg {
+  font-size: 1.6rem;
+}
+
+/* ==== record ==== */
+
+.celebrate-record-banner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 2rem;
+  border: 0.19rem solid var(--celebrate-record-color);
+  color: var(--celebrate-record-color);
+  border-radius: var(--celebrate-stamp-radius);
+  background: var(--celebrate-record-bg);
+}
+
+.celebrate-record-banner-text {
+  font-family: var(--celebrate-stamp-font);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.18em;
+}
+
+.celebrate-record-banner-note {
+  font-family: var(--celebrate-stamp-font);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ==== confetti ==== */
+
+.celebrate-confetti-burst {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* 粒自体の見た目（大きさ・色・角丸）はConfettiBurst.tsxがParticleFieldのrenderへ
+   インラインstyleで直接渡す。位置・移動・フェードはParticleField/radialMotionが担う。 */
+
+/* ==== sparkle ==== */
+
+.celebrate-sparkle-burst {
+  position: relative;
+  display: block;
+  width: 0;
+  height: 0;
+  pointer-events: none;
 }
 
 .celebrate-sparkle-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 1rem;
   height: 1rem;
   margin: -0.5rem;
+  border-radius: 999px;
+  border: 2px solid var(--celebrate-sparkle-color);
   opacity: 0;
   animation: celebrate-sparkle-flash 0.65s ease-out forwards;
 }
 
-@keyframes celebrate-sparkle-burst {
-  0% {
-    transform: translate(-50%, -50%) scale(0) rotate(0deg);
-    opacity: 0;
-  }
-  16% {
-    opacity: 1;
-  }
-  72% {
-    transform:
-      translate(
-        calc(-50% + var(--celebrate-sparkle-x)),
-        calc(-50% + var(--celebrate-sparkle-y))
-      )
-      scale(1)
-      rotate(var(--celebrate-sparkle-rotate));
-    opacity: 1;
-  }
-  100% {
-    transform:
-      translate(
-        calc(-50% + var(--celebrate-sparkle-x)),
-        calc(-50% + var(--celebrate-sparkle-y))
-      )
-      scale(0.65)
-      rotate(var(--celebrate-sparkle-rotate));
-    opacity: 0;
-  }
-}
+/* 粒自体の見た目（大きさ・色・角丸）はSparkleBurst.tsxがParticleFieldのrenderへ
+   インラインstyleで直接渡す。位置・移動・フェードはParticleField/radialMotion
+   （動きの構造テンプレート。celebrate-particle-field-item参照）が担う。 */
 
 @keyframes celebrate-sparkle-flash {
   0% {
@@ -101,8 +206,748 @@
   }
 }
 
+/* ==== radial burst（中心からscale＋opacityで広がって消える汎用構造） ====
+   pop/ripple/ring/flash は全てこれのパラメータ違い（radialBurst.ts の
+   RADIAL_BURST_PRESETS 参照）。shape で塗り方（塗りつぶし／輪郭／グロー）を、
+   scale-from/to・size・duration・delay を CSS変数で受け取って動く。
+   以前は variant ごとに別コンポーネント・別キーフレームで実装されていたが、
+   中身が「scale + opacity」の一点だけだったため1つの構造に統合した。 */
+
+/* layer全部をまとめて動かす原点ラッパー（`origin`未指定時は静止＝従来と同じ見た目）。
+   anchorと同じ0x0の箱なので、内側の.celebrate-radialのtop/left:50%の基準点は変わらない。 */
+.celebrate-radial-origin {
+  position: absolute;
+  inset: 0;
+}
+
+.celebrate-radial {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--celebrate-radial-size);
+  height: var(--celebrate-radial-size);
+  margin: calc(var(--celebrate-radial-size) / -2);
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  animation-name: celebrate-radial-burst;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.celebrate-radial--fill {
+  background: var(--celebrate-radial-color);
+}
+
+.celebrate-radial--outline {
+  border: 0.15rem solid var(--celebrate-radial-color);
+}
+
+.celebrate-radial--glow {
+  background: radial-gradient(circle, var(--celebrate-radial-color) 0%, transparent 70%);
+}
+
+@keyframes celebrate-radial-burst {
+  0% {
+    transform: scale(var(--celebrate-radial-scale-from));
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(var(--celebrate-radial-scale-to));
+    opacity: 0;
+  }
+}
+
+/* ==== sakura（紙吹雪の季節バリエーション：舞い落ちる花びら） ==== */
+
+.celebrate-sakura-burst {
+  position: relative;
+  display: block;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* 花びらの大きさ・色はSakuraBurst.tsxがParticleFieldのrenderへインラインstyleで直接渡す。
+   位置・落下・横揺れ・フェードはParticleField/fallMotionが担う。形（長円を斜めに切った形）
+   だけはここで固定する。 */
+.celebrate-sakura-petal {
+  border-radius: 100% 0 100% 0;
+}
+
+/* ==== heart / star / emoji（GlyphBurst 共有） ==== */
+
+.celebrate-glyph-burst {
+  position: relative;
+  display: block;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.celebrate-glyph-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: var(--celebrate-glyph-size);
+  line-height: 1;
+  animation: celebrate-glyph-drift 0.9s ease-out forwards;
+}
+
+@keyframes celebrate-glyph-drift {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform:
+      translate(calc(-50% + var(--celebrate-glyph-x)), calc(-50% + var(--celebrate-glyph-y)))
+      scale(1)
+      rotate(var(--celebrate-glyph-rotate));
+    opacity: 0;
+  }
+}
+
+/* ==== bounce ==== */
+
+.celebrate-bounce-text {
+  display: inline-block;
+  font-family: var(--celebrate-stamp-font);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--celebrate-bounce-color);
+  animation: celebrate-bounce-in 0.5s cubic-bezier(0.36, 1.6, 0.4, 1) forwards;
+}
+
+@keyframes celebrate-bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ==== medal ==== */
+
+.celebrate-medal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  border: 0.19rem solid var(--celebrate-medal-color);
+  color: var(--celebrate-medal-color);
+  font-family: var(--celebrate-stamp-font);
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.celebrate-medal::before,
+.celebrate-medal::after {
+  content: "";
+  position: absolute;
+  top: 2.4rem;
+  width: 0.7rem;
+  height: 1.1rem;
+  background: var(--celebrate-medal-color);
+}
+
+.celebrate-medal::before {
+  left: 0.5rem;
+  transform: rotate(-18deg);
+  clip-path: polygon(0 0, 100% 0, 60% 100%, 0% 80%);
+}
+
+.celebrate-medal::after {
+  right: 0.5rem;
+  transform: rotate(18deg);
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 40% 100%);
+}
+
+
+/* ==== checkmark ==== */
+
+.celebrate-checkmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3rem;
+  height: 3rem;
+  margin: -1.5rem;
+  pointer-events: none;
+}
+
+.celebrate-checkmark-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* 円弧・チェックの描画自体は StrokePath（celebrate-stroke-path）に委ねる。
+   色は CheckmarkBurst.tsx が StrokeLine.color として直接渡す。 */
+
+/* ==== cracker（クラッカー：斜め上へのコーン状に紙テープが飛ぶ） ==== */
+
+.celebrate-cracker-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* リボン自体の見た目（太さ・長さ・色・回転）はCrackerBurst.tsxがParticleFieldの
+   renderへインラインstyleで直接渡す。位置・移動・フェードはParticleField/radialMotionが担う。 */
+
+
+/* ==== shake / hitstop（④環境・演出：画面全体側。<html> に付く class） ==== */
+
+html.celebrate-shake-active {
+  animation: celebrate-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes celebrate-shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+html.celebrate-hitstop-active::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 1200;
+  animation: celebrate-hitstop-flash 0.35s ease-out forwards;
+}
+
+@keyframes celebrate-hitstop-flash {
+  0% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* vignette は hitstop と同じ <html> だが、擬似要素は1要素につき before/after の
+   2つしか使えないため、hitstop（::after）と衝突しないよう ::before を使う。 */
+html.celebrate-vignette-active::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1150;
+  box-shadow: inset 0 0 min(14vw, 14vh) min(3vw, 3vh) rgba(10, 6, 20, 0.55);
+  opacity: 0;
+  animation: celebrate-vignette-pulse 0.65s ease-out forwards;
+}
+
+@keyframes celebrate-vignette-pulse {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ==== rain（④環境・演出：画面全体に降る紙吹雪。実体コンテンツを持つため
+   celebrate-fullscreen-layer 直下に描画される） ==== */
+
+.celebrate-rain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* 1粒＝1つのラッパー（vw位置固定）+ 中に1粒だけのParticleField（縦の落下を担当）。
+   粒自体の見た目（大きさ・色・回転）はConfettiRain.tsxがrenderへインラインstyleで渡す。 */
+.celebrate-rain-drop {
+  position: absolute;
+  top: 0;
+}
+
+/* ==== lightning（稲妻：画面の上端から下端まで貫く。実体を持つ全画面コンテンツ） ==== */
+
+.celebrate-lightning-strike {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  animation: celebrate-lightning-flicker 0.5s ease-out forwards;
+}
+
+/* ==== StrokePath（経路を描き下ろす構造テンプレート。lightningの稲光・shatterの
+   ヒビはどちらもstroke-dasharray/dashoffsetを0まで動かす同じ仕組みで、太さ・色・
+   duration・グローの強さが違うだけだった。RadialBurstと同じ「layers配列」の形）。 ==== */
+
+.celebrate-stroke-path-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.celebrate-stroke-path {
+  fill: none;
+  stroke: var(--celebrate-stroke-color, #fff);
+  stroke-width: var(--celebrate-stroke-width, 2);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  opacity: var(--celebrate-stroke-opacity, 1);
+  stroke-dasharray: var(--celebrate-stroke-dash, 160);
+  stroke-dashoffset: var(--celebrate-stroke-dash, 160);
+  animation: celebrate-stroke-draw var(--celebrate-stroke-duration, 0.2s) var(--celebrate-stroke-delay, 0ms)
+    ease-out forwards;
+}
+
+.celebrate-stroke-path--glow-electric {
+  filter:
+    drop-shadow(0 0 3px #fff)
+    drop-shadow(0 0 10px var(--celebrate-stroke-color))
+    drop-shadow(0 0 22px var(--celebrate-stroke-color));
+}
+
+.celebrate-stroke-path--glow-soft {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+}
+
+@keyframes celebrate-stroke-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 本体（雷鳴っぽい明滅）は wrapper 側の opacity で担当し、path 側は
+   stroke-dashoffset の「描き下ろし」だけに専念させる（同じ要素に opacity の
+   アニメーションを2つ重ねると後勝ちで片方が無効になるため、役割を分けた）。 */
+@keyframes celebrate-lightning-flicker {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  12% {
+    opacity: 0.2;
+  }
+  18% {
+    opacity: 1;
+  }
+  28% {
+    opacity: 0.4;
+  }
+  38% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.celebrate-lightning-strike-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  animation: celebrate-lightning-flash 0.5s ease-out forwards;
+}
+
+@keyframes celebrate-lightning-flash {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.35;
+  }
+  15% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.2;
+  }
+  30% {
+    opacity: 0;
+  }
+}
+
+/* ==== ClipReveal（マスク・リビール構造テンプレート。軸I=clip-reveal） ====
+   覆いをclip-pathで動かして中身を出し入れする。RadialBurst/ParticleField/StrokePathとは
+   別の描画軸（「粒・線を描き足す」のではなく「覆いを動かして中身を出し入れする」）。
+   edge違いは全部同じ仕組みで、"覆いが晴れる/覆う"のどちらの向きかは1つのkeyframeを
+   animation-direction: reverse で逆再生するだけで表現する（keyframeを倍にしない）。 */
+
+.celebrate-clip-reveal {
+  position: absolute;
+  inset: 0;
+  background: var(--celebrate-clip-reveal-color, #000);
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+  pointer-events: none;
+}
+
+.celebrate-clip-reveal--out {
+  animation-direction: reverse;
+}
+
+.celebrate-clip-reveal--left {
+  animation-name: celebrate-clip-reveal-left;
+}
+@keyframes celebrate-clip-reveal-left {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.celebrate-clip-reveal--right {
+  animation-name: celebrate-clip-reveal-right;
+}
+@keyframes celebrate-clip-reveal-right {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.celebrate-clip-reveal--top {
+  animation-name: celebrate-clip-reveal-top;
+}
+@keyframes celebrate-clip-reveal-top {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.celebrate-clip-reveal--bottom {
+  animation-name: celebrate-clip-reveal-bottom;
+}
+@keyframes celebrate-clip-reveal-bottom {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.celebrate-clip-reveal--center {
+  animation-name: celebrate-clip-reveal-center;
+}
+@keyframes celebrate-clip-reveal-center {
+  from {
+    clip-path: circle(0% at 50% 50%);
+  }
+  to {
+    clip-path: circle(75% at 50% 50%);
+  }
+}
+
+/* ==== float（ふわふわ：ゆらゆら揺れながらゆっくり浮かぶ） ==== */
+
+.celebrate-float {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 1.7rem;
+  line-height: 1;
+  animation: celebrate-float-drift 2.4s ease-in-out forwards;
+}
+
+/* CSSだけで描いた雲形（絵文字は使わない）。土台の角丸楕円 + 複数の円（puff）を
+   重ねて、大きくもこもこした輪郭にする（見た目は FloatDrift.tsx 側で puff を
+   4つ並べているので、ここでは土台と各 puff の大きさ・位置だけ決める）。 */
+.celebrate-float-cloud {
+  position: relative;
+  display: block;
+  width: 4.4rem;
+  height: 2rem;
+  background: #fff;
+  border-radius: 999px;
+  box-shadow: 0 0.12rem 0.35rem rgba(0, 0, 0, 0.1);
+}
+
+.celebrate-float-puff {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.celebrate-float-puff--1 {
+  width: 1.9rem;
+  height: 1.9rem;
+  top: -1.05rem;
+  left: 0.1rem;
+}
+
+.celebrate-float-puff--2 {
+  width: 2.4rem;
+  height: 2.4rem;
+  top: -1.35rem;
+  left: 1.35rem;
+}
+
+.celebrate-float-puff--3 {
+  width: 1.7rem;
+  height: 1.7rem;
+  top: -0.9rem;
+  left: 2.9rem;
+}
+
+.celebrate-float-puff--4 {
+  width: 1.3rem;
+  height: 1.3rem;
+  top: -0.5rem;
+  right: 0.05rem;
+}
+
+/* 揺れ幅を小さく・保持時間を長くして「穏やかに漂う」印象にする
+   （以前は速く左右に振れていて、もこもこした大きな雲には忙しなく見えていた）。 */
+@keyframes celebrate-float-drift {
+  0% {
+    transform: translate(-50%, -50%) translateY(0) scale(0.75);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(-0.2rem) scale(1);
+  }
+  45% {
+    transform: translate(calc(-50% - 0.4rem), calc(-50% - 1rem)) scale(1.02);
+  }
+  70% {
+    transform: translate(calc(-50% + 0.4rem), calc(-50% - 1.9rem)) scale(1);
+  }
+  100% {
+    transform: translate(-50%, calc(-50% - 2.9rem)) scale(0.92);
+    opacity: 0;
+  }
+}
+
+/* ==== ParticleField（拡張可能なエンジンの核） ====
+   transform/opacityはrAFでJS側から直接書き込まれる（motionProfile.ts参照）。
+   CSSはレイアウトの基準（絶対配置・原点）だけを持つ。 */
+
+.celebrate-particle-field-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform, opacity;
+}
+
+/* ==== firework（花火：複数の破裂点が時間差で咲く） ==== */
+
+.celebrate-firework {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* shellの破裂位置（オフセット）はFireworkBurst.tsxがtransformとしてインラインで直接渡す
+   （willow等style別のgravityがJS側の値になったため、CSSカスタムプロパティ経由をやめた）。 */
+.celebrate-firework-shell {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.celebrate-firework-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin: -0.3rem;
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0;
+  animation: celebrate-firework-flash 0.4s ease-out forwards;
+}
+
+/* 粒自体の見た目（大きさ・色）はFireworkBurst.tsxがParticleFieldのrenderへ
+   インラインstyleで直接渡す。位置・移動・フェードはParticleField/ballisticMotionが担う。 */
+.celebrate-firework-particle {
+  border-radius: 999px;
+}
+
+@keyframes celebrate-firework-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25% {
+    opacity: 0.9;
+    transform: scale(1.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+/* ==== shatter（画面ひび割れ崩壊：⑤段階エフェクト・時間軸型） ====
+   ①ヒビが入る→②広がる→③バキバキ（シェイク）→④破片が崩れ落ちる、の4局面。
+   実体を持つ全画面コンテンツなので celebrate-fullscreen-layer 直下に描画される。 */
+
+.celebrate-shatter {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.celebrate-shatter-shake-layer {
+  position: absolute;
+  inset: 0;
+  /* ③バキバキ：ヒビが伸び終わる頃（0.3s前後）に短く激しく揺れる。 */
+  animation: celebrate-shatter-shake 0.32s 0.28s ease-in-out;
+}
+
+@keyframes celebrate-shatter-shake {
+  10%,
+  90% {
+    transform: translate3d(-2px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(3px, -1px, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-5px, 1px, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(5px, -1px, 0);
+  }
+}
+
+/* ①②：ヒビが中心から伸びていく（StrokePath共通実装。celebrate-stroke-path参照）。 */
+
+/* ④：グリッド状の破片が、下段から少し遅れて重力方向へ崩れ落ちる。 */
+.celebrate-shatter-shard {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(10, 10, 20, 0.3));
+  opacity: 0;
+  animation: celebrate-shatter-fall 0.95s cubic-bezier(0.5, 0, 0.75, 0) forwards;
+}
+
+@keyframes celebrate-shatter-fall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  55% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--celebrate-shatter-fall-x), var(--celebrate-shatter-fall-y)) rotate(var(--celebrate-shatter-rotate));
+    opacity: 0;
+  }
+}
+
+/* ==== popup（テキストチャネル：「+1」のような浮遊表示） ==== */
+
+.celebrate-popup-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--celebrate-stamp-font);
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--celebrate-popup-color);
+  white-space: nowrap;
+  animation: celebrate-popup-float 0.9s ease-out forwards;
+}
+
+@keyframes celebrate-popup-float {
+  0% {
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0;
+  }
+  25% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, calc(-50% - 2.4rem)) scale(1);
+    opacity: 0;
+  }
+}
+
+/* ==== reduced-motion（#620 の必須要件） ==== */
+
 @media (prefers-reduced-motion: reduce) {
-  .celebrate-sparkle-particle {
+  .celebrate-stamp,
+  .celebrate-record-banner,
+  .celebrate-confetti-piece,
+  .celebrate-bounce-text,
+  .celebrate-medal {
+    animation-duration: 0.15s;
+    animation-name: celebrate-reduced-fade;
+  }
+
+  .celebrate-radial {
+    animation-duration: 0.12s !important;
+    animation-delay: 0s !important;
+  }
+
+  .celebrate-sparkle-particle,
+  .celebrate-glyph-particle,
+  .celebrate-sakura-petal {
     animation: none;
     opacity: 0;
   }
@@ -110,6 +955,65 @@
   .celebrate-sparkle-flash {
     animation-duration: 0.15s;
     animation-name: celebrate-sparkle-flash-reduced;
+  }
+
+  /* checkmarkのreduced-motionは`.celebrate-stroke-path`側のルール（下記）に一本化済み。 */
+
+  .celebrate-cracker-streamer,
+  .celebrate-popup-text {
+    animation-duration: 0.15s;
+    animation-name: celebrate-reduced-fade;
+  }
+
+  html.celebrate-shake-active {
+    animation: none;
+  }
+
+  html.celebrate-hitstop-active::after {
+    animation-duration: 0.12s;
+  }
+
+  html.celebrate-vignette-active::before {
+    animation-duration: 0.15s;
+  }
+
+  .celebrate-rain-piece {
+    animation-duration: 0.4s !important;
+  }
+
+  .celebrate-float {
+    animation-duration: 0.15s;
+    animation-name: celebrate-reduced-fade;
+  }
+
+  .celebrate-lightning-strike,
+  .celebrate-lightning-strike-flash {
+    animation-duration: 0.15s;
+  }
+
+  .celebrate-stroke-path {
+    animation-duration: 0.08s;
+  }
+
+  .celebrate-firework-particle {
+    animation: none;
+    opacity: 0;
+  }
+
+  .celebrate-firework-flash {
+    animation-duration: 0.15s;
+  }
+
+  .celebrate-shatter-shake-layer {
+    animation: none;
+  }
+
+  .celebrate-shatter-shard {
+    animation-duration: 0.2s;
+  }
+
+  .celebrate-clip-reveal {
+    animation-duration: 0.15s;
   }
 }
 
@@ -121,5 +1025,192 @@
   to {
     transform: scale(1.5);
     opacity: 0;
+  }
+}
+
+@keyframes celebrate-reduced-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==== border effects（useCelebrateBorder） ====
+   celebrate() のオーバーレイ方式と違い、呼び出し側が ref で渡した“既存の要素”自身に
+   直接 class を付け外しする（第3の方式。variantScreenEffect と同じ考え方だが、
+   対象は <html> ではなく個別の要素）。 */
+
+/* glow/neon/fire/ice/electric：box-shadowのパルス/フリッカー系は celebrate-border-glow.ts
+   から Web Animations API（Element.animate）で駆動する（CSS @keyframes はステップ数・
+   タイミングを実行時パラメータ化できないため）。この5つに対応する静的CSSは存在しない。 */
+
+/* spin/rainbow：要素の外周を conic-gradient のリングで縁取る。border-image は角丸に
+   追従しない（web.devのCSS border animationの知見どおり）ため、::beforeの
+   mask-compositeでリング状にくり抜く方式を使う。色の並び（--celebrate-border-conic-stops）
+   は borderConicRing.ts が呼び出し時に inline style で設定する。
+   sweep（spin）＝回り続ける、flash（rainbow）＝一度だけ現れて消える。 */
+.celebrate-border-conic-ring {
+  position: relative;
+  isolation: isolate;
+}
+
+.celebrate-border-conic-ring::before {
+  content: "";
+  position: absolute;
+  inset: -0.18rem;
+  border-radius: inherit;
+  padding: 0.18rem;
+  background: conic-gradient(from var(--celebrate-border-angle), var(--celebrate-border-conic-stops, #ff5f6d, #ffc371, #47cf73, #4aa8ff, #ff5f6d));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.celebrate-border-conic-ring--sweep::before {
+  animation: celebrate-border-conic-sweep calc(1.2s * var(--celebrate-border-duration-scale, 1)) linear;
+}
+
+@keyframes celebrate-border-conic-sweep {
+  from {
+    --celebrate-border-angle: 0deg;
+  }
+  to {
+    --celebrate-border-angle: 360deg;
+  }
+}
+
+.celebrate-border-conic-ring--flash::before {
+  opacity: 0;
+  animation: celebrate-border-conic-flash calc(0.9s * var(--celebrate-border-duration-scale, 1)) ease-out forwards;
+}
+
+@keyframes celebrate-border-conic-flash {
+  0% {
+    opacity: 0;
+    transform: rotate(0deg) scale(0.9);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(120deg) scale(1);
+  }
+}
+
+/* ring：glow と違い、ソフトな box-shadow ではなく輪郭のはっきりした二重リングが
+   外へ広がって消える。 */
+.celebrate-border-ring {
+  position: relative;
+}
+
+.celebrate-border-ring::before,
+.celebrate-border-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 0.12rem solid var(--celebrate-border-color, var(--accent, #d64545));
+  opacity: 0;
+  pointer-events: none;
+  animation: celebrate-border-ring-pulse calc(0.8s * var(--celebrate-border-duration-scale, 1)) ease-out forwards;
+}
+
+.celebrate-border-ring::after {
+  animation-delay: 0.15s;
+}
+
+@keyframes celebrate-border-ring-pulse {
+  0% {
+    inset: 0;
+    opacity: 1;
+  }
+  100% {
+    inset: -0.6rem;
+    opacity: 0;
+  }
+}
+
+/* ants：破線の輪をゆっくり回転させ、行進しているように見せる
+   （Photoshopの選択範囲の「マーチングアンツ」と同じ発想）。 */
+.celebrate-border-ants {
+  position: relative;
+}
+
+.celebrate-border-ants::before {
+  content: "";
+  position: absolute;
+  inset: -0.15rem;
+  border-radius: inherit;
+  border: 0.1rem dashed var(--celebrate-border-color, var(--accent, #d64545));
+  pointer-events: none;
+  animation:
+    celebrate-border-ants-march calc(1.2s * var(--celebrate-border-duration-scale, 1)) linear forwards,
+    celebrate-border-ants-fade calc(1.2s * var(--celebrate-border-duration-scale, 1)) ease-in forwards;
+}
+
+@keyframes celebrate-border-ants-march {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(140deg);
+  }
+}
+
+@keyframes celebrate-border-ants-fade {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* shine：斜めの光沢が枠を一度だけ横切る（つや消しカードのハイライト演出）。 */
+.celebrate-border-shine {
+  position: relative;
+  isolation: isolate;
+}
+
+.celebrate-border-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.75) 50%, transparent 65%);
+  background-size: 250% 250%;
+  background-position: -120% -120%;
+  pointer-events: none;
+  animation: celebrate-border-shine-sweep calc(0.7s * var(--celebrate-border-duration-scale, 1)) ease-out forwards;
+}
+
+@keyframes celebrate-border-shine-sweep {
+  to {
+    background-position: 120% 120%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebrate-border-conic-ring--sweep::before,
+  .celebrate-border-ants::before,
+  .celebrate-border-shine::after {
+    animation: none;
+  }
+
+  .celebrate-border-conic-ring--flash::before {
+    animation-duration: 0.2s;
+  }
+
+  .celebrate-border-ring::before,
+  .celebrate-border-ring::after {
+    animation-duration: 0.2s;
   }
 }

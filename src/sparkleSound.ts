@@ -1,3 +1,8 @@
+// Web Audio APIで合成する短い効果音（10プリセット）。音声ファイルを同梱しない
+// （npm単体配布でアセットを増やさないため）。`playChime`が実際の再生を担い、
+// `recipes.tsx`の各variantは固定のpreset番号を、`sparkle`だけ`chooseSparkleSound`で
+// ランダムなpresetを選ぶ。
+
 export interface SparkleSoundPreset {
   frequencies: readonly [number, number];
   waveform: OscillatorType;
@@ -31,20 +36,26 @@ export function chooseSparkleSound(
 }
 
 /**
+ * 指定した preset 番号（`SPARKLE_SOUND_PRESETS` の添字）で鳴らす。
  * ユーザー操作に同期して呼ぶ短い合成音。利用不可・ブロック時は何もせず終了する。
+ * `playSparkleSound` が「ランダムに選ぶ」薄いラッパーとしてこれを使う。
+ *
+ * @param gainScale 音量倍率（既定1）。intensity（コンボ数など）を反映する用途。
+ *   0.35 を超えると耳に痛くなりやすいので上限でクランプする。
  */
-export function playSparkleSound(random: () => number = Math.random): void {
+export function playChime(presetIndex: number, gainScale = 1): void {
   try {
     if (navigator.userActivation && !navigator.userActivation.isActive) return;
     const AudioContextCtor = window.AudioContext;
     if (!AudioContextCtor) return;
 
     const context = new AudioContextCtor();
-    const preset = chooseSparkleSound(random);
+    const preset = SPARKLE_SOUND_PRESETS[presetIndex % SPARKLE_SOUND_PRESETS.length]!;
     const now = context.currentTime;
+    const peakGain = Math.min(0.35, 0.12 * gainScale);
     const gain = context.createGain();
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.12, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(peakGain, now + 0.008);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + preset.durationSeconds);
     gain.connect(context.destination);
 
@@ -64,4 +75,9 @@ export function playSparkleSound(random: () => number = Math.random): void {
   } catch {
     // 音は演出の付加価値。ブラウザ制約で失敗してもUI操作へ例外を伝播させない。
   }
+}
+
+/** sparkle 用：毎回ランダムな preset で鳴らす（`playChime` の薄いラッパー）。 */
+export function playSparkleSound(random: () => number = Math.random, gainScale = 1): void {
+  playChime(sparkleSoundIndex(random()), gainScale);
 }

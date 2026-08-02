@@ -1,28 +1,66 @@
 {
-  "name": "@tools/celebrate",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@celebrate-js/celebrate",
+  "version": "0.1.0",
   "type": "module",
+  "description": "React向けの「決まった瞬間」の演出ライブラリ（印影スタンプ・紙吹雪・花火・ボーダーエフェクトなど）。",
+  "license": "MIT",
+  "author": "sato mikoto",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sato0825/celebrate-js.git"
+  },
+  "homepage": "https://github.com/sato0825/celebrate-js#readme",
+  "bugs": {
+    "url": "https://github.com/sato0825/celebrate-js/issues"
+  },
+  "keywords": [
+    "react",
+    "confetti",
+    "celebration",
+    "animation",
+    "ui-feedback",
+    "particles"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
+      "require": "./dist/react.cjs"
+    },
     "./celebrate.css": "./src/celebrate.css"
   },
+  "files": [
+    "dist",
+    "src/celebrate.css",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json"
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
-  "dependencies": {
-    "@tools/ui": "workspace:*"
-  },
   "devDependencies": {
-    "@tools/tsconfig": "workspace:*",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "jsdom": "^28.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "typescript": "^5.6.3"
+    "tsup": "^8.5.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
   }
 }
