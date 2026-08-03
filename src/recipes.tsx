@@ -488,14 +488,19 @@ export function renderCelebration(
   // with 自体は1段しか効かせない（無限にネストして重ねられると duration 計算・
   // 後片付けの見通しが立たなくなるため）。
   const { with: _ignored, ...layerOptions } = options;
+  // primaryを最後（DOM順で後）に置く：position:absoluteのcelebrate-compose-layerは
+  // z-index指定が無い限りDOM順で後の方が上に重なる。primaryを先に置くと、confetti/ring
+  // のような疎な装飾では気づきにくいが、大きく不透明なwithコンテンツ（自作バッジ等）を
+  // 重ねた瞬間にprimary本体が完全に隠れてしまう（実際に踏んだ不具合）。
+  // 装飾は本体の周り・背後に添えるもの、という前提でprimaryを常に最前面にする。
   return (
     <span className="celebrate-compose">
-      {primary}
       {layers.map((layer, index) => (
         <span key={index} className="celebrate-compose-layer">
           {renderContent(layer, layerOptions)}
         </span>
       ))}
+      {primary}
     </span>
   );
 }

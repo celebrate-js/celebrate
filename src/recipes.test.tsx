@@ -137,6 +137,20 @@ describe("renderCelebration", () => {
     const html = renderToStaticMarkup(<>{renderCelebration("confetti", {})}</>);
     expect(html).not.toContain("celebrate-compose");
   });
+
+  it("primary（本体）はwithレイヤーより後（＝DOM順で上＝画面上で前面）に描画される", () => {
+    // celebrate-compose-layerはposition:absoluteなので、DOM順で後の要素が上に重なる。
+    // primaryが先だと、大きく不透明なwithコンテンツ（自作バッジ等）に本体が完全に
+    // 隠れてしまう不具合があった。装飾（with）は本体の背後、本体は常に最前面。
+    const html = renderToStaticMarkup(
+      <>{renderCelebration("stamp", { text: "合格", with: [<span key="badge" data-testid="custom-badge" />] })}</>
+    );
+    const layerIndex = html.indexOf("celebrate-compose-layer");
+    const primaryIndex = html.indexOf("celebrate-stamp");
+    expect(layerIndex).toBeGreaterThan(-1);
+    expect(primaryIndex).toBeGreaterThan(-1);
+    expect(layerIndex).toBeLessThan(primaryIndex);
+  });
 });
 
 describe("typoの実行時警告", () => {
