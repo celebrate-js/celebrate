@@ -285,10 +285,12 @@ const spiralMotion: MotionProfile<SpiralParams> = (t, p) => {
   };
 };
 
-const SPIRAL_GLYPHS = ["🌀", "✨", "🎈"];
+// キラキラ・ハート・桜・星でまとめた「可愛い」テーマの一貫した絵柄セット
+// （元は🌀✨🎈という無関係な組み合わせで、テーマがバラバラだった）。
+const SPIRAL_GLYPHS = ["✨", "💖", "🌸", "⭐", "💫"];
 
 // エンジン直利用（Tier 3）：celebrate()もCATALOGも経由しない。ParticleFieldを
-// 直接JSXに置き、motionは自作関数・見た目も自由なReactNode（絵文字3種）を渡す。
+// 直接JSXに置き、motionは自作関数・見た目も自由なReactNode（絵文字5種）を渡す。
 function EngineDemo() {
   const [fireKey, setFireKey] = useState(0);
 
@@ -306,20 +308,24 @@ function EngineDemo() {
       <button className="combo-button" onClick={() => setFireKey((k) => k + 1)}>
         spiral 発火
       </button>
-      <div style={{ position: "relative", height: "6rem", marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ position: "relative", height: "9rem", marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <ParticleField
           key={fireKey}
-          particles={Array.from({ length: 9 }, (_, i) => ({
+          particles={Array.from({ length: 16 }, (_, i) => ({
             motion: spiralMotion,
             params: {
-              radius: 2 + (i % 3) * 0.7,
-              angularSpeed: 5 + i * 0.4,
-              fallSpeed: 3,
-              durationSeconds: 1.2,
+              radius: 1.4 + (i % 5) * 0.55,
+              angularSpeed: 3.4 + (i % 4) * 0.5,
+              fallSpeed: 2.2,
+              durationSeconds: 1.7,
             },
-            durationSeconds: 1.2,
-            delaySeconds: i * 0.03,
-            render: <span style={{ fontSize: "1.3rem" }}>{SPIRAL_GLYPHS[i % SPIRAL_GLYPHS.length]}</span>,
+            durationSeconds: 1.7,
+            delaySeconds: i * 0.025,
+            render: (
+              <span style={{ fontSize: `${1 + (i % 3) * 0.35}rem`, filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.15))" }}>
+                {SPIRAL_GLYPHS[i % SPIRAL_GLYPHS.length]}
+              </span>
+            ),
           }))}
         />
       </div>
@@ -338,11 +344,12 @@ function CustomBadge() {
         gap: "0.4rem",
         padding: "0.7rem 1.1rem",
         borderRadius: "999px",
-        background: "#222",
-        color: "#fff",
+        background: "#fff",
+        color: "#2b2620",
+        border: "1px solid #e6e1d8",
         fontWeight: 800,
         whiteSpace: "nowrap",
-        boxShadow: "0 8px 20px -6px rgba(0, 0, 0, 0.4)",
+        boxShadow: "0 8px 20px -6px rgba(0, 0, 0, 0.35)",
       }}
     >
       🛠️ 自作コンポーネント
