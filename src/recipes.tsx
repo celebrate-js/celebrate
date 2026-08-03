@@ -98,6 +98,13 @@ export interface CelebrateVariantOptions {
   /** 演出の強度。見た目の拡大率・durationの伸び・音量・振動に連続的に反映される。 */
   intensity?: number;
   /**
+   * 効果音のpreset番号（`SPARKLE_SOUND_PRESETS`の添字。0〜9、範囲外は循環する）を上書きする。
+   * 省略時は各variantの既定音（`sparkle`は毎回ランダム）。色やscaleと同じく、
+   * どの音を鳴らすかは呼び出し側が目的・用途に応じて決めるものであり、
+   * ライブラリ側で決め打ちにする理由はないため上書きを許可している。
+   */
+  soundPreset?: number;
+  /**
    * 表示し続ける時間（ms）の明示的な上書き。`with` に登録名ではない ReactNode を
    * 渡した場合、そのdurationはこの表から引けないため、必要なら明示的に指定する。
    * 省略時は「本体（＋登録済みの名前のwith）の中でいちばん長いもの」から自動計算する。
@@ -110,8 +117,11 @@ type HapticPattern = number | readonly number[];
 interface Recipe {
   render: (options: CelebrateVariantOptions) => ReactElement;
   durationMs: number;
-  /** gainScale は intensity 由来の音量倍率（既定1）。未指定＝この演出に音はない。 */
-  sound?: (gainScale: number) => void;
+  /**
+   * gainScale は intensity 由来の音量倍率（既定1）。未指定＝この演出に音はない。
+   * presetOverride は `options.soundPreset`（呼び出し側が明示的に指定した場合のみ）。
+   */
+  sound?: (gainScale: number, presetOverride?: number) => void;
   haptic?: HapticPattern;
   /** <html> に付け外しするクラス名（shake/hitstop/vignette）。見た目は自前で描かない。 */
   containerModifierClassName?: string;
@@ -121,8 +131,8 @@ interface Recipe {
 
 const fixedChime =
   (presetIndex: number) =>
-  (gainScale: number): void =>
-    playChime(presetIndex % SPARKLE_SOUND_PRESETS.length, gainScale);
+  (gainScale: number, presetOverride?: number): void =>
+    playChime((presetOverride ?? presetIndex) % SPARKLE_SOUND_PRESETS.length, gainScale);
 
 // カタログ（Tier1）に入れる基準：構造的な新しさ（RadialBurstかParticleFieldか等）ではなく、
 // UXの意味（どの瞬間に使うか）で1語の名前を持つ価値があるかどうか。pop/ripple/ring/flashは
@@ -193,7 +203,8 @@ export const RECIPES = {
   sparkle: {
     render: ({ theme, seed }) => <SparkleBurst theme={theme} seed={seed} />,
     durationMs: SPARKLE_DURATION_MS,
-    sound: (gainScale) => playSparkleSound(Math.random, gainScale),
+    sound: (gainScale, presetOverride) =>
+      presetOverride === undefined ? playSparkleSound(Math.random, gainScale) : playChime(presetOverride, gainScale),
     haptic: [8, 15, 8, 15, 8],
   },
   record: {
@@ -401,12 +412,12 @@ export function isFullScreenContent(content: CelebrateVariant | ReactNode): bool
  */
 export function playSoundsForCelebration(
   content: CelebrateVariant | ReactNode,
-  options?: Pick<CelebrateVariantOptions, "sound" | "with" | "intensity">
+  options?: Pick<CelebrateVariantOptions, "sound" | "with" | "intensity" | "soundPreset">
 ): void {
   if (options?.sound === false) return;
   const gainScale = options?.intensity === undefined ? 1 : intensityToGainMultiplier(options.intensity);
   const items = [content, ...withLayers(options?.with)];
-  for (const item of items) recipeFor(item)?.sound?.(gainScale);
+  for (const item of items) recipeFor(item)?.sound?.(gainScale, options?.soundPreset);
 }
 
 const MAX_VIBRATION_MS = 80;

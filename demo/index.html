@@ -394,6 +394,70 @@
           grid-template-columns: 1fr;
         }
       }
+
+      /* ==== APIリファレンス ==== */
+
+      .api-subsection {
+        margin-top: 1.75rem;
+      }
+
+      .api-subsection:first-of-type {
+        margin-top: 0;
+      }
+
+      .api-subsection h3 {
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0 0 0.4rem;
+      }
+
+      .api-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+        margin-top: 0.5rem;
+      }
+
+      .api-table th,
+      .api-table td {
+        text-align: left;
+        padding: 0.45rem 0.6rem;
+        border-bottom: 1px solid #e6e1d8;
+        vertical-align: top;
+      }
+
+      .api-table th {
+        color: #5a4a3a;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      .api-table td:first-child,
+      .api-table td:nth-child(2) {
+        white-space: nowrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      .api-table td:nth-child(3) {
+        color: #6b6154;
+        white-space: nowrap;
+      }
+
+      .api-table code {
+        background: #f0ece3;
+        border-radius: 0.25rem;
+        padding: 0.05rem 0.35rem;
+        font-size: 0.95em;
+      }
+
+      @media (max-width: 40rem) {
+        .api-table {
+          display: block;
+          overflow-x: auto;
+        }
+      }
     </style>
   </head>
   <body>

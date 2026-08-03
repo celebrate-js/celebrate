@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   RECIPES,
@@ -6,10 +7,12 @@ import {
   durationForCelebration,
   hasSoundForCelebration,
   isFullScreenContent,
+  playSoundsForCelebration,
   renderCelebration,
 } from "./recipes";
 import { SPARKLE_DURATION_MS } from "./sparkle";
 import { CELEBRATE_DURATION_MS } from "./pieces";
+import { SPARKLE_SOUND_PRESETS } from "./sparkleSound";
 
 describe("recipes", () => {
   it("sparkleだけ固有durationで、既存variantの時間は変わらない", () => {
@@ -41,6 +44,72 @@ describe("recipes", () => {
 
   it("CELEBRATE_VARIANT_NAMESはRECIPESの全キーを含む", () => {
     expect(new Set(CELEBRATE_VARIANT_NAMES)).toEqual(new Set(Object.keys(RECIPES)));
+  });
+});
+
+describe("playSoundsForCelebration（options.soundPreset）", () => {
+  let capturedFrequencies: number[];
+  let originalAudioContext: typeof window.AudioContext | undefined;
+
+  beforeEach(() => {
+    capturedFrequencies = [];
+    originalAudioContext = window.AudioContext;
+
+    class MockOscillator {
+      type = "sine";
+      frequency = {
+        setValueAtTime: (frequency: number) => {
+          capturedFrequencies.push(frequency);
+        },
+      };
+      connect = () => {};
+      start = () => {};
+      stop = () => {};
+    }
+    class MockGain {
+      gain = { setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} };
+      connect = () => {};
+    }
+    class MockAudioContext {
+      currentTime = 0;
+      createGain() {
+        return new MockGain();
+      }
+      createOscillator() {
+        return new MockOscillator();
+      }
+      resume() {
+        return Promise.resolve();
+      }
+      close() {
+        return Promise.resolve();
+      }
+    }
+    window.AudioContext = MockAudioContext as unknown as typeof AudioContext;
+  });
+
+  afterEach(() => {
+    window.AudioContext = originalAudioContext as typeof AudioContext;
+  });
+
+  it("soundPresetを指定しなければ、そのvariantの既定presetの音が鳴る（popはpreset 3）", () => {
+    playSoundsForCelebration("pop");
+    expect(capturedFrequencies).toEqual([...SPARKLE_SOUND_PRESETS[3]!.frequencies]);
+  });
+
+  it("soundPresetを指定すると、既定presetではなく指定した番号の音が鳴る", () => {
+    playSoundsForCelebration("pop", { soundPreset: 7 });
+    expect(capturedFrequencies).toEqual([...SPARKLE_SOUND_PRESETS[7]!.frequencies]);
+  });
+
+  it("音を持たないvariant（cracker）はsoundPresetを指定しても鳴らない", () => {
+    playSoundsForCelebration("cracker", { soundPreset: 7 });
+    expect(capturedFrequencies).toEqual([]);
+  });
+
+  it("sparkleにsoundPresetを指定すると、ランダム選択ではなく指定番号に固定される", () => {
+    playSoundsForCelebration("sparkle", { soundPreset: 2 });
+    expect(capturedFrequencies).toEqual([...SPARKLE_SOUND_PRESETS[2]!.frequencies]);
   });
 });
 

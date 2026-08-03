@@ -10,6 +10,8 @@ import {
   ClipReveal,
   Sequence,
   hasSoundForCelebration,
+  hasHapticForCelebration,
+  durationForCelebration,
   CELEBRATE_VARIANT_NAMES,
   type CelebrateVariant,
   type CelebrateVariantOptions,
@@ -1181,7 +1183,7 @@ function Quickstart() {
         <code>{"<CelebrateProvider>"}</code>で包んで<code>useCelebrate()</code>を呼ぶだけ。
         3段階（Tier）の自由度がある：①名前で選ぶカタログ（下記）、②複数局面を順番に切り替える合成層
         （<code>with</code>/<code>Sequence</code>）、③構造テンプレートに生のパラメータを渡すTier 3。
-        詳細は<a href="../docs/guide.md">ガイド</a>と<a href="../docs/api-reference.md">APIリファレンス</a>参照。
+        詳細は<a href="#catalog">上のカタログ</a>と<a href="#api-reference">下のAPIリファレンス</a>参照（リポジトリの<code>docs/</code>にも同内容のmarkdown版がある）。
       </p>
       <pre className="playground-code">
         <code>{QUICKSTART_CODE}</code>
@@ -1199,6 +1201,344 @@ function SectionDivider({ icon, title, description }: { icon: string; title: str
       </h2>
       <p>{description}</p>
     </div>
+  );
+}
+
+// APIリファレンス：docs/api-reference.mdの内容をこのページ上でも読めるようにしたもの
+// （リンクだけだと生のmarkdownファイルへ飛ぶだけになり、ドキュメントページとして
+// 情報量が足りないため、propsの型・既定値・説明の一覧をそのまま埋め込む）。
+interface ApiRow {
+  name: string;
+  type: string;
+  defaultValue?: string;
+  desc: string;
+}
+
+function ApiTable({ rows }: { rows: readonly ApiRow[] }) {
+  return (
+    <table className="api-table">
+      <thead>
+        <tr>
+          <th>prop</th>
+          <th>type</th>
+          <th>既定値</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr key={row.name}>
+            <td>
+              <code>{row.name}</code>
+            </td>
+            <td>
+              <code>{row.type}</code>
+            </td>
+            <td>{row.defaultValue ?? "-"}</td>
+            <td>{row.desc}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function ApiSubsection({ title, note, children }: { title: string; note?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="api-subsection">
+      <h3>{title}</h3>
+      {note && <p className="section-hint">{note}</p>}
+      {children}
+    </div>
+  );
+}
+
+const CELEBRATE_PROVIDER_PROPS: readonly ApiRow[] = [
+  { name: "theme", type: "CelebrateTheme", defaultValue: "組み込みの既定テーマ", desc: "意匠（色・角丸・書体）。個々のcelebrate()呼び出しで上書き可能。" },
+  {
+    name: "container",
+    type: "RefObject<HTMLElement | null>",
+    desc: "指定すると、rain/lightning/shatterのような画面全体エフェクトをviewport全体ではなくこの要素の内側に閉じ込める（position: relativeをこの要素に設定しておくこと）。省略時はdocument.body。",
+  },
+];
+
+const CELEBRATE_OPTIONS: readonly ApiRow[] = [
+  { name: "anchor", type: "RefObject<HTMLElement | null>", desc: "演出の基準にする要素。省略＝画面中央（グローバル）。渡す＝その要素の中心（ローカル）。" },
+  { name: "text", type: "string", defaultValue: '""', desc: "stamp / record / bounce / medal / popupで大きく出す文字。" },
+  { name: "note", type: "string", desc: "recordで大きい文字の下に添える一言（例：「れんぞく 7問」）。" },
+  { name: "size", type: '"md" | "lg"', defaultValue: '"md"', desc: "stampの印影の大きさ。" },
+  { name: "with", type: "CelebrateVariant | ReactNode | (...)[]", desc: "重ねて同時に出すもの。登録済みの名前・生のReactNode・その配列（混在可）。" },
+  { name: "theme", type: "CelebrateTheme", defaultValue: "Providerのtheme", desc: "この呼び出しだけ意匠を上書き。" },
+  { name: "sound", type: "boolean", defaultValue: "true", desc: "効果音を鳴らすか。登録済みの名前にだけ効果を持つ。" },
+  { name: "haptic", type: "boolean", defaultValue: "true", desc: "端末を振動させるか。登録済みの名前にだけ効果を持つ。" },
+  { name: "seed", type: "number", defaultValue: "ランダム", desc: "sparkle/sakura/heart/star/emoji/cracker：再現可能なテスト・デモ用。" },
+  { name: "glyphs", type: "readonly string[]", defaultValue: "variantごとの定番セット", desc: "heart/star/emoji：撒く文字・絵文字を上書き。" },
+  { name: "glyph", type: "string", defaultValue: "CSSで描いた雲形", desc: "float：漂わせる文字を指定（絵文字ではなく雲がデフォルト）。" },
+  { name: "color", type: "string", defaultValue: "淡いピンク／theme", desc: "sakura：花びらの色。pop/ripple/ring/flash：色の既定値を上書き。" },
+  { name: "scale", type: "number", defaultValue: "1", desc: "見た目の大きさ倍率。firework/pop/ripple/ring/flashが対応。" },
+  { name: "colors", type: "readonly string[]", defaultValue: "theme.confettiColors", desc: "firework：色パレットの上書き。" },
+  { name: "fireworkStyle", type: '"peony" | "willow" | "ring"', defaultValue: '"peony"', desc: "firework：花火の種類。" },
+  { name: "intensity", type: "number", defaultValue: "1", desc: "演出の強度。拡大率・duration・音量・振動に対数カーブで反映。" },
+  { name: "soundPreset", type: "number", defaultValue: "variantごとの既定音", desc: "効果音のpreset番号（SPARKLE_SOUND_PRESETSの添字）を上書きする。色やscaleと同じく、どの音を鳴らすかは呼び出し側が目的・用途に応じて決めるもの。" },
+  { name: "durationMs", type: "number", defaultValue: "自動計算", desc: "表示し続ける時間の明示的な上書き。withに生のReactNodeを渡した場合、そのdurationはカタログから引けないためここで指定する。" },
+];
+
+const RADIAL_BURST_LAYER_PROPS: readonly ApiRow[] = [
+  { name: "shape", type: '"fill" | "outline" | "glow"', desc: "塗り方。" },
+  { name: "scaleFrom", type: "number", desc: "開始時のscale。" },
+  { name: "scaleTo", type: "number", desc: "終了時のscale。" },
+  { name: "size", type: "number", desc: "要素の基準直径（rem）。" },
+  { name: "color", type: "string", defaultValue: "呼び出し側の色", desc: "このlayerだけ色を上書き。" },
+  { name: "durationMs", type: "number", defaultValue: "500", desc: "このlayer自体のアニメーション長。" },
+  { name: "delayMs", type: "number", defaultValue: "0", desc: "発火からの遅延。複数layerを時間差で重ねる場合に使う。" },
+];
+
+const RADIAL_BURST_PROPS: readonly ApiRow[] = [
+  { name: "scale", type: "number", defaultValue: "1", desc: "見た目の大きさ倍率。各layerのsizeにだけ掛かる。" },
+  { name: "color", type: "string", defaultValue: "theme.stampColor", desc: "色の既定値。layer自身のcolorが優先される。" },
+  {
+    name: "origin",
+    type: "readonly RadialOriginKeyframe[]",
+    desc: "原点（全layer共通の中心点）が経路上を移動する場合の経由点（2点以上）。省略時は原点固定。{offset: 0〜1, xRem, yRem}の配列で、Element.animateで駆動する。",
+  },
+  { name: "originDurationMs", type: "number", defaultValue: "800", desc: "原点移動アニメーションの長さ。" },
+];
+
+const PARTICLE_SPEC_PROPS: readonly ApiRow[] = [
+  { name: "motion", type: "MotionProfile<P>", desc: "(elapsedSeconds, params) => ParticleStateを満たす関数。プリセット（fallMotion等）か自作関数。" },
+  { name: "params", type: "P", desc: "motionに渡すパラメータ。" },
+  { name: "durationSeconds", type: "number", desc: "この粒の表示時間。" },
+  { name: "delaySeconds", type: "number", defaultValue: "0", desc: "発火からの遅延。" },
+  { name: "render", type: "ReactNode | ((state) => ReactNode)", defaultValue: "defaultRender", desc: "見た目。状態に応じて変えたい場合は関数で渡す。" },
+];
+
+const STROKE_LINE_PROPS: readonly ApiRow[] = [
+  { name: "points", type: "string", desc: "SVG polylineのpoints属性にそのまま渡せる文字列（直線区間のみ）。" },
+  { name: "d", type: "string", desc: "SVG pathのd属性にそのまま渡せる文字列（円弧などの曲線も表現できる）。" },
+  { name: "strokeWidth", type: "number", desc: "線の太さ。" },
+  { name: "dashLength", type: "number", desc: "stroke-dasharray/dashoffsetに使う値（経路のおおよその長さ）。" },
+  { name: "color", type: "string", defaultValue: '"#fff"', desc: "線の色。" },
+  { name: "opacity", type: "number", defaultValue: "1", desc: "不透明度。" },
+  { name: "glow", type: '"soft" | "electric"', desc: "グローの強さ。electric＝稲光相当、soft＝ヒビ相当。省略でグローなし。" },
+  { name: "durationMs", type: "number", desc: "描き下ろしのアニメーション長。" },
+  { name: "delayMs", type: "number", defaultValue: "0", desc: "発火からの遅延。" },
+];
+
+const CLIP_REVEAL_PROPS: readonly ApiRow[] = [
+  { name: "edge", type: '"left" | "right" | "top" | "bottom" | "center"', defaultValue: '"left"', desc: "どの方向へワイプするか。centerは円形のワイプ。" },
+  { name: "direction", type: '"in" | "out"', defaultValue: '"in"', desc: "in＝覆いが晴れて中身が見える。out＝覆いが閉じて中身を隠す（同じ経路の逆再生）。" },
+  { name: "durationMs", type: "number", defaultValue: "500", desc: "アニメーション長。" },
+  { name: "delayMs", type: "number", defaultValue: "0", desc: "発火からの遅延。" },
+  { name: "color", type: "string", defaultValue: '"#000"', desc: "カーテン自体の色。" },
+  { name: "children", type: "ReactNode", desc: "カーテンの下に見える内容。省略時は単色のカーテンだけを描く。" },
+];
+
+const SEQUENCE_PROPS: readonly ApiRow[] = [{ name: "steps", type: "readonly SequenceStep<TResult>[]", desc: "ステップの一覧。順番に表示する。" }];
+
+const SEQUENCE_STEP_PROPS: readonly ApiRow[] = [
+  { name: "render", type: "(prevResult) => ReactNode", desc: "このステップの内容。前ステップの結果（初段はundefined）を受け取れる。" },
+  { name: "durationMs", type: "number", desc: "このステップの表示時間。省略時はこのステップで止まる（最後のステップに使う）。" },
+  { name: "computeResult", type: "(prevResult) => TResult", defaultValue: "前段の結果を引き継ぐ", desc: "次のステップに渡す値を計算する。" },
+  { name: "onEnter", type: "(prevResult) => void", desc: "このステップが始まった瞬間に1回だけ呼ばれる（効果音・振動などをステップ単位に持たせる）。" },
+];
+
+const ENTER_SETTLE_OPTIONS: readonly ApiRow[] = [
+  { name: "scaleFrom", type: "number", defaultValue: "1", desc: "開始時のscale。" },
+  { name: "scaleTo", type: "number", defaultValue: "1", desc: "終了時のscale。" },
+  { name: "translateYFromRem", type: "number", defaultValue: "0", desc: "開始時の縦方向オフセット（rem。負で上から）。" },
+  { name: "rotateFromDeg", type: "number", defaultValue: "0", desc: "開始時の回転（度）。" },
+  { name: "rotateToDeg", type: "number", defaultValue: "0", desc: "終了時の回転（度）。傾いたまま留めたい場合（stamp）はここも指定する。" },
+  { name: "easing", type: '"settle" | "overshoot"', defaultValue: '"settle"', desc: "settle＝素直に収まる。overshoot＝行き過ぎてから戻るバネ的な動き（record相当）。" },
+  { name: "durationMs", type: "number", defaultValue: "300", desc: "アニメーション長。" },
+];
+
+const USE_CELEBRATE_BORDER_RETURN: readonly ApiRow[] = [
+  { name: "ref", type: "RefObject<T | null>", desc: "装飾したい要素に渡す。" },
+  {
+    name: "celebrateBorder",
+    type: "(trigger?, options?) => void",
+    desc: "発火する。triggerはカタログの名前（BorderEffectKind）か、glowPreset()等が返す生のプリセット。",
+  },
+];
+
+const CELEBRATE_BORDER_OPTIONS: readonly ApiRow[] = [
+  { name: "intensity", type: "number", defaultValue: "1", desc: "演出の強度。durationに対数カーブで反映される（全機構＝glow/conicRing/class共通で効く）。" },
+];
+
+interface BorderKindRow {
+  kind: string;
+  mechanism: string;
+  durationMs: number;
+  desc: string;
+}
+
+const BORDER_KIND_ROWS: readonly BorderKindRow[] = [
+  { kind: "glow", mechanism: "glow", durationMs: 900, desc: "box-shadowを外へ広げながらフェードする1回パルス。" },
+  { kind: "neon", mechanism: "glow", durationMs: 1000, desc: "ネオンサインのように明滅してから消える。" },
+  { kind: "fire", mechanism: "glow", durationMs: 1100, desc: "暖色2色のゆらめき。" },
+  { kind: "ice", mechanism: "glow", durationMs: 1100, desc: "寒色2色の静かなシマー。" },
+  { kind: "electric", mechanism: "glow", durationMs: 700, desc: "稲妻のような離散的なジッター（neonより速い）。" },
+  { kind: "spin", mechanism: "conicRing", durationMs: 1200, desc: "外周をconic-gradientのリングが回り続ける。" },
+  { kind: "rainbow", mechanism: "conicRing", durationMs: 900, desc: "虹色のリングが一度だけ現れて消える。" },
+  { kind: "ring", mechanism: "class", durationMs: 800, desc: "輪郭のはっきりした二重リングが外へ広がって消える。" },
+  { kind: "ants", mechanism: "class", durationMs: 1200, desc: "破線の輪がゆっくり回転する（マーチングアンツ）。" },
+  { kind: "shine", mechanism: "class", durationMs: 700, desc: "斜めの光沢が一度だけ横切る。" },
+];
+
+function BorderKindTable() {
+  return (
+    <table className="api-table">
+      <thead>
+        <tr>
+          <th>kind</th>
+          <th>機構</th>
+          <th>既定duration</th>
+          <th>説明</th>
+        </tr>
+      </thead>
+      <tbody>
+        {BORDER_KIND_ROWS.map((row) => (
+          <tr key={row.kind}>
+            <td>
+              <code>{row.kind}</code>
+            </td>
+            <td>
+              <code>{row.mechanism}</code>
+            </td>
+            <td>{row.durationMs}ms</td>
+            <td>{row.desc}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+const USE_CONTAINER_MODIFIER_ARGS: readonly ApiRow[] = [
+  { name: "className", type: "string", desc: "<html>に付け外しするクラス名。" },
+  { name: "durationMs", type: "number", desc: "このクラスを保持する時間。" },
+];
+
+const REWARD_TIER_PROPS: readonly ApiRow[] = [
+  { name: "chance", type: "number", desc: "この階級が選ばれる相対重み（合計が1である必要はない）。" },
+  { name: "with", type: "W", desc: "この階級で重ねるもの（celebrate()のoptions.withにそのまま渡せる）。" },
+];
+
+// variant一覧テーブル：名前・カテゴリ・duration・sound/hapticの有無。
+// ハードコードした数値を別途持つと実装とズレる（SSOTでなくなる）ため、
+// CATALOG_CATEGORIES（カタログセクションと共通のデータ）とdurationForCelebration()/
+// hasSoundForCelebration()/hasHapticForCelebration()（recipes.tsxの実データ）から
+// 実行時に組み立てる。
+const VARIANT_TO_CATEGORY = new Map<CelebrateVariant, string>(
+  CATALOG_CATEGORIES.flatMap((category) => category.variants.map((v) => [v.variant, category.title] as const))
+);
+
+function VariantTable() {
+  return (
+    <table className="api-table">
+      <thead>
+        <tr>
+          <th>variant</th>
+          <th>category</th>
+          <th>duration</th>
+          <th>sound</th>
+          <th>haptic</th>
+        </tr>
+      </thead>
+      <tbody>
+        {CELEBRATE_VARIANT_NAMES.map((variant) => (
+          <tr key={variant}>
+            <td>
+              <code>{variant}</code>
+            </td>
+            <td>{VARIANT_TO_CATEGORY.get(variant) ?? "-"}</td>
+            <td>{durationForCelebration(variant)}ms</td>
+            <td>{hasSoundForCelebration(variant) ? "🔈" : "-"}</td>
+            <td>{hasHapticForCelebration(variant) ? "📳" : "-"}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function ApiReferenceSection() {
+  return (
+    <section id="api-reference" className="doc-section">
+      <p className="section-title">
+        <span>📚</span>
+        <span>API リファレンス</span>
+      </p>
+      <p className="section-hint">
+        各propsの型・既定値・説明の一覧（<code>docs/api-reference.md</code>と同内容）。使い方の説明・コード例はこのページの上のセクション、または
+        <code>docs/guide.md</code>参照。
+      </p>
+
+      <ApiSubsection title="CelebrateVariant 一覧" note={<>登録済みの{CELEBRATE_VARIANT_NAMES.length}variant。durationMs/sound/hapticは実装から実行時に取得した値（ハードコードではない）。</>}>
+        <VariantTable />
+      </ApiSubsection>
+
+      <ApiSubsection title="CelebrateProviderProps">
+        <ApiTable rows={CELEBRATE_PROVIDER_PROPS} />
+      </ApiSubsection>
+
+      <ApiSubsection title="CelebrateOptions" note={<>celebrate(content, options)の第二引数。</>}>
+        <ApiTable rows={CELEBRATE_OPTIONS} />
+      </ApiSubsection>
+
+      <ApiSubsection title="RadialBurstLayer / RadialBurst">
+        <ApiTable rows={RADIAL_BURST_LAYER_PROPS} />
+        <p className="section-hint" style={{ marginTop: "0.75rem" }}>
+          RadialBurst自体のprops（layers/children/theme/classNameに加えて）：
+        </p>
+        <ApiTable rows={RADIAL_BURST_PROPS} />
+      </ApiSubsection>
+
+      <ApiSubsection title="ParticleSpec<P>">
+        <ApiTable rows={PARTICLE_SPEC_PROPS} />
+      </ApiSubsection>
+
+      <ApiSubsection title="StrokeLine" note={<>pointsとdはどちらか一方を指定する（直線区間のみならpoints、円弧など曲線を含むならd）。</>}>
+        <ApiTable rows={STROKE_LINE_PROPS} />
+      </ApiSubsection>
+
+      <ApiSubsection title="ClipReveal" note={<>覆いをclip-pathで動かして中身を出し入れするプリミティブ（軸I=clip-reveal）。</>}>
+        <ApiTable rows={CLIP_REVEAL_PROPS} />
+      </ApiSubsection>
+
+      <ApiSubsection title="Sequence / SequenceStep<TResult>">
+        <ApiTable rows={SEQUENCE_PROPS} />
+        <p className="section-hint" style={{ marginTop: "0.75rem" }}>
+          <code>SequenceStep&lt;TResult&gt;</code>：
+        </p>
+        <ApiTable rows={SEQUENCE_STEP_PROPS} />
+      </ApiSubsection>
+
+      <ApiSubsection title="enterSettleStyle(options)" note={<>「入って、そのまま残る」構造テンプレート（stamp/medal/recordが共有）。EnterSettleOptionsは全て省略可。</>}>
+        <ApiTable rows={ENTER_SETTLE_OPTIONS} />
+      </ApiSubsection>
+
+      <ApiSubsection title="useCelebrateBorder()">
+        <p className="section-hint">戻り値：</p>
+        <ApiTable rows={USE_CELEBRATE_BORDER_RETURN} />
+        <p className="section-hint" style={{ marginTop: "0.75rem" }}>
+          <code>CelebrateBorderOptions</code>：
+        </p>
+        <ApiTable rows={CELEBRATE_BORDER_OPTIONS} />
+        <p className="section-hint" style={{ marginTop: "0.75rem" }}>
+          <code>BORDER_EFFECT_KINDS</code>（10種）は実質2機構＋単純なCSSクラス3種に集約されている：
+        </p>
+        <BorderKindTable />
+      </ApiSubsection>
+
+      <ApiSubsection title="useContainerModifier()">
+        <ApiTable rows={USE_CONTAINER_MODIFIER_ARGS} />
+      </ApiSubsection>
+
+      <ApiSubsection title="RewardTier<W>">
+        <ApiTable rows={REWARD_TIER_PROPS} />
+      </ApiSubsection>
+    </section>
   );
 }
 
@@ -1230,6 +1570,7 @@ export function App() {
       <EngineDemo />
       <ReactNodeDemo />
       <ScopedDemo />
+      <ApiReferenceSection />
     </CelebrateProvider>
   );
 }

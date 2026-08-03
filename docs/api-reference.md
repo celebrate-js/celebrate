@@ -29,6 +29,7 @@
 | `colors` | `readonly string[]` | `theme.confettiColors` | `firework`：色パレットの上書き。 |
 | `fireworkStyle` | `"peony" \| "willow" \| "ring"` | `"peony"` | `firework`：花火の種類。 |
 | `intensity` | `number` | `1` | 演出の強度。拡大率・duration・音量・振動に対数カーブで反映。 |
+| `soundPreset` | `number` | 各variantの既定音（`sparkle`は毎回ランダム） | 効果音のpreset番号（`SPARKLE_SOUND_PRESETS`の添字。範囲外は循環する）を上書きする。どの音を鳴らすかは色やscaleと同じく呼び出し側が目的・用途に応じて決めるものなので、ライブラリ側で決め打ちにしていない。 |
 | `durationMs` | `number` | 自動計算 | 表示し続ける時間の明示的な上書き。`with`に生のReactNodeを渡した場合、そのdurationはカタログから引けないためここで指定する。 |
 
 ## `RadialBurstLayer` props
