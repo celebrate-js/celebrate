@@ -12,9 +12,11 @@ import { DEFAULT_CELEBRATE_THEME, type CelebrateTheme } from "./theme";
 export interface ConfettiBurstProps {
   theme?: CelebrateTheme;
   className?: string;
+  /** 色パレットを上書きする（省略時は theme.confettiColors）。firework等と同じ形。 */
+  colors?: readonly string[];
 }
 
-function toParticleSpec(piece: ConfettiPiece, index: number, theme: CelebrateTheme): ParticleSpec<RadialMotionParams> {
+function toParticleSpec(piece: ConfettiPiece, index: number, palette: readonly string[], theme: CelebrateTheme): ParticleSpec<RadialMotionParams> {
   return {
     motion: radialMotion,
     params: { angleRad: piece.angleRad, speed: piece.speed, durationSeconds: CONFETTI_DURATION_SECONDS },
@@ -30,7 +32,7 @@ function toParticleSpec(piece: ConfettiPiece, index: number, theme: CelebrateThe
           {
             width: `${piece.size}rem`,
             height: `${piece.size}rem`,
-            background: theme.confettiColors[piece.tone],
+            background: palette[piece.tone % palette.length],
             borderRadius: piece.round ? "999px" : theme.pieceRadius,
             transform: `rotate(${piece.rotateDeg}deg)`,
           } as CSSProperties
@@ -41,10 +43,11 @@ function toParticleSpec(piece: ConfettiPiece, index: number, theme: CelebrateThe
 }
 
 /** 中心から粒が散る紙吹雪（ワンショット）。 */
-export function ConfettiBurst({ theme = DEFAULT_CELEBRATE_THEME, className }: ConfettiBurstProps) {
+export function ConfettiBurst({ theme = DEFAULT_CELEBRATE_THEME, className, colors }: ConfettiBurstProps) {
+  const palette = colors ?? theme.confettiColors;
   return (
     <span aria-hidden="true" className={clsx("celebrate-confetti-burst", className)}>
-      <ParticleField particles={CONFETTI_PIECES.map((piece, i) => toParticleSpec(piece, i, theme))} />
+      <ParticleField particles={CONFETTI_PIECES.map((piece, i) => toParticleSpec(piece, i, palette, theme))} />
     </span>
   );
 }

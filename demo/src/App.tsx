@@ -1046,10 +1046,26 @@ function formatOptionsSnippet(options: CelebrateVariantOptions, withList: readon
   if (options.note) lines.push(`  note: "${options.note}",`);
   if (options.intensity !== undefined) lines.push(`  intensity: ${options.intensity},`);
   if (options.sizeRem !== undefined) lines.push(`  sizeRem: ${options.sizeRem},`);
+  if (options.colors) lines.push(`  colors: [${options.colors.map((c) => `"${c}"`).join(", ")}],`);
   if (options.theme) lines.push(`  theme: { ...DEFAULT_CELEBRATE_THEME, stampColor: "${options.theme.stampColor}" },`);
   if (lines.length === 0) return "";
   return `, {\n${lines.join("\n")}\n}`;
 }
+
+// このvariantにこのoptionが実際に効くかどうか（recipes.tsxのrender関数が
+// 実際に参照しているかどうかと一致させる）。合わないoptionをUIに出しっぱなしにすると
+// 「効かないのに設定できるように見える」ミスリードになるため、Playgroundでは
+// 選んだvariantに応じてコントロール自体を出し分ける。
+const TEXT_VARIANTS = new Set<CelebrateVariant>(["stamp", "record", "bounce", "medal", "popup"]);
+const NOTE_VARIANTS = new Set<CelebrateVariant>(["record"]);
+const SIZE_VARIANTS = new Set<CelebrateVariant>(["firework", "pop", "ripple", "ring", "flash"]);
+// 色の指定方法がvariantによって違う：RadialBurst系(pop/ripple/ring/flash)・stamp系・record等は
+// theme.stampColorの単色上書き（options.color→なければtheme経由）で効くが、粒の集合を
+// 複数トーンで塗るvariant（confetti/sparkle/cracker/rain/firework）はtheme.confettiColors
+// （4色パレット）かoptions.colorsでしか色を変えられず、stampColorを変えても何も起きない
+// （実際にこれで「fireworkで色を変えても反映されない」というバグを踏んだ）。
+// Playgroundの1つの色スウォッチをどちらに流し込むかを、選んだvariantで出し分ける。
+const PALETTE_VARIANTS = new Set<CelebrateVariant>(["confetti", "sparkle", "cracker", "rain", "firework"]);
 
 function Playground() {
   const celebrate = useCelebrate();
@@ -1060,6 +1076,10 @@ function Playground() {
   const [note, setNote] = useState("");
   const [color, setColor] = useState(DEFAULT_PLAYGROUND_COLOR);
   const [sizeRem, setSizeRem] = useState<number | null>(null);
+  const supportsText = TEXT_VARIANTS.has(variant);
+  const supportsNote = NOTE_VARIANTS.has(variant);
+  const supportsSize = SIZE_VARIANTS.has(variant);
+  const usesPalette = PALETTE_VARIANTS.has(variant);
 
   const toggleWith = (target: CelebrateVariant) => {
     setWithList((prev) => (prev.includes(target) ? prev.filter((v) => v !== target) : [...prev, target]));
@@ -1068,13 +1088,19 @@ function Playground() {
   const options = useMemo<CelebrateVariantOptions>(() => {
     const o: CelebrateVariantOptions = {};
     if (withList.length > 0) o.with = withList;
-    if (text) o.text = text;
-    if (note) o.note = note;
+    if (supportsText && text) o.text = text;
+    if (supportsNote && note) o.note = note;
     if (intensity !== 1) o.intensity = intensity;
-    if (sizeRem !== null) o.sizeRem = sizeRem;
-    if (color !== DEFAULT_PLAYGROUND_COLOR) o.theme = { ...DEFAULT_CELEBRATE_THEME, stampColor: color };
+    if (supportsSize && sizeRem !== null) o.sizeRem = sizeRem;
+    if (color !== DEFAULT_PLAYGROUND_COLOR) {
+      if (usesPalette) {
+        o.colors = [color];
+      } else {
+        o.theme = { ...DEFAULT_CELEBRATE_THEME, stampColor: color };
+      }
+    }
     return o;
-  }, [withList, text, note, intensity, sizeRem, color]);
+  }, [withList, text, note, intensity, sizeRem, color, supportsText, supportsNote, supportsSize, usesPalette]);
 
   const code = `celebrate("${variant}"${formatOptionsSnippet(options, withList)});`;
 
@@ -1123,31 +1149,39 @@ function Playground() {
               onChange={(e) => setIntensity(Number(e.target.value))}
             />
           </label>
-          <label className="playground-checkbox">
-            <input type="checkbox" checked={sizeRem !== null} onChange={(e) => setSizeRem(e.target.checked ? 5 : null)} />
-            sizeRem を指定する（絶対サイズ・firework/pop/ripple/ring/flashのみ対応）
-          </label>
-          {sizeRem !== null && (
+          {supportsSize && (
+            <>
+              <label className="playground-checkbox">
+                <input type="checkbox" checked={sizeRem !== null} onChange={(e) => setSizeRem(e.target.checked ? 5 : null)} />
+                sizeRem を指定する（絶対サイズ）
+              </label>
+              {sizeRem !== null && (
+                <label>
+                  sizeRem: {sizeRem.toFixed(1)}rem
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="12"
+                    step="0.5"
+                    value={sizeRem}
+                    onChange={(e) => setSizeRem(Number(e.target.value))}
+                  />
+                </label>
+              )}
+            </>
+          )}
+          {supportsText && (
             <label>
-              sizeRem: {sizeRem.toFixed(1)}rem
-              <input
-                type="range"
-                min="0.5"
-                max="12"
-                step="0.5"
-                value={sizeRem}
-                onChange={(e) => setSizeRem(Number(e.target.value))}
-              />
+              text
+              <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="例：合格" />
             </label>
           )}
-          <label>
-            text
-            <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="例：合格" />
-          </label>
-          <label>
-            note
-            <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="例：れんぞく 7問" />
-          </label>
+          {supportsNote && (
+            <label>
+              note
+              <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="例：れんぞく 7問" />
+            </label>
+          )}
           <label>
             color
             <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
@@ -1339,7 +1373,7 @@ const CELEBRATE_OPTIONS: readonly ApiRow[] = [
   { name: "color", type: "string", defaultValue: "淡いピンク／theme", desc: "sakura：花びらの色。pop/ripple/ring/flash：色の既定値を上書き。" },
   { name: "scale", type: "number", defaultValue: "1", desc: "見た目の大きさ倍率。firework/pop/ripple/ring/flashが対応。" },
   { name: "sizeRem", type: "number", defaultValue: "-", desc: "見た目の大きさの絶対値（rem）。scaleと違い基準サイズを意識せず直接remで指定できる。両方指定するとsizeRemが優先される。" },
-  { name: "colors", type: "readonly string[]", defaultValue: "theme.confettiColors", desc: "firework：色パレットの上書き。" },
+  { name: "colors", type: "readonly string[]", defaultValue: "theme.confettiColors", desc: "confetti/sparkle/cracker/rain/firework：色パレットの上書き。theme.stampColorではなくtheme.confettiColorsで塗るため、単色を変えたい場合はcolorではなくこちら。" },
   { name: "fireworkStyle", type: '"peony" | "willow" | "ring"', defaultValue: '"peony"', desc: "firework：花火の種類。" },
   { name: "intensity", type: "number", defaultValue: "1", desc: "演出の強度。拡大率・duration・音量・振動に対数カーブで反映。" },
   { name: "soundPreset", type: "number", defaultValue: "variantごとの既定音", desc: "効果音のpreset番号（SPARKLE_SOUND_PRESETSの添字）を上書きする。色やscaleと同じく、どの音を鳴らすかは呼び出し側が目的・用途に応じて決めるもの。" },

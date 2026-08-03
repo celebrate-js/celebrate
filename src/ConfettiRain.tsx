@@ -10,6 +10,8 @@ export interface ConfettiRainProps {
   className?: string;
   /** 再現可能なテスト・デモ用。 */
   seed?: number;
+  /** 色パレットを上書きする（省略時は theme.confettiColors）。firework等と同じ形。 */
+  colors?: readonly string[];
 }
 
 /**
@@ -21,10 +23,11 @@ export interface ConfettiRainProps {
  * `CelebrateProvider` が変換されていない overlay-root 直下に描画する（他の
  * variant のような中心寄せの transform を持たない）。
  */
-export function ConfettiRain({ theme = DEFAULT_CELEBRATE_THEME, className, seed }: ConfettiRainProps) {
+export function ConfettiRain({ theme = DEFAULT_CELEBRATE_THEME, className, seed, colors }: ConfettiRainProps) {
   const [pieces] = useState<readonly RainPiece[]>(() =>
     createRainPieces(seed === undefined ? Math.random : createSeededRainRandom(seed))
   );
+  const palette = colors ?? theme.confettiColors;
 
   return (
     <span aria-hidden="true" data-confetti-rain="" className={clsx("celebrate-rain", className)}>
@@ -45,7 +48,7 @@ export function ConfettiRain({ theme = DEFAULT_CELEBRATE_THEME, className, seed 
                       {
                         width: `${piece.size}rem`,
                         height: `${piece.size}rem`,
-                        background: theme.confettiColors[piece.tone],
+                        background: palette[piece.tone % palette.length],
                         transform: `rotate(${piece.rotateDeg}deg)`,
                       } as CSSProperties
                     }

@@ -15,9 +15,11 @@ export interface SparkleBurstProps {
   className?: string;
   /** 再現可能なテスト・デモ用。省略時は発火ごとに新しい散り方になる。 */
   seed?: number;
+  /** 色パレットを上書きする（省略時は theme.confettiColors）。firework等と同じ形。 */
+  colors?: readonly string[];
 }
 
-function toParticleSpec(particle: SparkleParticle, theme: CelebrateTheme): ParticleSpec<RadialMotionParams> {
+function toParticleSpec(particle: SparkleParticle, palette: readonly string[], theme: CelebrateTheme): ParticleSpec<RadialMotionParams> {
   const durationSeconds = SPARKLE_DURATION_MS / 1000;
   return {
     motion: radialMotion,
@@ -32,7 +34,7 @@ function toParticleSpec(particle: SparkleParticle, theme: CelebrateTheme): Parti
           {
             width: `${particle.size}rem`,
             height: `${particle.size}rem`,
-            background: theme.confettiColors[particle.tone],
+            background: palette[particle.tone % palette.length],
             borderRadius: particle.shape === "dot" ? "999px" : theme.pieceRadius,
             transform: `rotate(${particle.rotateDeg}deg)`,
           } as CSSProperties
@@ -43,10 +45,11 @@ function toParticleSpec(particle: SparkleParticle, theme: CelebrateTheme): Parti
 }
 
 /** `confetti`/`cracker`/`rain`/`firework`/`sakura`と同じく、実体は`ParticleField`にプリセットを渡しているだけ。 */
-export function SparkleBurst({ theme = DEFAULT_CELEBRATE_THEME, className, seed }: SparkleBurstProps) {
+export function SparkleBurst({ theme = DEFAULT_CELEBRATE_THEME, className, seed, colors }: SparkleBurstProps) {
   const [particles] = useState<readonly SparkleParticle[]>(() =>
     createSparkleParticles(seed === undefined ? Math.random : createSeededSparkleRandom(seed))
   );
+  const palette = colors ?? theme.confettiColors;
 
   return (
     <span aria-hidden="true" data-sparkle-burst="" className={clsx("celebrate-sparkle-burst", className)}>
@@ -55,7 +58,7 @@ export function SparkleBurst({ theme = DEFAULT_CELEBRATE_THEME, className, seed 
         className="celebrate-sparkle-flash"
         style={{ "--celebrate-sparkle-color": theme.stampColor } as CSSProperties}
       />
-      <ParticleField particles={particles.map((p) => toParticleSpec(p, theme))} />
+      <ParticleField particles={particles.map((p) => toParticleSpec(p, palette, theme))} />
     </span>
   );
 }

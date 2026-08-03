@@ -103,6 +103,11 @@
   border: 0.19rem solid var(--celebrate-stamp-color);
   color: var(--celebrate-stamp-color);
   border-radius: var(--celebrate-stamp-radius);
+  /* text は「正」「合格」のような1〜2文字を想定しているが、呼び出し側は
+     任意の文字列を渡せる。フォントサイズは文字数に応じてJS側（Stamp.tsx）で
+     縮めているが、想定を大きく超える長さでも円の外に絶対にはみ出さないよう、
+     最後の安全弁としてoverflow:hiddenを持たせる。 */
+  overflow: hidden;
 }
 
 .celebrate-stamp--lg {
@@ -113,12 +118,11 @@
 .celebrate-stamp-text {
   font-family: var(--celebrate-stamp-font);
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.05;
   font-size: 1.1rem;
-}
-
-.celebrate-stamp-text--lg {
-  font-size: 1.6rem;
+  text-align: center;
+  word-break: break-word;
+  padding: 0 0.15rem;
 }
 
 /* ==== record ==== */

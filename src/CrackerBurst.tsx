@@ -10,9 +10,11 @@ export interface CrackerBurstProps {
   className?: string;
   /** 再現可能なテスト・デモ用。 */
   seed?: number;
+  /** 色パレットを上書きする（省略時は theme.confettiColors）。firework等と同じ形。 */
+  colors?: readonly string[];
 }
 
-function toParticleSpec(streamer: CrackerStreamer, theme: CelebrateTheme): ParticleSpec<RadialMotionParams> {
+function toParticleSpec(streamer: CrackerStreamer, palette: readonly string[]): ParticleSpec<RadialMotionParams> {
   const durationSeconds = CRACKER_DURATION_MS / 1000;
   return {
     motion: radialMotion,
@@ -27,7 +29,7 @@ function toParticleSpec(streamer: CrackerStreamer, theme: CelebrateTheme): Parti
           {
             width: "0.18rem",
             height: `${streamer.length}rem`,
-            background: theme.confettiColors[streamer.tone],
+            background: palette[streamer.tone % palette.length],
             borderRadius: "999px",
             transform: `rotate(${streamer.rotateDeg + streamer.curlDeg}deg)`,
           } as CSSProperties
@@ -38,14 +40,15 @@ function toParticleSpec(streamer: CrackerStreamer, theme: CelebrateTheme): Parti
 }
 
 /** クラッカー（パーティーポッパー）。斜め上へ紙テープが勢いよく飛ぶワンショット。 */
-export function CrackerBurst({ theme = DEFAULT_CELEBRATE_THEME, className, seed }: CrackerBurstProps) {
+export function CrackerBurst({ theme = DEFAULT_CELEBRATE_THEME, className, seed, colors }: CrackerBurstProps) {
   const [streamers] = useState<readonly CrackerStreamer[]>(() =>
     createCrackerStreamers(seed === undefined ? Math.random : createSeededCrackerRandom(seed))
   );
+  const palette = colors ?? theme.confettiColors;
 
   return (
     <span aria-hidden="true" data-cracker-burst="" className={clsx("celebrate-cracker-burst", className)}>
-      <ParticleField particles={streamers.map((s) => toParticleSpec(s, theme))} />
+      <ParticleField particles={streamers.map((s) => toParticleSpec(s, palette))} />
     </span>
   );
 }

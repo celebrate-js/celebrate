@@ -13,6 +13,7 @@ import {
 import { SPARKLE_DURATION_MS } from "./sparkle";
 import { CELEBRATE_DURATION_MS } from "./pieces";
 import { SPARKLE_SOUND_PRESETS } from "./sparkleSound";
+import { DEFAULT_CELEBRATE_THEME } from "./theme";
 
 describe("recipes", () => {
   it("sparkleだけ固有durationで、既存variantの時間は変わらない", () => {
@@ -70,6 +71,32 @@ describe("options.sizeRem（絶対サイズ→scaleへの変換）", () => {
     const html = renderToStaticMarkup(<>{renderCelebration("ring", {})}</>);
     // ringの基準size=2rem、scale=1なので変化なし。
     expect(html).toContain("--celebrate-radial-size:2rem");
+  });
+});
+
+describe("options.colors（confetti/sparkle/cracker/rain/fireworkの色パレット上書き）", () => {
+  // theme.stampColorを変えても、粒の色（confettiColors由来）には反映されない
+  // （実際にfireworkで踏んだ不具合：「色を変えても反映されない」）。
+  // colorsは上書きできる、という契約をvariantごとに固定する。
+  it("confettiはcolorsで指定した色を使い、theme.confettiColorsは使わない", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("confetti", { colors: ["#123456"] })}</>);
+    expect(html).toContain("#123456");
+    expect(html).not.toContain(DEFAULT_CELEBRATE_THEME.confettiColors[1]);
+  });
+
+  it("sparkleもcolorsで上書きできる", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("sparkle", { colors: ["#abcdef"], seed: 1 })}</>);
+    expect(html).toContain("#abcdef");
+  });
+
+  it("crackerもcolorsで上書きできる", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("cracker", { colors: ["#ff00aa"], seed: 1 })}</>);
+    expect(html).toContain("#ff00aa");
+  });
+
+  it("colorsを指定しなければ、既存通りtheme.confettiColorsが使われる", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("confetti", {})}</>);
+    expect(html).toContain(DEFAULT_CELEBRATE_THEME.confettiColors[0]);
   });
 });
 

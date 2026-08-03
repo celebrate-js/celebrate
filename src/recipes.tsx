@@ -99,7 +99,10 @@ export interface CelebrateVariantOptions {
    * 呼び出し側で扱いやすいケース向け。`stamp`の`size`（"md"/"lg"）とは別物。
    */
   sizeRem?: number;
-  /** `firework`: 色パレットを上書きする（省略時は theme.confettiColors）。 */
+  /**
+   * 色パレットを上書きする（省略時は theme.confettiColors）。
+   * `confetti`/`sparkle`/`cracker`/`rain`/`firework`が対応。
+   */
   colors?: readonly string[];
   /** `firework`: 花火の種類。既定 "peony"。 */
   fireworkStyle?: FireworkStyle;
@@ -226,9 +229,9 @@ export const RECIPES = {
 
   // ③報酬：ご褒美・大当たり。達成よりも一段上の「やった！」感。
   confetti: {
-    render: ({ theme }) => (
+    render: ({ theme, colors }) => (
       <span className="celebrate-anchor">
-        <ConfettiBurst theme={theme} />
+        <ConfettiBurst theme={theme} colors={colors} />
       </span>
     ),
     durationMs: CELEBRATE_DURATION_MS,
@@ -236,7 +239,7 @@ export const RECIPES = {
     haptic: [10, 20, 10, 20, 30],
   },
   sparkle: {
-    render: ({ theme, seed }) => <SparkleBurst theme={theme} seed={seed} />,
+    render: ({ theme, seed, colors }) => <SparkleBurst theme={theme} seed={seed} colors={colors} />,
     durationMs: SPARKLE_DURATION_MS,
     sound: (gainScale, presetOverride) =>
       presetOverride === undefined ? playSparkleSound(Math.random, gainScale) : playChime(presetOverride, gainScale),
@@ -303,9 +306,9 @@ export const RECIPES = {
 
   // ⑤キャラクター・ナラティブ：粒や記号ではなく1つの主体が動く。
   cracker: {
-    render: ({ theme, seed }) => (
+    render: ({ theme, seed, colors }) => (
       <span className="celebrate-anchor">
-        <CrackerBurst theme={theme} seed={seed} />
+        <CrackerBurst theme={theme} seed={seed} colors={colors} />
       </span>
     ),
     durationMs: CRACKER_DURATION_MS,
@@ -344,7 +347,7 @@ export const RECIPES = {
     containerModifierClassName: "celebrate-vignette-active",
   },
   rain: {
-    render: ({ theme, seed }) => <ConfettiRain theme={theme} seed={seed} />,
+    render: ({ theme, seed, colors }) => <ConfettiRain theme={theme} seed={seed} colors={colors} />,
     durationMs: RAIN_DURATION_MS,
     fullscreen: true,
   },

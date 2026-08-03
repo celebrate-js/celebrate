@@ -27,7 +27,7 @@
 | `color` | `string` | 淡いピンク（`sakura`）／theme（RadialBurst系） | `sakura`：花びらの色。`pop`/`ripple`/`ring`/`flash`：色の既定値を上書き。 |
 | `scale` | `number` | `1` | 見た目の大きさ倍率。`firework`/`pop`/`ripple`/`ring`/`flash`が対応。 |
 | `sizeRem` | `number` | - | 見た目の大きさの絶対値（rem）。`scale`と違い基準サイズを意識せず直接remで指定できる。対応variantは`scale`と同じ。両方指定した場合は`sizeRem`が優先される。`scale=1`に対応するremはvariantごとに異なる（`pop`=2.6・`ripple`=2.4・`ring`=2・`flash`=4・`firework`=3.2、いずれも実装時に個別に決め打ちされた値の踏襲で、variant間の一貫性はない）。 |
-| `colors` | `readonly string[]` | `theme.confettiColors` | `firework`：色パレットの上書き。 |
+| `colors` | `readonly string[]` | `theme.confettiColors` | `confetti`/`sparkle`/`cracker`/`rain`/`firework`：色パレットの上書き。これらは`theme.stampColor`ではなく`theme.confettiColors`（複数トーン）で塗るため、単色を変えたい場合は`color`ではなくこちらを使う。 |
 | `fireworkStyle` | `"peony" \| "willow" \| "ring"` | `"peony"` | `firework`：花火の種類。 |
 | `intensity` | `number` | `1` | 演出の強度。拡大率・duration・音量・振動に対数カーブで反映。 |
 | `soundPreset` | `number` | 各variantの既定音（`sparkle`は毎回ランダム） | 効果音のpreset番号（`SPARKLE_SOUND_PRESETS`の添字。範囲外は循環する）を上書きする。どの音を鳴らすかは色やscaleと同じく呼び出し側が目的・用途に応じて決めるものなので、ライブラリ側で決め打ちにしていない。 |
