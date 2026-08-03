@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import {
   CelebrateProvider,
@@ -872,6 +872,15 @@ function ClipRevealDemo() {
   // （reveal＝覆われている、cover＝開いている）。ページ読み込み時から常時マウントしていると、
   // 見る頃にはアニメーションがとっくに終わって逆の状態で静止して見える。
   const [fired, setFired] = useState(false);
+
+  // 一度発火した後にedge/direction/colorを変えても、前回発火したClipRevealが
+  // 最終状態のまま残り続けて画面が更新されない（fireKeyを変えて再発火するまで
+  // 何も反映されない）と、「設定を変えたのに前回の残像が今の設定の初期状態に
+  // 見えてしまい、向きが逆に見える」という混乱の元になる。設定が変わったら
+  // 毎回、発火前の静止状態まで一旦戻す。
+  useEffect(() => {
+    setFired(false);
+  }, [edge, direction, color]);
 
   const code = `<ClipReveal edge="${edge}" direction="${direction}" color="${color}">\n  <span>🎁</span>\n</ClipReveal>`;
 
