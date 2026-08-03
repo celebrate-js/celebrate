@@ -30,6 +30,12 @@ export interface ClipRevealProps {
  *   <ClipReveal edge="left" direction="in" color="#000">
  *     <img src="result.png" />
  *   </ClipReveal>
+ *
+ * 覆い（カーテン）と中身（children）は別レイヤーにする。同じ要素にclip-pathを
+ * 当てると、カーテンの色と中身が同じ範囲で一緒に切り取られてしまい、
+ * 「カーテンが動いて中身が現れる」ではなく「両方が一緒にワイプインする」という
+ * 別物の見た目になる（実際にこの実装ミスで発火直後だけ開いて見え、
+ * すぐ閉じて見えるという逆の動きになっていた）。
  */
 export function ClipReveal({
   edge = "left",
@@ -41,24 +47,27 @@ export function ClipReveal({
   className,
 }: ClipRevealProps) {
   return (
-    <span
-      aria-hidden="true"
-      data-clip-reveal=""
-      className={clsx(
-        "celebrate-clip-reveal",
-        `celebrate-clip-reveal--${edge}`,
-        direction === "out" && "celebrate-clip-reveal--out",
-        className
+    <span data-clip-reveal="" className={clsx("celebrate-clip-reveal-wrapper", className)}>
+      {children !== undefined && (
+        <span aria-hidden="true" className="celebrate-clip-reveal-content">
+          {children}
+        </span>
       )}
-      style={
-        {
-          "--celebrate-clip-reveal-color": color,
-          animationDuration: `${durationMs}ms`,
-          animationDelay: `${delayMs}ms`,
-        } as CSSProperties
-      }
-    >
-      {children}
+      <span
+        aria-hidden="true"
+        className={clsx(
+          "celebrate-clip-reveal",
+          `celebrate-clip-reveal--${edge}`,
+          direction === "out" && "celebrate-clip-reveal--out"
+        )}
+        style={
+          {
+            "--celebrate-clip-reveal-color": color,
+            animationDuration: `${durationMs}ms`,
+            animationDelay: `${delayMs}ms`,
+          } as CSSProperties
+        }
+      />
     </span>
   );
 }

@@ -609,10 +609,25 @@ html.celebrate-vignette-active::before {
 }
 
 /* ==== ClipReveal（マスク・リビール構造テンプレート。軸I=clip-reveal） ====
-   覆いをclip-pathで動かして中身を出し入れする。RadialBurst/ParticleField/StrokePathとは
-   別の描画軸（「粒・線を描き足す」のではなく「覆いを動かして中身を出し入れする」）。
+   覆い（カーテン）を中身（children）とは別レイヤーにし、覆いだけをclip-pathで
+   動かす。RadialBurst/ParticleField/StrokePathとは別の描画軸（「粒・線を描き足す」
+   のではなく「覆いを動かして中身を出し入れする」）。
    edge違いは全部同じ仕組みで、"覆いが晴れる/覆う"のどちらの向きかは1つのkeyframeを
-   animation-direction: reverse で逆再生するだけで表現する（keyframeを倍にしない）。 */
+   animation-direction: reverse で逆再生するだけで表現する（keyframeを倍にしない）。
+   keyframeは「from＝覆いが全面を覆っている」「to＝覆いが晴れて消える」の向きで統一する
+   （direction="in"＝順再生でfromからtoへ＝覆いが晴れる、"out"＝逆再生でtoからfromへ＝
+   覆いが閉じる、がそのままCSSのanimation-directionの意味と一致するようにするため）。 */
+
+.celebrate-clip-reveal-wrapper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.celebrate-clip-reveal-content {
+  position: absolute;
+  inset: 0;
+}
 
 .celebrate-clip-reveal {
   position: absolute;
@@ -620,7 +635,6 @@ html.celebrate-vignette-active::before {
   background: var(--celebrate-clip-reveal-color, #000);
   animation-timing-function: ease-in-out;
   animation-fill-mode: forwards;
-  pointer-events: none;
 }
 
 .celebrate-clip-reveal--out {
@@ -632,10 +646,10 @@ html.celebrate-vignette-active::before {
 }
 @keyframes celebrate-clip-reveal-left {
   from {
-    clip-path: inset(0 100% 0 0);
+    clip-path: inset(0 0 0 0);
   }
   to {
-    clip-path: inset(0 0 0 0);
+    clip-path: inset(0 100% 0 0);
   }
 }
 
@@ -644,10 +658,10 @@ html.celebrate-vignette-active::before {
 }
 @keyframes celebrate-clip-reveal-right {
   from {
-    clip-path: inset(0 0 0 100%);
+    clip-path: inset(0 0 0 0);
   }
   to {
-    clip-path: inset(0 0 0 0);
+    clip-path: inset(0 0 0 100%);
   }
 }
 
@@ -656,10 +670,10 @@ html.celebrate-vignette-active::before {
 }
 @keyframes celebrate-clip-reveal-top {
   from {
-    clip-path: inset(100% 0 0 0);
+    clip-path: inset(0 0 0 0);
   }
   to {
-    clip-path: inset(0 0 0 0);
+    clip-path: inset(100% 0 0 0);
   }
 }
 
@@ -668,10 +682,10 @@ html.celebrate-vignette-active::before {
 }
 @keyframes celebrate-clip-reveal-bottom {
   from {
-    clip-path: inset(0 0 100% 0);
+    clip-path: inset(0 0 0 0);
   }
   to {
-    clip-path: inset(0 0 0 0);
+    clip-path: inset(0 0 100% 0);
   }
 }
 
@@ -680,10 +694,10 @@ html.celebrate-vignette-active::before {
 }
 @keyframes celebrate-clip-reveal-center {
   from {
-    clip-path: circle(0% at 50% 50%);
+    clip-path: circle(75% at 50% 50%);
   }
   to {
-    clip-path: circle(75% at 50% 50%);
+    clip-path: circle(0% at 50% 50%);
   }
 }
 

@@ -917,8 +917,20 @@ function ClipRevealDemo() {
           fontSize: "2rem",
         }}
       >
-        <span>🎁</span>
-        <ClipReveal key={fireKey} edge={edge} direction={direction} color={color} />
+        <ClipReveal key={fireKey} edge={edge} direction={direction} color={color}>
+          <span
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "#fff7e6",
+            }}
+          >
+            🎁
+          </span>
+        </ClipReveal>
       </div>
     </section>
   );
