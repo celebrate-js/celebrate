@@ -1045,6 +1045,7 @@ function formatOptionsSnippet(options: CelebrateVariantOptions, withList: readon
   if (options.text) lines.push(`  text: "${options.text}",`);
   if (options.note) lines.push(`  note: "${options.note}",`);
   if (options.intensity !== undefined) lines.push(`  intensity: ${options.intensity},`);
+  if (options.sizeRem !== undefined) lines.push(`  sizeRem: ${options.sizeRem},`);
   if (options.theme) lines.push(`  theme: { ...DEFAULT_CELEBRATE_THEME, stampColor: "${options.theme.stampColor}" },`);
   if (lines.length === 0) return "";
   return `, {\n${lines.join("\n")}\n}`;
@@ -1058,6 +1059,7 @@ function Playground() {
   const [text, setText] = useState("");
   const [note, setNote] = useState("");
   const [color, setColor] = useState(DEFAULT_PLAYGROUND_COLOR);
+  const [sizeRem, setSizeRem] = useState<number | null>(null);
 
   const toggleWith = (target: CelebrateVariant) => {
     setWithList((prev) => (prev.includes(target) ? prev.filter((v) => v !== target) : [...prev, target]));
@@ -1069,9 +1071,10 @@ function Playground() {
     if (text) o.text = text;
     if (note) o.note = note;
     if (intensity !== 1) o.intensity = intensity;
+    if (sizeRem !== null) o.sizeRem = sizeRem;
     if (color !== DEFAULT_PLAYGROUND_COLOR) o.theme = { ...DEFAULT_CELEBRATE_THEME, stampColor: color };
     return o;
-  }, [withList, text, note, intensity, color]);
+  }, [withList, text, note, intensity, sizeRem, color]);
 
   const code = `celebrate("${variant}"${formatOptionsSnippet(options, withList)});`;
 
@@ -1120,6 +1123,23 @@ function Playground() {
               onChange={(e) => setIntensity(Number(e.target.value))}
             />
           </label>
+          <label className="playground-checkbox">
+            <input type="checkbox" checked={sizeRem !== null} onChange={(e) => setSizeRem(e.target.checked ? 5 : null)} />
+            sizeRem を指定する（絶対サイズ・firework/pop/ripple/ring/flashのみ対応）
+          </label>
+          {sizeRem !== null && (
+            <label>
+              sizeRem: {sizeRem.toFixed(1)}rem
+              <input
+                type="range"
+                min="0.5"
+                max="12"
+                step="0.5"
+                value={sizeRem}
+                onChange={(e) => setSizeRem(Number(e.target.value))}
+              />
+            </label>
+          )}
           <label>
             text
             <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="例：合格" />
@@ -1318,6 +1338,7 @@ const CELEBRATE_OPTIONS: readonly ApiRow[] = [
   { name: "glyph", type: "string", defaultValue: "CSSで描いた雲形", desc: "float：漂わせる文字を指定（絵文字ではなく雲がデフォルト）。" },
   { name: "color", type: "string", defaultValue: "淡いピンク／theme", desc: "sakura：花びらの色。pop/ripple/ring/flash：色の既定値を上書き。" },
   { name: "scale", type: "number", defaultValue: "1", desc: "見た目の大きさ倍率。firework/pop/ripple/ring/flashが対応。" },
+  { name: "sizeRem", type: "number", defaultValue: "-", desc: "見た目の大きさの絶対値（rem）。scaleと違い基準サイズを意識せず直接remで指定できる。両方指定するとsizeRemが優先される。" },
   { name: "colors", type: "readonly string[]", defaultValue: "theme.confettiColors", desc: "firework：色パレットの上書き。" },
   { name: "fireworkStyle", type: '"peony" | "willow" | "ring"', defaultValue: '"peony"', desc: "firework：花火の種類。" },
   { name: "intensity", type: "number", defaultValue: "1", desc: "演出の強度。拡大率・duration・音量・振動に対数カーブで反映。" },

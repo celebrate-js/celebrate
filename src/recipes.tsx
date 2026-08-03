@@ -91,6 +91,14 @@ export interface CelebrateVariantOptions {
   color?: string;
   /** 見た目の大きさ倍率。既定1。`firework`/`pop`/`ripple`/`ring`/`flash`が対応。 */
   scale?: number;
+  /**
+   * 見た目の大きさの絶対値（rem）。`scale`（相対倍率）と違い、基準サイズを意識せず
+   * 直接remで指定できる。`firework`/`pop`/`ripple`/`ring`/`flash`が対応。両方指定した場合は
+   * `sizeRem`が優先される。基準サイズ（`scale`が1のときのremとの対応）は
+   * `SCALE_REFERENCE_SIZE_REM`参照。親要素のサイズに合わせたい場合など、絶対値の方が
+   * 呼び出し側で扱いやすいケース向け。`stamp`の`size`（"md"/"lg"）とは別物。
+   */
+  sizeRem?: number;
   /** `firework`: 色パレットを上書きする（省略時は theme.confettiColors）。 */
   colors?: readonly string[];
   /** `firework`: 花火の種類。既定 "peony"。 */
@@ -134,6 +142,33 @@ const fixedChime =
   (gainScale: number, presetOverride?: number): void =>
     playChime((presetOverride ?? presetIndex) % SPARKLE_SOUND_PRESETS.length, gainScale);
 
+// options.sizeRem（絶対値・rem）→scale（相対倍率）への変換基準。
+// 「scale=1のとき何remか」は元々、各variantの実装時に個別に決め打ちされていた値
+// （RADIAL_BURST_PRESETSの一番外側のlayerのsize、fireworkは破裂半径の可変範囲の中央値）
+// でしかなく、variantを跨いだ一貫性は無い（呼び出し側から指摘された点）。sizeRemオプションは
+// この「決め打ちの基準」を呼び出し側から隠し、常に絶対remで指定できるようにするためのもの。
+const SCALE_REFERENCE_SIZE_REM: Partial<Record<CelebrateVariant, number>> = {
+  pop: 2.6,
+  ripple: 2.4,
+  ring: 2,
+  flash: 4,
+  // 破裂半径は粒ごとに2.2〜4.2remでランダムに散らばる（1つのサイズに決まらない）ため、
+  // その中央値を基準として近似している。
+  firework: 3.2,
+};
+
+/** `options.scale`と`options.sizeRem`のどちらが指定されていても、実際に使うscaleを1つに解決する。 */
+function resolveScale(
+  variant: CelebrateVariant,
+  options: Pick<CelebrateVariantOptions, "scale" | "sizeRem">
+): number {
+  if (options.sizeRem !== undefined) {
+    const reference = SCALE_REFERENCE_SIZE_REM[variant] ?? 1;
+    return options.sizeRem / reference;
+  }
+  return options.scale ?? 1;
+}
+
 // カタログ（Tier1）に入れる基準：構造的な新しさ（RadialBurstかParticleFieldか等）ではなく、
 // UXの意味（どの瞬間に使うか）で1語の名前を持つ価値があるかどうか。pop/ripple/ring/flashは
 // 構造的には全部RadialBurstの同じプリセット違いだが、UX上は別の意味（軽いタップ確認／報酬）を
@@ -143,16 +178,16 @@ const fixedChime =
 export const RECIPES = {
   // ①入力フィードバック：ボタン等を押した「軽いタップ確認」。
   pop: {
-    render: ({ theme, scale, color }) => (
-      <RadialBurst layers={RADIAL_BURST_PRESETS.pop.layers} theme={theme} scale={scale} color={color} />
+    render: ({ theme, scale, sizeRem, color }) => (
+      <RadialBurst layers={RADIAL_BURST_PRESETS.pop.layers} theme={theme} scale={resolveScale("pop", { scale, sizeRem })} color={color} />
     ),
     durationMs: POP_DURATION_MS,
     sound: fixedChime(3),
     haptic: 12,
   },
   ripple: {
-    render: ({ theme, scale, color }) => (
-      <RadialBurst layers={RADIAL_BURST_PRESETS.ripple.layers} theme={theme} scale={scale} color={color} />
+    render: ({ theme, scale, sizeRem, color }) => (
+      <RadialBurst layers={RADIAL_BURST_PRESETS.ripple.layers} theme={theme} scale={resolveScale("ripple", { scale, sizeRem })} color={color} />
     ),
     durationMs: RIPPLE_DURATION_MS,
     sound: fixedChime(5),
@@ -214,23 +249,23 @@ export const RECIPES = {
     haptic: [15, 30, 15, 30, 40],
   },
   flash: {
-    render: ({ theme, scale, color }) => (
-      <RadialBurst layers={RADIAL_BURST_PRESETS.flash.layers} theme={theme} scale={scale} color={color} />
+    render: ({ theme, scale, sizeRem, color }) => (
+      <RadialBurst layers={RADIAL_BURST_PRESETS.flash.layers} theme={theme} scale={resolveScale("flash", { scale, sizeRem })} color={color} />
     ),
     durationMs: FLASH_DURATION_MS,
     sound: fixedChime(11),
   },
   ring: {
-    render: ({ theme, scale, color }) => (
-      <RadialBurst layers={RADIAL_BURST_PRESETS.ring.layers} theme={theme} scale={scale} color={color} />
+    render: ({ theme, scale, sizeRem, color }) => (
+      <RadialBurst layers={RADIAL_BURST_PRESETS.ring.layers} theme={theme} scale={resolveScale("ring", { scale, sizeRem })} color={color} />
     ),
     durationMs: RING_DURATION_MS,
     sound: fixedChime(6),
   },
   firework: {
-    render: ({ theme, seed, scale, colors, fireworkStyle }) => (
+    render: ({ theme, seed, scale, sizeRem, colors, fireworkStyle }) => (
       <span className="celebrate-anchor">
-        <FireworkBurst theme={theme} seed={seed} scale={scale} colors={colors} style={fireworkStyle} />
+        <FireworkBurst theme={theme} seed={seed} scale={resolveScale("firework", { scale, sizeRem })} colors={colors} style={fireworkStyle} />
       </span>
     ),
     durationMs: FIREWORK_DURATION_MS,

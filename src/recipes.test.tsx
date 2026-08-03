@@ -47,6 +47,32 @@ describe("recipes", () => {
   });
 });
 
+describe("options.sizeRem（絶対サイズ→scaleへの変換）", () => {
+  it("sizeRemを指定すると、基準サイズ（pop=2.6rem）に対する比率がscaleとして反映される", () => {
+    // sizeRem=5.2 は基準2.6remのちょうど2倍 → scale=2 → layer.size(2.6) * 2 = 5.2rem
+    const html = renderToStaticMarkup(<>{renderCelebration("pop", { sizeRem: 5.2 })}</>);
+    expect(html).toContain("--celebrate-radial-size:5.2rem");
+  });
+
+  it("sizeRemを指定しなければ、既存のscaleオプションがそのまま使われる", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("pop", { scale: 2 })}</>);
+    expect(html).toContain("--celebrate-radial-size:5.2rem");
+  });
+
+  it("scaleとsizeRemを両方指定した場合はsizeRemが優先される", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("pop", { scale: 100, sizeRem: 2.6 })}</>);
+    // sizeRem=2.6は基準そのもの→scale=1相当。scale:100は無視される。
+    expect(html).toContain("--celebrate-radial-size:2.6rem");
+    expect(html).not.toContain("--celebrate-radial-size:260rem");
+  });
+
+  it("どちらも指定しなければscale=1相当（既定の見た目のまま）", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("ring", {})}</>);
+    // ringの基準size=2rem、scale=1なので変化なし。
+    expect(html).toContain("--celebrate-radial-size:2rem");
+  });
+});
+
 describe("playSoundsForCelebration（options.soundPreset）", () => {
   let capturedFrequencies: number[];
   let originalAudioContext: typeof window.AudioContext | undefined;
