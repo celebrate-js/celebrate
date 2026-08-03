@@ -82,6 +82,44 @@ describe("ParticleField", () => {
   });
 });
 
+describe("ParticleField（最初のrAFコールバックが大幅に遅延した場合の回帰テスト）", () => {
+  // バックグラウンドタブ等で最初のrequestAnimationFrameが大きく遅延すると、
+  // startTimeを「effectが走った時刻」基準にしていた旧実装ではelapsedが最初のtickの
+  // 時点で既にdurationSecondsを超えてしまい、1回も可視状態を描画しないまま
+  // 「終了」してしまっていた（見えないまま消える不具合。#実際のバグ報告で発覚）。
+  it("最初のtickのタイムスタンプがどれだけ未来でも、そのフレームをelapsed=0として扱う", () => {
+    // 注：jsdom環境では実時間の遅延そのものは再現できないため、この回帰テストは
+    // 「実装がrAFコールバックの引数（タイムスタンプ）だけを基準にelapsedを計算し、
+    // 自前でperformance.now()を読み直さない」という契約を固定するもの。
+    // 修正前の実装（自前でperformance.now()を読み直す版）は、実ブラウザで最初のrAFが
+    // 大幅に遅延した場合にのみこの不具合が再現し、synchronousなjsdomでは再現できない
+    // （effect実行〜最初のtickの間の実時間差がほぼ0のため）。
+    let invoked = false;
+    window.requestAnimationFrame = (cb: FrameRequestCallback) => {
+      rafCalls++;
+      if (!invoked) {
+        invoked = true;
+        // 実際の経過時間とは無関係な、大幅に未来のタイムスタンプ
+        // （バックグラウンドタブで最初のrAFが数秒遅延した状況を模す）。
+        cb(999_999);
+      }
+      return 1;
+    };
+
+    const particles: ParticleSpec<StaticScaleParams>[] = [
+      { motion: staticScaleMotion, params: { scaleFrom: 0, scaleTo: 1, durationSeconds: 1 }, durationSeconds: 1 },
+    ];
+    act(() => {
+      root.render(<ParticleField particles={particles} />);
+    });
+
+    const item = container.querySelector(".celebrate-particle-field-item") as HTMLElement;
+    // 最初のtickのタイムスタンプが999999であっても、それを基準点として扱うため
+    // elapsed=0として評価され、opacity:0のまま終了することはない。
+    expect(item.style.opacity).not.toBe("0");
+  });
+});
+
 describe("ParticleField（prefers-reduced-motion: reduce）", () => {
   let originalMatchMedia: typeof window.matchMedia;
 

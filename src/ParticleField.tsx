@@ -76,17 +76,23 @@ export function ParticleField({ particles, defaultRender, className }: ParticleF
       typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
     const REDUCED_FADE_SECONDS = 0.15;
 
-    const startTime = performance.now();
+    // startTimeは「effectが走った時刻」ではなく「最初のrAFコールバックが実際に
+    // 呼ばれた時刻」を基準にする。バックグラウンドタブ等で最初のrAFが大きく遅延すると
+    // （体感1フレームでも実時間は数秒経っていることがある）、effect実行時刻を基準にした
+    // 場合はここでelapsedが最初のtickの時点で既にdurationSecondsを超えてしまい、
+    // 1回も可視状態を描画しないまま「終了」してしまう（見えないまま消える不具合）。
+    let startTime: number | null = null;
     let frameId: number;
 
-    const tick = () => {
-      const now = performance.now();
+    const tick = (now: number) => {
+      if (startTime === null) startTime = now;
+      const elapsedSinceStart = now - startTime;
       let stillActive = false;
 
       particlesRef.current.forEach((spec, i) => {
         const el = refs.current[i];
         if (!el) return;
-        const elapsed = (now - startTime) / 1000 - (spec.delaySeconds ?? 0);
+        const elapsed = elapsedSinceStart / 1000 - (spec.delaySeconds ?? 0);
         if (elapsed < 0) {
           el.style.opacity = "0";
           stillActive = true;

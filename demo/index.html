@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@celebrate-js/celebrate — ぷちぷちポップイット（仮）</title>
+    <title>@celebrate-js/celebrate — ドキュメント</title>
     <style>
       :root {
         --accent: #d64545;
@@ -20,23 +20,32 @@
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        background: linear-gradient(180deg, #fff7e6 0%, #ffe9f3 45%, #e8f6ff 100%);
-        color: #3a2e2e;
+        background: #f7f5f2;
+        color: #2b2622;
         min-height: 100vh;
       }
 
-      /* ==== ポップイット（子ども向け・シリコンおもちゃ風） ==== */
-
-      .popit-card {
-        border-radius: 2rem;
-        padding: 1.5rem 1.75rem 2rem;
-        background: #ffffffb0;
-        box-shadow: 0 10px 30px -12px rgba(120, 90, 60, 0.25);
-        border: 3px dashed #ffd166;
+      h1 {
+        font-size: 1.9rem;
       }
 
-      .popit-title {
-        font-size: 1.6rem;
+      a {
+        color: var(--accent);
+      }
+
+      /* ==== 全セクション共通のカード（旧: popit-card / border-demo-card /
+         playground-card / features-card。見た目がほぼ同じだったので統一した） ==== */
+
+      .doc-section {
+        border-radius: 1rem;
+        padding: 1.25rem 1.5rem 1.75rem;
+        background: #ffffff;
+        box-shadow: 0 6px 20px -14px rgba(40, 30, 20, 0.35);
+        border: 1px solid #e6e1d8;
+      }
+
+      .section-title {
+        font-size: 1.35rem;
         font-weight: 800;
         margin: 0 0 0.25rem;
         display: flex;
@@ -44,76 +53,43 @@
         gap: 0.5rem;
       }
 
-      .popit-hint {
+      .section-hint {
         margin: 0 0 1.25rem;
-        color: #7a6a5a;
-        font-size: 0.95rem;
+        color: #6b6154;
+        font-size: 0.92rem;
+        line-height: 1.6;
       }
 
-      .popit-grid {
-        display: grid;
-        grid-template-columns: repeat(8, 3.6rem);
-        gap: 0.7rem;
-        justify-content: start;
+      .section-hint code,
+      .catalog-card-description code {
+        background: #f0ece3;
+        border-radius: 0.25rem;
+        padding: 0.05rem 0.35rem;
+        font-size: 0.85em;
       }
 
-      .popit-bubble {
-        position: relative;
-        width: 3.6rem;
-        height: 3.6rem;
-        border: none;
-        border-radius: 999px;
-        cursor: pointer;
+      /* ==== 区切り見出し（Tier 2 / Tier 3 のような大区分） ==== */
+
+      .section-divider {
+        padding: 0.5rem 0.25rem 0;
+      }
+
+      .section-divider h2 {
+        font-size: 1.15rem;
         font-weight: 800;
-        font-size: 0.9rem;
-        color: rgba(0, 0, 0, 0.45);
+        margin: 0 0 0.2rem;
         display: flex;
         align-items: center;
-        justify-content: center;
-        transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
-        box-shadow:
-          inset -4px -6px 0 rgba(0, 0, 0, 0.12),
-          inset 3px 4px 0 rgba(255, 255, 255, 0.55),
-          0 4px 6px rgba(120, 90, 60, 0.18);
+        gap: 0.5rem;
       }
 
-      .popit-bubble:hover {
-        transform: translateY(-1px) scale(1.04);
-      }
-
-      .popit-bubble:active {
-        transform: scale(0.88);
-        box-shadow:
-          inset 3px 4px 6px rgba(0, 0, 0, 0.25),
-          inset -2px -3px 0 rgba(255, 255, 255, 0.25);
-      }
-
-      .popit-bubble-face {
-        font-size: 1.3rem;
-        line-height: 1;
-        filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
-      }
-
-      .popit-bubble-sound {
-        position: absolute;
-        top: -0.35rem;
-        right: -0.35rem;
-        font-size: 0.85rem;
-        filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
-      }
-
-      h1 {
-        font-size: 1.9rem;
+      .section-divider p {
+        margin: 0;
+        color: #6b6154;
+        font-size: 0.88rem;
       }
 
       /* ==== ボーダーエフェクトのデモ ==== */
-
-      .border-demo-card {
-        border-radius: 1.25rem;
-        padding: 1.25rem 1.5rem;
-        background: #ffffff80;
-        border: 1px solid #e4dcd0;
-      }
 
       .border-demo-target {
         width: 12rem;
@@ -130,6 +106,7 @@
       .border-demo-buttons {
         display: flex;
         gap: 0.6rem;
+        flex-wrap: wrap;
       }
 
       .border-demo-buttons button {
@@ -157,7 +134,7 @@
         transform: scale(0.96);
       }
 
-      /* ==== ドキュメント風ヘッダー（react-toastify の Introduction ページに寄せた） ==== */
+      /* ==== ドキュメントヘッダー（react-toastify の Introduction ページに寄せた） ==== */
 
       .docs-header {
         display: flex;
@@ -169,6 +146,14 @@
         font-size: 2.2rem;
         font-weight: 800;
         margin: 0;
+      }
+
+      .docs-tagline {
+        margin: 0;
+        color: #6b6154;
+        font-size: 1rem;
+        max-width: 44rem;
+        line-height: 1.6;
       }
 
       .docs-badges {
@@ -200,15 +185,102 @@
         color: #fff;
       }
 
-      /* ==== プレイグラウンド（react-toastify の "The playground" に相当） ==== */
+      /* ==== カタログ（Tier 1・25 variant） ==== */
 
-      .playground-card {
-        border-radius: 1.25rem;
-        padding: 1.5rem 1.75rem 2rem;
-        background: #ffffffb0;
-        box-shadow: 0 10px 30px -12px rgba(120, 90, 60, 0.25);
-        border: 1px solid #e4dcd0;
+      .catalog-category {
+        margin-top: 1.5rem;
       }
+
+      .catalog-category:first-of-type {
+        margin-top: 0;
+      }
+
+      .catalog-category-title {
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0 0 0.15rem;
+      }
+
+      .catalog-category-description {
+        margin: 0 0 0.75rem;
+        color: #6b6154;
+        font-size: 0.85rem;
+      }
+
+      .catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+        gap: 0.75rem;
+      }
+
+      .catalog-card {
+        border-radius: 0.75rem;
+        border: 1px solid #e6e1d8;
+        background: #fbfaf7;
+        padding: 0.9rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .catalog-card-head {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .catalog-card-name {
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: var(--accent);
+      }
+
+      .catalog-card-sound {
+        font-size: 0.8rem;
+      }
+
+      .catalog-card-description {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #4a4238;
+        line-height: 1.5;
+        flex: 1;
+      }
+
+      .catalog-card-code {
+        margin: 0;
+        border-radius: 0.5rem;
+        background: #1e1e2e;
+        padding: 0.5rem 0.65rem;
+        overflow-x: auto;
+      }
+
+      .catalog-card-code code {
+        color: #e2dfff;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.75rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .catalog-card-trigger {
+        align-self: flex-start;
+        border-radius: 0.5rem;
+        border: 1px solid var(--accent);
+        background: #fff;
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 0.35rem 0.9rem;
+        cursor: pointer;
+      }
+
+      .catalog-card-trigger:hover {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      /* ==== プレイグラウンド（react-toastify の "The playground" に相当） ==== */
 
       .playground-grid {
         display: grid;
@@ -306,13 +378,6 @@
       }
 
       /* ==== Features（react-toastify の Features 箇条書きに相当） ==== */
-
-      .features-card {
-        border-radius: 1.25rem;
-        padding: 1.25rem 1.5rem;
-        background: #ffffff80;
-        border: 1px solid #e4dcd0;
-      }
 
       .features-list {
         margin: 0;

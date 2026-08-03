@@ -779,6 +779,16 @@ html.celebrate-vignette-active::before {
   will-change: transform, opacity;
 }
 
+/* particles[].renderが返す中身（span等）は、呼び出し側がwidth/heightをinline styleで
+   指定してくる（confetti/sparkle/cracker/rain/sakura/firework全部この形）。
+   spanの既定displayはinlineで、inline要素はwidth/heightを無視する（CSSの仕様）ため、
+   これが無いと「色もサイズも指定は正しいのに実際のレイアウトサイズは0×0で見えない」
+   という発見しづらい不具合になる（実際に6 variant全部で踏んだ）。
+   呼び出し側に毎回display:blockを書かせる代わりに、ParticleField側で一括保証する。 */
+.celebrate-particle-field-item > * {
+  display: block;
+}
+
 /* ==== firework（花火：複数の破裂点が時間差で咲く） ==== */
 
 .celebrate-firework {
@@ -933,7 +943,6 @@ html.celebrate-vignette-active::before {
 @media (prefers-reduced-motion: reduce) {
   .celebrate-stamp,
   .celebrate-record-banner,
-  .celebrate-confetti-piece,
   .celebrate-bounce-text,
   .celebrate-medal {
     animation-duration: 0.15s;

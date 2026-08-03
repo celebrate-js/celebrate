@@ -31,102 +31,152 @@ import {
   type RadialLayer,
 } from "../../src/index";
 
-// 仮のポップイット（#620 の構想を手早く触って確認するための最小デモ）。
-//
-// ポップイット自体が variant カタログを兼ねる：「同じ pop エフェクトを連打する」
-// おもちゃではなく、variant をボタン1つ1つに割り当てて、押すたびに違うエフェクト・音が
-// 出てくる「触れるカタログ」として作る。別途カタログ画面を並べる必要はない
-// （データは1つ、見せ方も1つ）。
+// カタログ（Tier1・25 variant）を公式ドキュメントとして提示するセクション。
+// recipes.tsxの8カテゴリ（UXの意味でグルーピングした並び順）をそのまま踏襲し、
+// 1 variant＝1カードで「名前・説明・呼び出しコード・試すボタン」を並べる。
+// 各カテゴリの理論的根拠はdocs/catalog-rationale.md参照。
 
-interface VariantSpec {
+interface CatalogVariantSpec {
   variant: CelebrateVariant;
-  label: string;
-  /** ボタンの中に出す、その variant を表す普通のアイコン。 */
-  icon: string;
-  with?: CelebrateVariant[];
+  description: string;
   text?: string;
   note?: string;
 }
 
-const CATALOG: VariantSpec[] = [
-  { variant: "stamp", label: "stamp", icon: "🀄", with: ["confetti"], text: "正" },
-  { variant: "confetti", label: "confetti", icon: "🎊" },
-  { variant: "record", label: "record", icon: "🏆", with: ["confetti"], text: "Congratulations!", note: "れんぞく 7問" },
-  { variant: "sparkle", label: "sparkle", icon: "✨" },
-  { variant: "pop", label: "pop", icon: "💥" },
-  { variant: "sakura", label: "sakura", icon: "🌸" },
-  { variant: "ripple", label: "ripple", icon: "💧" },
-  { variant: "ring", label: "ring", icon: "💍" },
-  { variant: "bounce", label: "bounce", icon: "🏀", text: "Nice!" },
-  { variant: "heart", label: "heart", icon: "💗" },
-  { variant: "star", label: "star", icon: "⭐" },
-  { variant: "medal", label: "medal", icon: "🥇", with: ["ring"], text: "1" },
-  { variant: "flash", label: "flash", icon: "🔆" },
-  { variant: "checkmark", label: "checkmark", icon: "✅" },
-  { variant: "emoji", label: "emoji", icon: "😊" },
-  { variant: "firework", label: "firework", icon: "🎆" },
-  { variant: "cracker", label: "cracker", icon: "🎉" },
-  { variant: "shake", label: "shake", icon: "📳" },
-  { variant: "hitstop", label: "hitstop", icon: "💫" },
-  { variant: "vignette", label: "vignette", icon: "🌑" },
-  { variant: "rain", label: "rain", icon: "🌧️" },
-  { variant: "lightning", label: "lightning", icon: "⚡" },
-  { variant: "shatter", label: "shatter", icon: "🧊" },
-  { variant: "float", label: "float", icon: "☁️" },
-  { variant: "popup", label: "popup", icon: "🔢", text: "+1" },
-];
-
-// 1マス＝1variant。形は全部同じ丸ボタンに揃え、色とアイコンだけで見分ける
-// （形をバラバラにすると何のボタンか分かりにくくなったため、シンプルに戻した）。
-const BUBBLE_HUE_STEP = 47; // 隣同士が似た色にならないよう黄金角に近い値で回す。
-
-function bubbleColor(index: number): string {
-  const hue = (index * BUBBLE_HUE_STEP) % 360;
-  return `hsl(${hue}deg 85% 72%)`;
+interface CatalogCategory {
+  title: string;
+  description: string;
+  variants: readonly CatalogVariantSpec[];
 }
 
-function PopBubble({ index }: { index: number }) {
-  const celebrate = useCelebrate();
-  const spec = CATALOG[index]!;
-  const color = bubbleColor(index);
+const CATALOG_CATEGORIES: readonly CatalogCategory[] = [
+  {
+    title: "① 入力フィードバック",
+    description: "ボタン等を押した「軽いタップ確認」に使う。",
+    variants: [
+      { variant: "pop", description: "中心から広がって消える、いちばん軽いフィードバック。" },
+      { variant: "ripple", description: "波紋のように広がる。ボタンのタップ確認に。" },
+      { variant: "checkmark", description: "円が描かれてからチェックが描き込まれる。正解・完了の定番表現。" },
+    ],
+  },
+  {
+    title: "② 達成",
+    description: "正解・完了・順位など「できた」を示す。",
+    variants: [
+      { variant: "stamp", description: "印影スタンプ。短い文字が押されたように現れて留まる。", text: "正" },
+      { variant: "medal", description: "リボン付きのメダル。stampより「授与された」感が強い。", text: "1" },
+      { variant: "bounce", description: "弾むように現れる短いテキスト。", text: "Nice!" },
+    ],
+  },
+  {
+    title: "③ 報酬",
+    description: "ご褒美・大当たり。達成よりも一段上の「やった！」感。",
+    variants: [
+      { variant: "confetti", description: "紙吹雪が舞う、定番の祝福演出。" },
+      { variant: "sparkle", description: "きらめきが散る。" },
+      { variant: "record", description: "自己ベスト更新を示す全画面バナー。", text: "Congratulations!", note: "れんぞく 7問" },
+      { variant: "flash", description: "一瞬強く光る。" },
+      { variant: "ring", description: "二重の輪が外へ広がって消える。" },
+      { variant: "firework", description: "複数の破裂点が時間差で咲く花火。" },
+    ],
+  },
+  {
+    title: "④ リアクション",
+    description: "絵文字で気持ちを表す。",
+    variants: [
+      { variant: "heart", description: "ハートが舞う。" },
+      { variant: "star", description: "星が舞う。" },
+      { variant: "emoji", description: "絵文字が舞う（既定は🎉✨🎊👍）。" },
+    ],
+  },
+  {
+    title: "⑤ キャラクター・ナラティブ",
+    description: "粒や記号ではなく1つの主体が動く。",
+    variants: [
+      { variant: "cracker", description: "クラッカーが弾けて紙テープが飛ぶ。" },
+      { variant: "float", description: "文字や雲形がふわふわ漂う。" },
+    ],
+  },
+  {
+    title: "⑥ 環境演出",
+    description: "画面全体への効果。",
+    variants: [
+      { variant: "sakura", description: "桜の花びらが舞い落ちる。" },
+      { variant: "shake", description: "画面全体が揺れる。" },
+      { variant: "hitstop", description: "一瞬の間（フレーム停止感）。" },
+      { variant: "vignette", description: "画面端が暗くなる、低体力表現の定番。" },
+      { variant: "rain", description: "紙吹雪が画面全体に降り注ぐ。" },
+      { variant: "lightning", description: "稲妻が画面を上端から下端まで貫く。" },
+    ],
+  },
+  {
+    title: "⑦ 段階エフェクト",
+    description: "複数局面が連続する時間軸型。",
+    variants: [{ variant: "shatter", description: "画面がひび割れて崩れ落ちる。" }],
+  },
+  {
+    title: "⑧ テキストチャネル",
+    description: "浮遊する数値・文字。",
+    variants: [{ variant: "popup", description: "「+1」のような数値・文字が浮かんで消える。", text: "+1" }],
+  },
+];
 
+function catalogCallSnippet(spec: CatalogVariantSpec): string {
+  const optionLines: string[] = [];
+  if (spec.text) optionLines.push(`text: "${spec.text}"`);
+  if (spec.note) optionLines.push(`note: "${spec.note}"`);
+  const options = optionLines.length > 0 ? `, { ${optionLines.join(", ")} }` : "";
+  return `celebrate("${spec.variant}"${options});`;
+}
+
+function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
+  const celebrate = useCelebrate();
   return (
-    <button
-      onClick={() =>
-        // anchor をボタン自身にすると、ボタンと同じ場所・同じくらいの大きさで
-        // 演出が重なって埋もれて見えなくなる（特に record のような大きい variant）。
-        // ポップイットは小さいボタンが並ぶ前提なので、あえてグローバル（画面中央）に出す。
-        celebrate(spec.variant, {
-          with: spec.with,
-          text: spec.text,
-          note: spec.note,
-          theme: { ...DEFAULT_CELEBRATE_THEME, stampColor: color },
-        })
-      }
-      className="popit-bubble"
-      style={{ background: color }}
-      aria-label={spec.label}
-      title={spec.label}
-    >
-      <span className="popit-bubble-face">{spec.icon}</span>
-      {hasSoundForCelebration(spec.variant) && <span className="popit-bubble-sound">🔈</span>}
-    </button>
+    <div className="catalog-card">
+      <div className="catalog-card-head">
+        <code className="catalog-card-name">{spec.variant}</code>
+        {hasSoundForCelebration(spec.variant) && (
+          <span className="catalog-card-sound" title="効果音あり">
+            🔈
+          </span>
+        )}
+      </div>
+      <p className="catalog-card-description">{spec.description}</p>
+      <pre className="catalog-card-code">
+        <code>{catalogCallSnippet(spec)}</code>
+      </pre>
+      <button
+        className="catalog-card-trigger"
+        onClick={() => celebrate(spec.variant, { text: spec.text, note: spec.note })}
+      >
+        試す
+      </button>
+    </div>
   );
 }
 
-function PopItGrid() {
+function CatalogSection() {
   return (
-    <section className="popit-card">
-      <p className="popit-title">
-        <span>🫧</span>
-        <span>ぷちぷちポップイット（仮）</span>
+    <section id="catalog" className="doc-section">
+      <p className="section-title">
+        <span>📖</span>
+        <span>カタログ（Tier 1）</span>
       </p>
-      <p className="popit-hint">アイコンを押すと、それぞれ違うエフェクトと音が出るよ！</p>
-      <div className="popit-grid">
-        {CATALOG.map((_, i) => (
-          <PopBubble key={i} index={i} />
-        ))}
-      </div>
+      <p className="section-hint">
+        名前で選ぶだけの、最も簡単な使い方。UXの意味（どの瞬間に使うか）でグルーピングしてある
+        （実装上の構造ではない。理論的根拠は<code>docs/catalog-rationale.md</code>参照）。
+      </p>
+      {CATALOG_CATEGORIES.map((category) => (
+        <div key={category.title} className="catalog-category">
+          <h3 className="catalog-category-title">{category.title}</h3>
+          <p className="catalog-category-description">{category.description}</p>
+          <div className="catalog-grid">
+            {category.variants.map((v) => (
+              <CatalogCard key={v.variant} spec={v} />
+            ))}
+          </div>
+        </div>
+      ))}
     </section>
   );
 }
@@ -138,18 +188,19 @@ function BorderEffectDemo() {
   const [intensity, setIntensity] = useState(1);
 
   return (
-    <section className="border-demo-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>🖼️</span>
-        <span>ボーダーエフェクト（カタログ版・Tier 1・仮）</span>
+        <span>ボーダーエフェクト（カタログ・Tier 1）</span>
       </p>
-      <p className="popit-hint">
-        オーバーレイを重ねるのではなく、このカード自身の境界線を光らせる／回転させる。
+      <p className="section-hint">
+        オーバーレイを重ねるのではなく、このカード自身の境界線を光らせる／回転させる、
+        celebrate()とは別の小さなAPI（<code>useCelebrateBorder()</code>）。
         アイコンライブラリのように名前で選ぶだけ（{BORDER_EFFECT_KINDS.length}種類。
-        中身は上の「空の構造から作る：ボーダー」と同じ2機構）。intensityはglow/conicRing/class
-        3機構すべてに同じduration倍率で効く（bounded-repeatの統合デモ）。
+        中身は後述の「ボーダー」構造テンプレートと同じ2機構）。intensityはglow/conicRing/class
+        3機構すべてに同じduration倍率で効く。
       </p>
-      <label className="popit-hint" style={{ display: "block", marginBottom: "0.5rem" }}>
+      <label className="section-hint" style={{ display: "block", marginBottom: "0.5rem" }}>
         intensity: {intensity.toFixed(2)}
         <input
           type="range"
@@ -194,14 +245,14 @@ function ComboDemo() {
   };
 
   return (
-    <section className="border-demo-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>🔥</span>
-        <span>コンボ（仮）</span>
+        <span>Intensity（連続的な強度）</span>
       </p>
-      <p className="popit-hint">
-        連打するほど intensity が上がって、見た目・音量・振動が連続的に派手になるよ。
-        {COMBO_RESET_MS}ms 押さないとリセット。
+      <p className="section-hint">
+        <code>intensity</code>で見た目・音量・振動を連続的に派手にできる。連打するほどintensityを上げる
+        「コンボ」のような使い方の例（{COMBO_RESET_MS}ms押さないとリセット）。
       </p>
       <button className="combo-button" onClick={hit}>
         combo ×{combo}
@@ -240,14 +291,15 @@ function EngineDemo() {
   const [fireKey, setFireKey] = useState(0);
 
   return (
-    <section className="border-demo-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>⚙️</span>
-        <span>エンジン直利用（Tier 3・仮）</span>
+        <span>自作の動き（Tier 3・MotionProfile）</span>
       </p>
-      <p className="popit-hint">
-        celebrate()を経由せず<code>ParticleField</code>を直接置く。motionはレジストリに無い自作関数（渦巻き）、
-        見た目も自由なReactNode。
+      <p className="section-hint">
+        celebrate()を経由せず<code>ParticleField</code>を直接置く。<code>motion</code>は
+        <code>MOTION_PROFILES</code>に登録されていない自作関数（渦巻き）でも、型さえ満たせばそのまま渡せる。
+        見た目（<code>render</code>）も自由なReactNode。
       </p>
       <button className="combo-button" onClick={() => setFireKey((k) => k + 1)}>
         spiral 発火
@@ -299,12 +351,12 @@ function CustomBadge() {
 function ReactNodeDemo() {
   const celebrate = useCelebrate();
   return (
-    <section className="border-demo-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>🧩</span>
-        <span>ReactNodeをそのまま渡す（仮）</span>
+        <span>ReactNodeをそのまま渡す</span>
       </p>
-      <p className="popit-hint">
+      <p className="section-hint">
         celebrate()の第一引数・<code>with</code>はvariant名だけでなく、生のReactNodeも受け取れる。
         カタログに登録されていない自作コンポーネントをそのまま重ねられる。
       </p>
@@ -345,12 +397,12 @@ function ScopedTrigger() {
 function ScopedDemo() {
   const boxRef = useRef<HTMLDivElement>(null);
   return (
-    <section className="border-demo-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>🪟</span>
-        <span>ローカルスコープ（仮）</span>
+        <span>ローカルスコープ（container）</span>
       </p>
-      <p className="popit-hint">
+      <p className="section-hint">
         <code>{"<CelebrateProvider container={ref}>"}</code>
         にすると、rain/lightning/shatterのような全画面variantを画面全体ではなくこの枠の中だけに閉じ込められる。
         右のボタンは比較用（shake/hitstopは<code>useContainerModifier()</code>を直接使うTier3の例で、常に画面全体が対象）。
@@ -374,7 +426,7 @@ function ScopedDemo() {
   );
 }
 
-// 「空の構造から作る」デモ。variant名のカタログを経由せず、構造テンプレート
+// 構造テンプレートのデモ。variant名のカタログを経由せず、構造テンプレート
 // （RadialBurst）に生のパラメータを直接渡す。pop/ripple/ring/flashはこれの
 // プリセット（パラメータの組み合わせ）でしかないことの証明として、カタログに
 // 存在しない組み合わせ（例：グローで4層・時間差広め）もその場で作れる。
@@ -421,12 +473,12 @@ function RadialBurstBuilder() {
     .join("\n")}\n</RadialBurst>`;
 
   return (
-    <section className="playground-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>🧱</span>
-        <span>空の構造から作る：RadialBurst（仮）</span>
+        <span>構造テンプレート：RadialBurst</span>
       </p>
-      <p className="popit-hint">
+      <p className="section-hint">
         variantのカタログ（名前）を経由せず、構造テンプレートに生のパラメータを渡して組み立てる。
         pop / ripple / ring / flash は全部これのプリセット違いでしかない＝カタログにない組み合わせもここで自由に作れる。
       </p>
@@ -500,7 +552,7 @@ function RadialBurstBuilder() {
   );
 }
 
-// 「空の構造から作る」デモ・その2：ParticleField + fallMotion。rain（雨）も
+// 構造テンプレートのデモ・その2：ParticleField + fallMotion。rain（雨）も
 // sakura（桜吹雪）も実体は同じParticleFieldにfallMotionとパラメータを渡しているだけ。
 // ここではfallMotionのパラメータ（落下速度・横揺れ・個数・絵柄）を直接いじれる。
 // render は文字列専用ではなく任意のReactNode（画像・SVG・自作コンポーネントも可）を
@@ -574,12 +626,12 @@ function ParticleFallBuilder() {
 />`;
 
   return (
-    <section className="playground-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>❄️</span>
-        <span>空の構造から作る：ParticleField（降ってくる系・仮）</span>
+        <span>構造テンプレート：ParticleField（降ってくる系）</span>
       </p>
-      <p className="popit-hint">
+      <p className="section-hint">
         rain（雨）もsakura（桜吹雪）も実体は同じ<code>ParticleField</code>に<code>fallMotion</code>という
         動き関数とパラメータを渡しているだけ。<code>render</code>は文字列専用ではなく
         <strong>任意のReactNode</strong>（画像・SVG・自作コンポーネントも可）を受け取れる
@@ -624,7 +676,7 @@ function ParticleFallBuilder() {
               <input type="text" value={glyph} onChange={(e) => setGlyph(e.target.value)} placeholder="❄️ 🍂 🌸 など" />
             </label>
           ) : (
-            <p className="popit-hint" style={{ margin: 0 }}>
+            <p className="section-hint" style={{ margin: 0 }}>
               色は固定1色ではなく、パレット（{SHAPE_PALETTE.length}色）から粒ごとに順番に割り当てる。
             </p>
           )}
@@ -658,7 +710,7 @@ function ParticleFallBuilder() {
   );
 }
 
-// 「空の構造から作る」デモ・その3：ボーダー系は実質2機構（glowのbox-shadowパルス/
+// 構造テンプレートのデモ・その3：ボーダー系は実質2機構（glowのbox-shadowパルス/
 // フリッカーと、conicRingのグラデーションリング）しかない。neon/fire/ice/electricは
 // glow系のパラメータ違い、spin/rainbowはconicRing系のパラメータ違いでしかないことの実演。
 type GlowFamily = "pulse" | "flicker" | "fire" | "ice" | "electric";
@@ -714,12 +766,12 @@ function BorderMechanismBuilder() {
       : `celebrateBorder(${mode === "sweep" ? "spinPreset" : "rainbowPreset"}("${stopsText}"));`;
 
   return (
-    <section className="playground-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>🖼️</span>
-        <span>空の構造から作る：ボーダー（仮）</span>
+        <span>構造テンプレート：ボーダー（glow/conicRing）</span>
       </p>
-      <p className="popit-hint">
+      <p className="section-hint">
         glow/neon/fire/ice/electricは全部box-shadowパルス/フリッカー（<code>glow</code>機構）のパラメータ違い、
         spin/rainbowは全部conic-gradientリング（<code>conicRing</code>機構）のパラメータ違いでしかない。
         名前を選ぶのではなく、機構と生のパラメータ（色・stops・mode）を直接指定する。
@@ -792,7 +844,7 @@ function BorderMechanismBuilder() {
   );
 }
 
-// 「空の構造から作る」デモ・その4：ClipReveal（軸I=マスク・リビール）。
+// 構造テンプレートのデモ・その4：ClipReveal（軸I=マスク・リビール）。
 // RadialBurst/ParticleField/StrokePathとは別の描画軸（覆いをclip-pathで動かして
 // 中身を出し入れする）であることの実演。中身には自作コンポーネント（画像の代わりに絵文字）を置く。
 const CLIP_REVEAL_EDGES: readonly ClipRevealEdge[] = ["left", "right", "top", "bottom", "center"];
@@ -806,12 +858,12 @@ function ClipRevealDemo() {
   const code = `<ClipReveal edge="${edge}" direction="${direction}" color="${color}">\n  <span>🎁</span>\n</ClipReveal>`;
 
   return (
-    <section className="playground-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>🎬</span>
-        <span>空の構造から作る：ClipReveal（軸I=マスク・リビール・仮）</span>
+        <span>構造テンプレート：ClipReveal（軸I=マスク・リビール）</span>
       </p>
-      <p className="popit-hint">
+      <p className="section-hint">
         RadialBurst（scale+opacity）/ParticleField（粒）/StrokePath（線）とは別の軸：
         覆いを<code>clip-path</code>で動かして中身を出し入れする（緞帳ワイプ）。
         <code>direction="out"</code>は同じ経路の逆再生（覆いが閉じる）。
@@ -870,7 +922,7 @@ function ClipRevealDemo() {
   );
 }
 
-// 「空の構造から作る」デモ・その5：Sequence（合成層。軸F=staged-sequence）。
+// 構造テンプレートのデモ・その5：Sequence（合成層。軸F=staged-sequence）。
 // with（parallel相当・同時に重ねる）とは別軸：「前段が終わってから次段が始まる」かつ
 // 「前段の実行結果（着地座標）を次段のパラメータとして受け取れる」ことの実演。
 function SequenceDemo() {
@@ -883,12 +935,12 @@ function SequenceDemo() {
   };
 
   return (
-    <section className="playground-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>🎞️</span>
-        <span>空の構造から作る：Sequence（合成層・仮）</span>
+        <span>合成層：Sequence</span>
       </p>
-      <p className="popit-hint">
+      <p className="section-hint">
         <code>with</code>（parallel相当・同時に重ねる）とは別軸：前段が終わってから次段が始まり、
         前段の実行結果（ここでは「落下地点のx座標」）を次段の<code>render</code>へ渡せる。
         各ステップの<code>onEnter</code>で効果音・振動をステップ単位に鳴らせる（ここではログ表示で代用）。
@@ -980,14 +1032,15 @@ function Playground() {
   const code = `celebrate("${variant}"${formatOptionsSnippet(options, withList)});`;
 
   return (
-    <section className="playground-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>🛝</span>
-        <span>The playground（カタログ版・Tier 1）</span>
+        <span>The playground（options全体を試す・Tier 1）</span>
       </p>
-      <p className="popit-hint">
-        こちらは登録済みの名前（variant）から選ぶ、簡単だが自由度の低い使い方。
-        上の「空の構造から作る」が生のパラメータを直接いじるのに対し、こちらは名前を選ぶだけ。
+      <p className="section-hint">
+        上のカタログが1 variant＝1個のシンプルな呼び出しだったのに対し、こちらは
+        <code>with</code>/<code>intensity</code>/<code>text</code>等の<code>CelebrateVariantOptions</code>を
+        自由に組み合わせて試せる。構造テンプレート（下記）は名前を経由せず生のパラメータを直接いじる、さらに下の層。
       </p>
       <div className="playground-grid">
         <div className="playground-controls">
@@ -1064,8 +1117,8 @@ const FEATURES = [
 
 function Features() {
   return (
-    <section className="features-card">
-      <p className="popit-title">
+    <section className="doc-section">
+      <p className="section-title">
         <span>✨</span>
         <span>Features</span>
       </p>
@@ -1082,6 +1135,7 @@ function DocsHeader() {
   return (
     <header className="docs-header">
       <h1 className="docs-title">@celebrate-js/celebrate</h1>
+      <p className="docs-tagline">React向けの祝福・反応エフェクトライブラリ。名前で選ぶだけのカタログから、生のパラメータを直接いじる構造テンプレートまで、3段階の自由度で使える。</p>
       <div className="docs-badges">
         <span className="docs-badge">
           <span>npm</span>
@@ -1100,20 +1154,79 @@ function DocsHeader() {
   );
 }
 
+const QUICKSTART_CODE = `import { CelebrateProvider, useCelebrate } from "@celebrate-js/celebrate/react";
+
+function App() {
+  return (
+    <CelebrateProvider>
+      <AnswerButton />
+    </CelebrateProvider>
+  );
+}
+
+function AnswerButton() {
+  const celebrate = useCelebrate();
+  return <button onClick={() => celebrate("confetti")}>正解</button>;
+}`;
+
+function Quickstart() {
+  return (
+    <section className="doc-section">
+      <p className="section-title">
+        <span>🚀</span>
+        <span>Quickstart</span>
+      </p>
+      <p className="section-hint">
+        <code>npm install @celebrate-js/celebrate</code>。あとは
+        <code>{"<CelebrateProvider>"}</code>で包んで<code>useCelebrate()</code>を呼ぶだけ。
+        3段階（Tier）の自由度がある：①名前で選ぶカタログ（下記）、②複数局面を順番に切り替える合成層
+        （<code>with</code>/<code>Sequence</code>）、③構造テンプレートに生のパラメータを渡すTier 3。
+        詳細は<a href="../docs/guide.md">ガイド</a>と<a href="../docs/api-reference.md">APIリファレンス</a>参照。
+      </p>
+      <pre className="playground-code">
+        <code>{QUICKSTART_CODE}</code>
+      </pre>
+    </section>
+  );
+}
+
+function SectionDivider({ icon, title, description }: { icon: string; title: string; description: string }) {
+  return (
+    <div className="section-divider">
+      <h2>
+        <span>{icon}</span>
+        <span>{title}</span>
+      </h2>
+      <p>{description}</p>
+    </div>
+  );
+}
+
 export function App() {
   return (
     <CelebrateProvider>
       <DocsHeader />
+      <Quickstart />
+      <Features />
+      <CatalogSection />
+      <BorderEffectDemo />
+      <Playground />
+      <ComboDemo />
+      <SectionDivider
+        icon="🧬"
+        title="合成層（Tier 2）"
+        description="複数局面を順番に切り替える。前段の実行結果を次段のパラメータとして渡せる。"
+      />
+      <SequenceDemo />
+      <SectionDivider
+        icon="🧱"
+        title="構造テンプレート（Tier 3）"
+        description="variant名のカタログを経由せず、構造テンプレートに生のパラメータを直接渡す。カタログの各variantは全部これのプリセット違いでしかない。"
+      />
       <RadialBurstBuilder />
       <ParticleFallBuilder />
-      <BorderMechanismBuilder />
       <ClipRevealDemo />
-      <SequenceDemo />
-      <Playground />
-      <Features />
-      <PopItGrid />
-      <BorderEffectDemo />
-      <ComboDemo />
+      <BorderMechanismBuilder />
       <EngineDemo />
       <ReactNodeDemo />
       <ScopedDemo />
