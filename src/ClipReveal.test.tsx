@@ -3,15 +3,15 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { ClipReveal } from "./ClipReveal";
 
 describe("ClipReveal", () => {
-  it("既定はedge=left、directionクラスは付かない（in扱い）", () => {
+  it("既定はedge=left、directionクラスは付かない（reveal扱い）", () => {
     const html = renderToStaticMarkup(<ClipReveal />);
     expect(html).toContain("celebrate-clip-reveal--left");
-    expect(html).not.toContain("celebrate-clip-reveal--out");
+    expect(html).not.toContain("celebrate-clip-reveal--cover");
   });
 
-  it("direction='out'で逆再生クラスが付く", () => {
-    const html = renderToStaticMarkup(<ClipReveal direction="out" />);
-    expect(html).toContain("celebrate-clip-reveal--out");
+  it("direction='cover'で逆再生クラスが付く", () => {
+    const html = renderToStaticMarkup(<ClipReveal direction="cover" />);
+    expect(html).toContain("celebrate-clip-reveal--cover");
   });
 
   it("edgeごとにクラスが変わる", () => {

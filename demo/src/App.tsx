@@ -862,14 +862,14 @@ const GIFT_CONTENT_STYLE: CSSProperties = {
 
 function ClipRevealDemo() {
   const [edge, setEdge] = useState<ClipRevealEdge>("left");
-  const [direction, setDirection] = useState<"in" | "out">("in");
+  const [direction, setDirection] = useState<"reveal" | "cover">("reveal");
   const [color, setColor] = useState("#2b2b2b");
   const [fireKey, setFireKey] = useState(0);
   // ClipRevealは他のTier3プリミティブ（RadialBurst/ParticleField等）と同じく
   // 「マウントした瞬間から即アニメーションが始まる」一発仕込みの構造で、celebrate()の
   // 使い方（発火した瞬間だけマウントする）を前提にしている。このdemoでも同様に、
   // 発火するまでは実体をマウントせず、静止した「発火前の状態」だけを描く
-  // （in＝覆われている、out＝開いている）。ページ読み込み時から常時マウントしていると、
+  // （reveal＝覆われている、cover＝開いている）。ページ読み込み時から常時マウントしていると、
   // 見る頃にはアニメーションがとっくに終わって逆の状態で静止して見える。
   const [fired, setFired] = useState(false);
 
@@ -884,7 +884,7 @@ function ClipRevealDemo() {
       <p className="section-hint">
         RadialBurst（scale+opacity）/ParticleField（粒）/StrokePath（線）とは別の軸：
         覆いを<code>clip-path</code>で動かして中身を出し入れする（緞帳ワイプ）。
-        <code>direction="out"</code>は同じ経路の逆再生（覆いが閉じる）。
+        <code>direction="cover"</code>は同じ経路の逆再生（覆いが閉じる）。
       </p>
       <div className="playground-grid">
         <div className="playground-controls">
@@ -900,9 +900,9 @@ function ClipRevealDemo() {
           </label>
           <label>
             direction
-            <select value={direction} onChange={(e) => setDirection(e.target.value as "in" | "out")}>
-              <option value="in">in（覆いが晴れる）</option>
-              <option value="out">out（覆いが閉じる）</option>
+            <select value={direction} onChange={(e) => setDirection(e.target.value as "reveal" | "cover")}>
+              <option value="reveal">reveal（覆いが晴れる）</option>
+              <option value="cover">cover（覆いが閉じる）</option>
             </select>
           </label>
           <label>
@@ -943,13 +943,13 @@ function ClipRevealDemo() {
           <ClipReveal key={fireKey} edge={edge} direction={direction} color={color}>
             <span style={GIFT_CONTENT_STYLE}>🎁</span>
           </ClipReveal>
-        ) : direction === "in" ? (
-          // 発火前の静止した状態（in＝覆われている）。ClipReveal自体はマウント直後から
+        ) : direction === "reveal" ? (
+          // 発火前の静止した状態（reveal＝覆われている）。ClipReveal自体はマウント直後から
           // アニメーションが動き出すため、静止画は生のdivで代用する（celebrate-clip-revealの
           // クラスを付けるとその場でアニメーションが始まってしまうため使えない）。
           <span style={{ width: "100%", height: "100%", background: color }} />
         ) : (
-          // 発火前の静止した状態（out＝開いている）。
+          // 発火前の静止した状態（cover＝開いている）。
           <span style={GIFT_CONTENT_STYLE}>🎁</span>
         )}
       </div>
@@ -1359,7 +1359,7 @@ const STROKE_LINE_PROPS: readonly ApiRow[] = [
 
 const CLIP_REVEAL_PROPS: readonly ApiRow[] = [
   { name: "edge", type: '"left" | "right" | "top" | "bottom" | "center"', defaultValue: '"left"', desc: "どの方向へワイプするか。centerは円形のワイプ。" },
-  { name: "direction", type: '"in" | "out"', defaultValue: '"in"', desc: "in＝覆いが晴れて中身が見える。out＝覆いが閉じて中身を隠す（同じ経路の逆再生）。" },
+  { name: "direction", type: '"reveal" | "cover"', defaultValue: '"reveal"', desc: "reveal＝覆いが晴れて中身が見える。cover＝覆いが閉じて中身を隠す（同じ経路の逆再生）。" },
   { name: "durationMs", type: "number", defaultValue: "500", desc: "アニメーション長。" },
   { name: "delayMs", type: "number", defaultValue: "0", desc: "発火からの遅延。" },
   { name: "color", type: "string", defaultValue: '"#000"', desc: "カーテン自体の色。" },

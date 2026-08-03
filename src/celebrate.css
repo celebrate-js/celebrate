@@ -615,7 +615,7 @@ html.celebrate-vignette-active::before {
    edge違いは全部同じ仕組みで、"覆いが晴れる/覆う"のどちらの向きかは1つのkeyframeを
    animation-direction: reverse で逆再生するだけで表現する（keyframeを倍にしない）。
    keyframeは「from＝覆いが全面を覆っている」「to＝覆いが晴れて消える」の向きで統一する
-   （direction="in"＝順再生でfromからtoへ＝覆いが晴れる、"out"＝逆再生でtoからfromへ＝
+   （direction="reveal"＝順再生でfromからtoへ＝覆いが晴れる、"cover"＝逆再生でtoからfromへ＝
    覆いが閉じる、がそのままCSSのanimation-directionの意味と一致するようにするため）。 */
 
 .celebrate-clip-reveal-wrapper {
@@ -637,7 +637,7 @@ html.celebrate-vignette-active::before {
   animation-fill-mode: forwards;
 }
 
-.celebrate-clip-reveal--out {
+.celebrate-clip-reveal--cover {
   animation-direction: reverse;
 }
 

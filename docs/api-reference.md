@@ -88,7 +88,7 @@ Tier1カタログ名にも紐付いていない、Tier3の生プリミティブ�
 | prop | type | 既定値 | 説明 |
 |---|---|---|---|
 | `edge` | `"left" \| "right" \| "top" \| "bottom" \| "center"` | `"left"` | どの方向へワイプするか。`"center"`は円形（circle）のワイプ。 |
-| `direction` | `"in" \| "out"` | `"in"` | `"in"`＝覆いが晴れて中身が見える。`"out"`＝覆いが閉じて中身を隠す（同じ経路の逆再生）。 |
+| `direction` | `"reveal" \| "cover"` | `"reveal"` | `"reveal"`＝覆いが晴れて中身が見える。`"cover"`＝覆いが閉じて中身を隠す（同じ経路の逆再生）。（`"in"`/`"out"`は主語が曖昧＝覆いのin/outか中身のin/outか誤読しやすいため、動詞に変更した） |
 | `durationMs` | `number` | `500` | アニメーション長。 |
 | `delayMs` | `number` | `0` | 発火からの遅延。 |
 | `color` | `string` | `"#000"` | カーテン自体の色。 |

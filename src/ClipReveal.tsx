@@ -13,8 +13,12 @@ export type ClipRevealEdge = "left" | "right" | "top" | "bottom" | "center";
 export interface ClipRevealProps {
   /** どの方向へワイプするか。既定 "left"（左から覆いが晴れる）。 */
   edge?: ClipRevealEdge;
-  /** "in"=覆いが晴れて中身が見える（既定）。"out"=覆いが閉じて中身を隠す（同じ経路の逆再生）。 */
-  direction?: "in" | "out";
+  /**
+   * "reveal"=覆いが晴れて中身が見える（既定）。"cover"=覆いが閉じて中身を隠す（同じ経路の逆再生）。
+   * "in"/"out"のような主語が曖昧な名前（覆いのin/outなのか中身のin/outなのか誤読しやすい）は
+   * 避け、何が起きるかそのままの動詞にしている。
+   */
+  direction?: "reveal" | "cover";
   durationMs?: number;
   delayMs?: number;
   /** カーテン自体の色。既定は黒。 */
@@ -27,7 +31,7 @@ export interface ClipRevealProps {
 /**
  * 覆いをclip-pathで動かして中身を出し入れするプリミティブ（軸I=clip-reveal）。
  *
- *   <ClipReveal edge="left" direction="in" color="#000">
+ *   <ClipReveal edge="left" direction="reveal" color="#000">
  *     <img src="result.png" />
  *   </ClipReveal>
  *
@@ -39,7 +43,7 @@ export interface ClipRevealProps {
  */
 export function ClipReveal({
   edge = "left",
-  direction = "in",
+  direction = "reveal",
   durationMs = 500,
   delayMs = 0,
   color = "#000",
@@ -58,7 +62,7 @@ export function ClipReveal({
         className={clsx(
           "celebrate-clip-reveal",
           `celebrate-clip-reveal--${edge}`,
-          direction === "out" && "celebrate-clip-reveal--out"
+          direction === "cover" && "celebrate-clip-reveal--cover"
         )}
         style={
           {
