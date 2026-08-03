@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   CelebrateProvider,
   useCelebrate,
@@ -851,11 +851,27 @@ function BorderMechanismBuilder() {
 // 中身を出し入れする）であることの実演。中身には自作コンポーネント（画像の代わりに絵文字）を置く。
 const CLIP_REVEAL_EDGES: readonly ClipRevealEdge[] = ["left", "right", "top", "bottom", "center"];
 
+const GIFT_CONTENT_STYLE: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "#fff7e6",
+};
+
 function ClipRevealDemo() {
   const [edge, setEdge] = useState<ClipRevealEdge>("left");
   const [direction, setDirection] = useState<"in" | "out">("in");
   const [color, setColor] = useState("#2b2b2b");
   const [fireKey, setFireKey] = useState(0);
+  // ClipRevealは他のTier3プリミティブ（RadialBurst/ParticleField等）と同じく
+  // 「マウントした瞬間から即アニメーションが始まる」一発仕込みの構造で、celebrate()の
+  // 使い方（発火した瞬間だけマウントする）を前提にしている。このdemoでも同様に、
+  // 発火するまでは実体をマウントせず、静止した「発火前の状態」だけを描く
+  // （in＝覆われている、out＝開いている）。ページ読み込み時から常時マウントしていると、
+  // 見る頃にはアニメーションがとっくに終わって逆の状態で静止して見える。
+  const [fired, setFired] = useState(false);
 
   const code = `<ClipReveal edge="${edge}" direction="${direction}" color="${color}">\n  <span>🎁</span>\n</ClipReveal>`;
 
@@ -900,7 +916,13 @@ function ClipRevealDemo() {
           </pre>
         </div>
       </div>
-      <button className="combo-button" onClick={() => setFireKey((k) => k + 1)}>
+      <button
+        className="combo-button"
+        onClick={() => {
+          setFireKey((k) => k + 1);
+          setFired(true);
+        }}
+      >
         🚀 発火（celebrate()を経由しない）
       </button>
       <div
@@ -917,20 +939,19 @@ function ClipRevealDemo() {
           fontSize: "2rem",
         }}
       >
-        <ClipReveal key={fireKey} edge={edge} direction={direction} color={color}>
-          <span
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "#fff7e6",
-            }}
-          >
-            🎁
-          </span>
-        </ClipReveal>
+        {fired ? (
+          <ClipReveal key={fireKey} edge={edge} direction={direction} color={color}>
+            <span style={GIFT_CONTENT_STYLE}>🎁</span>
+          </ClipReveal>
+        ) : direction === "in" ? (
+          // 発火前の静止した状態（in＝覆われている）。ClipReveal自体はマウント直後から
+          // アニメーションが動き出すため、静止画は生のdivで代用する（celebrate-clip-revealの
+          // クラスを付けるとその場でアニメーションが始まってしまうため使えない）。
+          <span style={{ width: "100%", height: "100%", background: color }} />
+        ) : (
+          // 発火前の静止した状態（out＝開いている）。
+          <span style={GIFT_CONTENT_STYLE}>🎁</span>
+        )}
       </div>
     </section>
   );
