@@ -325,19 +325,19 @@ function EngineDemo() {
       <button className="combo-button" onClick={() => setFireKey((k) => k + 1)}>
         spiral 発火
       </button>
-      <div style={{ position: "relative", height: "9rem", marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ position: "relative", height: "11rem", marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <ParticleField
           key={fireKey}
-          particles={Array.from({ length: 16 }, (_, i) => ({
+          particles={Array.from({ length: 36 }, (_, i) => ({
             motion: spiralMotion,
             params: {
               radius: 1.4 + (i % 5) * 0.55,
               angularSpeed: 3.4 + (i % 4) * 0.5,
-              fallSpeed: 2.2,
-              durationSeconds: 1.7,
+              fallSpeed: 1.3,
+              durationSeconds: 3.2,
             },
-            durationSeconds: 1.7,
-            delaySeconds: i * 0.025,
+            durationSeconds: 3.2,
+            delaySeconds: i * 0.05,
             render: <SparkleShape color={SPIRAL_PALETTE[i % SPIRAL_PALETTE.length]!} sizeRem={0.7 + (i % 3) * 0.25} />,
           }))}
         />
