@@ -603,6 +603,7 @@ function ParticleFallBuilder() {
   const [spreadX, setSpreadX] = useState(12);
   const [glyph, setGlyph] = useState("❄️");
   const [renderKind, setRenderKind] = useState<FallRenderKind>("glyph");
+  const [natural, setNatural] = useState(false);
   const [fireKey, setFireKey] = useState(0);
 
   const renderNodeFor = (index: number): ReactNode =>
@@ -612,26 +613,53 @@ function ParticleFallBuilder() {
       <DiamondShape color={SHAPE_PALETTE[index % SHAPE_PALETTE.length]!} />
     );
 
-  const particles = Array.from({ length: count }, (_, i) => ({
-    motion: fallMotion,
-    params: {
-      fallSpeed,
-      startX: count > 1 ? (i / (count - 1) - 0.5) * spreadX * 2 : 0,
-      swayAmplitude,
-      swayFrequency: swayFrequency + (i % 3) * 0.3,
+  // 既定は「揃った」並び（startX等分・delay等分・swayFrequencyが3値しか無い）にしている。
+  // 見た目には正しく動いているが、粒同士が完全に規則的なので「1枚の波」のように
+  // 揃って見えてしまう（実際に指摘された点）。natural=trueのときは、同じパラメータを
+  // 中心に呼び出し側でランダムに散らす（fallMotion自体は変えず、渡すparamsだけを
+  // 粒ごとにばらつかせる＝MotionProfileは決定的なまま、乱数は呼び出し側の責任という
+  // 設計に沿っている）。
+  const particles = Array.from({ length: count }, (_, i) => {
+    const evenStartX = count > 1 ? (i / (count - 1) - 0.5) * spreadX * 2 : 0;
+    const evenDelay = (i / count) * 0.4;
+    return {
+      motion: fallMotion,
+      params: {
+        fallSpeed: natural ? fallSpeed * (0.7 + Math.random() * 0.6) : fallSpeed,
+        startX: natural ? (Math.random() - 0.5) * spreadX * 2 : evenStartX,
+        swayAmplitude: natural ? swayAmplitude * (0.4 + Math.random() * 1.2) : swayAmplitude,
+        swayFrequency: natural ? swayFrequency * (0.6 + Math.random() * 0.8) : swayFrequency + (i % 3) * 0.3,
+        durationSeconds,
+      },
       durationSeconds,
-    },
-    durationSeconds,
-    delaySeconds: (i / count) * 0.4,
-    render: renderNodeFor(i),
-  }));
+      delaySeconds: natural ? Math.random() * 0.6 : evenDelay,
+      render: renderNodeFor(i),
+    };
+  });
 
   const renderCode =
     renderKind === "glyph"
       ? `<span style={{ fontSize: "1.1rem" }}>${glyph}</span>`
       : `<DiamondShape color={PALETTE[i % PALETTE.length]} />`;
 
-  const code = `<ParticleField
+  const code = natural
+    ? `<ParticleField
+  particles={Array.from({ length: ${count} }, (_, i) => ({
+    motion: fallMotion,
+    params: {
+      // 呼び出し側でMath.random()を使って粒ごとにばらつかせる（fallMotion自体は決定的なまま）
+      fallSpeed: ${fallSpeed} * (0.7 + Math.random() * 0.6),
+      startX: (Math.random() - 0.5) * ${(spreadX * 2).toFixed(1)},
+      swayAmplitude: ${swayAmplitude} * (0.4 + Math.random() * 1.2),
+      swayFrequency: ${swayFrequency} * (0.6 + Math.random() * 0.8),
+      durationSeconds: ${durationSeconds},
+    },
+    durationSeconds: ${durationSeconds},
+    delaySeconds: Math.random() * 0.6,
+    render: ${renderCode},
+  }))}
+/>`
+    : `<ParticleField
   particles={Array.from({ length: ${count} }, (_, i) => ({
     motion: fallMotion,
     params: {
@@ -684,6 +712,10 @@ function ParticleFallBuilder() {
           <label>
             spreadX（横方向の広がり）: {spreadX}
             <input type="range" min="2" max="24" step="1" value={spreadX} onChange={(e) => setSpreadX(Number(e.target.value))} />
+          </label>
+          <label className="playground-checkbox">
+            <input type="checkbox" checked={natural} onChange={(e) => setNatural(e.target.checked)} />
+            自然にバラける（乱数で物理演算っぽく散らす）
           </label>
           <label>
             見た目（render）
