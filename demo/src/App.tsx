@@ -619,20 +619,39 @@ function ParticleFallBuilder() {
   // 中心に呼び出し側でランダムに散らす（fallMotion自体は変えず、渡すparamsだけを
   // 粒ごとにばらつかせる＝MotionProfileは決定的なまま、乱数は呼び出し側の責任という
   // 設計に沿っている）。
+  //
+  // 乱数の「種」はfireKey/count/naturalが変わったときだけ作り直す（useMemo）。
+  // これが無いと、Math.random()を描画のたびに呼んでいるだけになり、無関係な
+  // スライダーを1つ動かすだけの再描画でも全粒の乱数が再計算されてしまう
+  // （「発火を押すたびに」ではなく「何か操作するたびに」変わって見える不具合だった）。
+  const naturalOffsets = useMemo(
+    () =>
+      Array.from({ length: count }, () => ({
+        speedFactor: 0.7 + Math.random() * 0.6,
+        startXFactor: Math.random() - 0.5,
+        swayAmpFactor: 0.4 + Math.random() * 1.2,
+        swayFreqFactor: 0.6 + Math.random() * 0.8,
+        delaySeconds: Math.random() * 0.6,
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fireKey, count, natural]
+  );
+
   const particles = Array.from({ length: count }, (_, i) => {
     const evenStartX = count > 1 ? (i / (count - 1) - 0.5) * spreadX * 2 : 0;
     const evenDelay = (i / count) * 0.4;
+    const offset = naturalOffsets[i]!;
     return {
       motion: fallMotion,
       params: {
-        fallSpeed: natural ? fallSpeed * (0.7 + Math.random() * 0.6) : fallSpeed,
-        startX: natural ? (Math.random() - 0.5) * spreadX * 2 : evenStartX,
-        swayAmplitude: natural ? swayAmplitude * (0.4 + Math.random() * 1.2) : swayAmplitude,
-        swayFrequency: natural ? swayFrequency * (0.6 + Math.random() * 0.8) : swayFrequency + (i % 3) * 0.3,
+        fallSpeed: natural ? fallSpeed * offset.speedFactor : fallSpeed,
+        startX: natural ? offset.startXFactor * spreadX * 2 : evenStartX,
+        swayAmplitude: natural ? swayAmplitude * offset.swayAmpFactor : swayAmplitude,
+        swayFrequency: natural ? swayFrequency * offset.swayFreqFactor : swayFrequency + (i % 3) * 0.3,
         durationSeconds,
       },
       durationSeconds,
-      delaySeconds: natural ? Math.random() * 0.6 : evenDelay,
+      delaySeconds: natural ? offset.delaySeconds : evenDelay,
       render: renderNodeFor(i),
     };
   });
