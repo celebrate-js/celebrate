@@ -11,6 +11,12 @@
 
 ## `CelebrateOptions`（`celebrate(content, options)`の第二引数）
 
+`celebrate("pop", { text: "x" })`のように、第一引数がvariant名のリテラルで書かれている場合、
+第二引数はそのvariantが実際に効果を持つoptionだけに型レベルで絞り込まれる（下表の「対応」列を
+参照。無効なoptionを渡すとコンパイルエラーになる）。`useState<CelebrateVariant>`のように変数で
+variantを動的に切り替える呼び出し方の場合はこの絞り込みができないため、従来通りどのoptionでも
+緩く受け付ける。
+
 | prop | type | 既定値 | 説明 |
 |---|---|---|---|
 | `anchor` | `RefObject<HTMLElement \| null>` | - | 演出の基準にする要素。省略＝画面中央（グローバル）。渡す＝その要素の中心（ローカル）。 |

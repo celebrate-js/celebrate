@@ -379,6 +379,50 @@ export type CelebrateVariant = keyof typeof RECIPES;
 /** カタログ表示・デモ向けに、登録済みの名前を列挙したもの。 */
 export const CELEBRATE_VARIANT_NAMES = Object.keys(RECIPES) as readonly CelebrateVariant[];
 
+/**
+ * variantごとに実際に効果を持つoptionだけを型レベルで許可するための対応表。
+ * `CelebrateVariantOptions`は全variant共通の1つのinterfaceなので、これまでは
+ * `celebrate("stamp", { colors: [...] })`のように、そのvariantには効果のないoptionを
+ * 渡してもコンパイルエラーにならず、実行時に黙って無視されるだけだった。
+ * `CelebrateFn`（src/context.ts）はこの表を使って、variant名がリテラルで分かる呼び出しに
+ * 限り、渡せるoptionをそのvariantが実際に使うものだけに絞り込む。
+ * ※ このRECIPESの各`render`の分割代入と手動で対応を取っている表なので、
+ * RECIPESの分割代入を変えたときはここも合わせて直すこと。
+ */
+export type VariantOptionsMap = {
+  pop: Pick<CelebrateVariantOptions, "scale" | "sizeRem" | "color">;
+  ripple: Pick<CelebrateVariantOptions, "scale" | "sizeRem" | "color">;
+  checkmark: Record<string, never>;
+  stamp: Pick<CelebrateVariantOptions, "text" | "size">;
+  medal: Pick<CelebrateVariantOptions, "text">;
+  bounce: Pick<CelebrateVariantOptions, "text">;
+  confetti: Pick<CelebrateVariantOptions, "colors">;
+  sparkle: Pick<CelebrateVariantOptions, "seed" | "colors">;
+  record: Pick<CelebrateVariantOptions, "text" | "note">;
+  flash: Pick<CelebrateVariantOptions, "scale" | "sizeRem" | "color">;
+  ring: Pick<CelebrateVariantOptions, "scale" | "sizeRem" | "color">;
+  firework: Pick<CelebrateVariantOptions, "seed" | "scale" | "sizeRem" | "colors" | "fireworkStyle">;
+  heart: Pick<CelebrateVariantOptions, "glyphs" | "seed">;
+  star: Pick<CelebrateVariantOptions, "glyphs" | "seed">;
+  emoji: Pick<CelebrateVariantOptions, "glyphs" | "seed">;
+  cracker: Pick<CelebrateVariantOptions, "seed" | "colors">;
+  float: Pick<CelebrateVariantOptions, "glyph">;
+  sakura: Pick<CelebrateVariantOptions, "color" | "seed">;
+  shake: Record<string, never>;
+  hitstop: Record<string, never>;
+  vignette: Record<string, never>;
+  rain: Pick<CelebrateVariantOptions, "seed" | "colors">;
+  lightning: Pick<CelebrateVariantOptions, "seed">;
+  shatter: Pick<CelebrateVariantOptions, "seed">;
+  popup: Pick<CelebrateVariantOptions, "text">;
+};
+
+/** 全variant・ReactNode共通で、意味がvariantに依存せず常に使えるoption。 */
+export type UniversalCelebrateOptions = Pick<
+  CelebrateVariantOptions,
+  "with" | "theme" | "sound" | "haptic" | "intensity" | "soundPreset" | "durationMs"
+>;
+
 function isRecipeName(content: unknown): content is CelebrateVariant {
   return typeof content === "string" && content in RECIPES;
 }

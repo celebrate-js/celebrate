@@ -82,7 +82,7 @@ export function CelebrateProvider({ children, theme, container }: CelebrateProvi
     setPortalTarget(container?.current ?? document.body);
   }, [container]);
 
-  const celebrate = useCallback<CelebrateFn>((content, options: CelebrateOptions = {}) => {
+  const celebrate = useCallback<CelebrateFn>((content: CelebrateVariant | ReactNode, options: CelebrateOptions = {}) => {
     const { anchor, ...variantOptions } = options;
     // 基準要素の位置は発火した瞬間に測る（演出は1秒で消えるため追従は不要）。
     // container が指定されている場合、overlay-root は viewport ではなく container 基準の
