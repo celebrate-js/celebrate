@@ -285,12 +285,29 @@ const spiralMotion: MotionProfile<SpiralParams> = (t, p) => {
   };
 };
 
-// キラキラ・ハート・桜・星でまとめた「可愛い」テーマの一貫した絵柄セット
-// （元は🌀✨🎈という無関係な組み合わせで、テーマがバラバラだった）。
-const SPIRAL_GLYPHS = ["✨", "💖", "🌸", "⭐", "💫"];
+// 絵文字ではなく自作SVG（DiamondShapeと同じ形）で「可愛い」を表現する：
+// 4方向に伸びる小さなキラキラ星形を、パステルカラーパレットから色を変えて散らす。
+const SPIRAL_PALETTE = ["#ff8fab", "#ffd6a5", "#caffbf", "#a0c4ff", "#bdb2ff"];
+
+function SparkleShape({ color, sizeRem }: { color: string; sizeRem: number }) {
+  return (
+    <svg
+      width={`${sizeRem}rem`}
+      height={`${sizeRem}rem`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      style={{ filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.15))" }}
+    >
+      <path
+        d="M12 0 C12 6.5 13.2 10 20.5 12 C13.2 14 12 17.5 12 24 C12 17.5 10.8 14 3.5 12 C10.8 10 12 6.5 12 0 Z"
+        fill={color}
+      />
+    </svg>
+  );
+}
 
 // エンジン直利用（Tier 3）：celebrate()もCATALOGも経由しない。ParticleFieldを
-// 直接JSXに置き、motionは自作関数・見た目も自由なReactNode（絵文字5種）を渡す。
+// 直接JSXに置き、motionは自作関数・見た目も自由なReactNode（自作SVG）を渡す。
 function EngineDemo() {
   const [fireKey, setFireKey] = useState(0);
 
@@ -321,11 +338,7 @@ function EngineDemo() {
             },
             durationSeconds: 1.7,
             delaySeconds: i * 0.025,
-            render: (
-              <span style={{ fontSize: `${1 + (i % 3) * 0.35}rem`, filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.15))" }}>
-                {SPIRAL_GLYPHS[i % SPIRAL_GLYPHS.length]}
-              </span>
-            ),
+            render: <SparkleShape color={SPIRAL_PALETTE[i % SPIRAL_PALETTE.length]!} sizeRem={0.7 + (i % 3) * 0.25} />,
           }))}
         />
       </div>
