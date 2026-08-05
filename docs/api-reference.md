@@ -23,6 +23,7 @@ variantを動的に切り替える呼び出し方の場合はこの絞り込み�
 | `text` | `string` | `""` | `stamp` / `record` / `bounce` / `medal` / `popup`で大きく出す文字。 |
 | `note` | `string` | - | `record`で大きい文字の下に添える一言（例：「れんぞく 7問」）。 |
 | `size` | `"md" \| "lg"` | `"md"` | `stamp`の印影の大きさ。 |
+| `rotateDeg` | `number` | `-6` | `stamp`：収まった後の傾き（度）。入り際はここからさらに8度分振れた角度から始まる。 |
 | `with` | `CelebrateVariant \| ReactNode \| (CelebrateVariant \| ReactNode)[]` | - | 重ねて同時に出すもの。登録済みの名前・生のReactNode・その配列（混在可）。 |
 | `theme` | `CelebrateTheme` | Providerのtheme | この呼び出しだけ意匠を上書き。 |
 | `sound` | `boolean` | `true` | 効果音を鳴らすか。登録済みの名前にだけ効果を持つ。 |

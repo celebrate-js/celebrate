@@ -100,6 +100,18 @@ describe("options.colors（confetti/sparkle/cracker/rain/fireworkの色パレッ
   });
 });
 
+describe("options.rotateDeg（stampの傾きの上書き）", () => {
+  it("rotateDegを指定すると、その傾きがStampまで届く", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("stamp", { text: "正", rotateDeg: 15 })}</>);
+    expect(html).toContain("--celebrate-enter-rotate-to:15deg");
+  });
+
+  it("指定しなければ既定の-6degのまま", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("stamp", { text: "正" })}</>);
+    expect(html).toContain("--celebrate-enter-rotate-to:-6deg");
+  });
+});
+
 describe("playSoundsForCelebration（options.soundPreset）", () => {
   let capturedFrequencies: number[];
   let originalAudioContext: typeof window.AudioContext | undefined;

@@ -40,3 +40,23 @@ describe("Stamp（想定より長いtextでも円からはみ出さない）", (
     expect(fontSizeRemOf(longHtml)).toBeLessThan(1.6);
   });
 });
+
+describe("Stamp（rotateDegで傾きを上書きできる）", () => {
+  it("rotateDegを指定しなければ既定の傾き（収まった後-6deg・入り際-14deg）のまま", () => {
+    const html = renderToStaticMarkup(<Stamp text="正" />);
+    expect(html).toContain("--celebrate-enter-rotate-to:-6deg");
+    expect(html).toContain("--celebrate-enter-rotate-from:-14deg");
+  });
+
+  it("rotateDegを指定すると、収まった後の傾きも入り際の振れ幅もそれを基準にずれる", () => {
+    const html = renderToStaticMarkup(<Stamp text="正" rotateDeg={20} />);
+    expect(html).toContain("--celebrate-enter-rotate-to:20deg");
+    expect(html).toContain("--celebrate-enter-rotate-from:12deg");
+  });
+
+  it("rotateDeg={0}で傾きなし（水平）にできる", () => {
+    const html = renderToStaticMarkup(<Stamp text="正" rotateDeg={0} />);
+    expect(html).toContain("--celebrate-enter-rotate-to:0deg");
+    expect(html).toContain("--celebrate-enter-rotate-from:-8deg");
+  });
+});

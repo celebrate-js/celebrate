@@ -18,7 +18,17 @@ export interface StampProps {
   size?: CelebrateSize;
   theme?: CelebrateTheme;
   className?: string;
+  /**
+   * 収まった後の傾き（度）。既定-6（実印を斜めに押したような既定の傾き）。
+   * 入り際の傾き（`rotateFromDeg`）はこの値からさらに8度分振れた角度になる
+   * （傾きの大きさ自体は既定と同じ「勢いよく傾いて収まる」動きを保つため）。
+   */
+  rotateDeg?: number;
 }
+
+const DEFAULT_ROTATE_DEG = -6;
+// 入り際は「収まる角度からさらに8度分振れた状態」から始まる（既定の-14→-6と同じ振れ幅）。
+const ROTATE_ENTRY_SWING_DEG = 8;
 
 // 想定している文字数（「正」「合格」のような1〜2文字）。呼び出し側は自由文字列を
 // 渡せるため、想定より長い文字列が来ても円の外にはみ出さないよう、文字数に応じて
@@ -40,6 +50,7 @@ export function Stamp({
   size = "md",
   theme = DEFAULT_CELEBRATE_THEME,
   className,
+  rotateDeg = DEFAULT_ROTATE_DEG,
 }: StampProps) {
   const fontSizeRem = stampFontSizeRem(text, BASE_FONT_SIZE_REM[size]);
   return (
@@ -52,7 +63,12 @@ export function Stamp({
           "--celebrate-stamp-color": theme.stampColor,
           "--celebrate-stamp-radius": theme.stampRadius,
           "--celebrate-stamp-font": theme.stampFont,
-          ...enterSettleStyle({ scaleFrom: 1.7, rotateFromDeg: -14, rotateToDeg: -6, durationMs: 300 }),
+          ...enterSettleStyle({
+            scaleFrom: 1.7,
+            rotateFromDeg: rotateDeg - ROTATE_ENTRY_SWING_DEG,
+            rotateToDeg: rotateDeg,
+            durationMs: 300,
+          }),
         } as CSSProperties
       }
     >

@@ -69,6 +69,8 @@ export interface CelebrateVariantOptions {
   note?: string;
   /** `stamp`: 印影の大きさ。 */
   size?: CelebrateSize;
+  /** `stamp`: 収まった後の傾き（度）。既定-6。呼び出し側のデザインに合わせて傾きを変えたい場合用。 */
+  rotateDeg?: number;
   /**
    * 重ねて同時に出すもの。登録済みの名前（`CelebrateVariant`）、生の ReactNode、
    * またはその配列。「ただ2つ名前を重ねたいだけ」の一番多いケースは名前のままで完結し、
@@ -209,7 +211,7 @@ export const RECIPES = {
 
   // ②達成：正解・完了・順位など「できた」を示す。
   stamp: {
-    render: ({ text = "", size, theme }) => <Stamp text={text} size={size} theme={theme} />,
+    render: ({ text = "", size, theme, rotateDeg }) => <Stamp text={text} size={size} theme={theme} rotateDeg={rotateDeg} />,
     durationMs: CELEBRATE_DURATION_MS,
     sound: fixedChime(0),
     haptic: 18,
@@ -393,7 +395,7 @@ export type VariantOptionsMap = {
   pop: Pick<CelebrateVariantOptions, "scale" | "sizeRem" | "color">;
   ripple: Pick<CelebrateVariantOptions, "scale" | "sizeRem" | "color">;
   checkmark: Record<string, never>;
-  stamp: Pick<CelebrateVariantOptions, "text" | "size">;
+  stamp: Pick<CelebrateVariantOptions, "text" | "size" | "rotateDeg">;
   medal: Pick<CelebrateVariantOptions, "text">;
   bounce: Pick<CelebrateVariantOptions, "text">;
   confetti: Pick<CelebrateVariantOptions, "colors">;
