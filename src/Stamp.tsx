@@ -12,6 +12,13 @@ import { DEFAULT_CELEBRATE_THEME, type CelebrateTheme } from "./theme";
 /** 印影の大きさ。`md`＝結果パネルの脇／`lg`＝クリア画面の主役。 */
 export type CelebrateSize = "md" | "lg";
 
+/**
+ * 印影の外枠の形。既定"rounded"はtheme.stampRadius（呼び出し側アプリのデザイントークン）
+ * 任せの角丸で、何も指定しなければ従来通り。"正方形しか無いのか"という指摘の通り、
+ * 縦横比自体は3rem四方（lg=4.75rem四方）で固定だが、枠の形は選べるようにする。
+ */
+export type CelebrateStampShape = "rounded" | "circle" | "square" | "star";
+
 export interface StampProps {
   /** 印影の文字（「正」「合格」など）。 */
   text: string;
@@ -24,6 +31,8 @@ export interface StampProps {
    * （傾きの大きさ自体は既定と同じ「勢いよく傾いて収まる」動きを保つため）。
    */
   rotateDeg?: number;
+  /** 外枠の形。既定"rounded"。 */
+  shape?: CelebrateStampShape;
 }
 
 const DEFAULT_ROTATE_DEG = -6;
@@ -51,13 +60,20 @@ export function Stamp({
   theme = DEFAULT_CELEBRATE_THEME,
   className,
   rotateDeg = DEFAULT_ROTATE_DEG,
+  shape = "rounded",
 }: StampProps) {
   const fontSizeRem = stampFontSizeRem(text, BASE_FONT_SIZE_REM[size]);
   return (
     <div
       // 正解演出が実際に出たことを e2e が機械的に確認するための目印（見た目には影響しない）。
       data-seal-stamp={text}
-      className={clsx("celebrate-stamp", "celebrate-enter-settle", size === "lg" && "celebrate-stamp--lg", className)}
+      className={clsx(
+        "celebrate-stamp",
+        "celebrate-enter-settle",
+        size === "lg" && "celebrate-stamp--lg",
+        shape !== "rounded" && `celebrate-stamp--${shape}`,
+        className
+      )}
       style={
         {
           "--celebrate-stamp-color": theme.stampColor,

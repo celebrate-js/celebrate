@@ -60,3 +60,17 @@ describe("Stamp（rotateDegで傾きを上書きできる）", () => {
     expect(html).toContain("--celebrate-enter-rotate-from:-8deg");
   });
 });
+
+describe("Stamp（shapeで外枠の形を変えられる）", () => {
+  it("既定（rounded）はshape専用のclassNameを持たない（従来通りtheme.stampRadius任せ）", () => {
+    const html = renderToStaticMarkup(<Stamp text="正" />);
+    expect(html).not.toContain("celebrate-stamp--circle");
+    expect(html).not.toContain("celebrate-stamp--square");
+    expect(html).not.toContain("celebrate-stamp--star");
+  });
+
+  it.each(["circle", "square", "star"] as const)("shape='%s'で対応するclassNameが付く", (shape) => {
+    const html = renderToStaticMarkup(<Stamp text="正" shape={shape} />);
+    expect(html).toContain(`celebrate-stamp--${shape}`);
+  });
+});

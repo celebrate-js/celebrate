@@ -16,6 +16,7 @@ import {
   type CelebrateVariant,
   type CelebrateVariantOptions,
   type ClipRevealEdge,
+  type CelebrateStampShape,
 } from "../../src/react";
 import {
   DEFAULT_CELEBRATE_THEME,
@@ -1118,6 +1119,7 @@ function formatOptionsSnippet(options: CelebrateVariantOptions, withList: readon
   if (options.intensity !== undefined) lines.push(`  intensity: ${options.intensity},`);
   if (options.sizeRem !== undefined) lines.push(`  sizeRem: ${options.sizeRem},`);
   if (options.rotateDeg !== undefined) lines.push(`  rotateDeg: ${options.rotateDeg},`);
+  if (options.shape !== undefined) lines.push(`  shape: "${options.shape}",`);
   if (options.colors) lines.push(`  colors: [${options.colors.map((c) => `"${c}"`).join(", ")}],`);
   if (options.theme) lines.push(`  theme: { ...DEFAULT_CELEBRATE_THEME, stampColor: "${options.theme.stampColor}" },`);
   if (lines.length === 0) return "";
@@ -1132,6 +1134,8 @@ const TEXT_VARIANTS = new Set<CelebrateVariant>(["stamp", "record", "bounce", "m
 const NOTE_VARIANTS = new Set<CelebrateVariant>(["record"]);
 const SIZE_VARIANTS = new Set<CelebrateVariant>(["firework", "pop", "ripple", "ring", "flash"]);
 const ROTATE_VARIANTS = new Set<CelebrateVariant>(["stamp"]);
+const SHAPE_VARIANTS = new Set<CelebrateVariant>(["stamp"]);
+const STAMP_SHAPES: readonly CelebrateStampShape[] = ["rounded", "circle", "square", "star"];
 // 色の指定方法がvariantによって違う：RadialBurst系(pop/ripple/ring/flash)・stamp系・record等は
 // theme.stampColorの単色上書き（options.color→なければtheme経由）で効くが、粒の集合を
 // 複数トーンで塗るvariant（confetti/sparkle/cracker/rain/firework）はtheme.confettiColors
@@ -1150,10 +1154,12 @@ function Playground() {
   const [color, setColor] = useState(DEFAULT_PLAYGROUND_COLOR);
   const [sizeRem, setSizeRem] = useState<number | null>(null);
   const [rotateDeg, setRotateDeg] = useState<number | null>(null);
+  const [shape, setShape] = useState<CelebrateStampShape | null>(null);
   const supportsText = TEXT_VARIANTS.has(variant);
   const supportsNote = NOTE_VARIANTS.has(variant);
   const supportsSize = SIZE_VARIANTS.has(variant);
   const supportsRotate = ROTATE_VARIANTS.has(variant);
+  const supportsShape = SHAPE_VARIANTS.has(variant);
   const usesPalette = PALETTE_VARIANTS.has(variant);
 
   const toggleWith = (target: CelebrateVariant) => {
@@ -1168,6 +1174,7 @@ function Playground() {
     if (intensity !== 1) o.intensity = intensity;
     if (supportsSize && sizeRem !== null) o.sizeRem = sizeRem;
     if (supportsRotate && rotateDeg !== null) o.rotateDeg = rotateDeg;
+    if (supportsShape && shape !== null) o.shape = shape;
     if (color !== DEFAULT_PLAYGROUND_COLOR) {
       if (usesPalette) {
         o.colors = [color];
@@ -1183,11 +1190,13 @@ function Playground() {
     intensity,
     sizeRem,
     rotateDeg,
+    shape,
     color,
     supportsText,
     supportsNote,
     supportsSize,
     supportsRotate,
+    supportsShape,
     usesPalette,
   ]);
 
@@ -1283,6 +1292,22 @@ function Playground() {
                 </label>
               )}
             </>
+          )}
+          {supportsShape && (
+            <label>
+              shape
+              <select
+                value={shape ?? ""}
+                onChange={(e) => setShape(e.target.value === "" ? null : (e.target.value as CelebrateStampShape))}
+              >
+                <option value="">（既定：rounded）</option>
+                {STAMP_SHAPES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
           {supportsText && (
             <label>
@@ -1478,6 +1503,12 @@ const CELEBRATE_OPTIONS: readonly ApiRow[] = [
   { name: "note", type: "string", desc: "recordで大きい文字の下に添える一言（例：「れんぞく 7問」）。" },
   { name: "size", type: '"md" | "lg"', defaultValue: '"md"', desc: "stampの印影の大きさ。" },
   { name: "rotateDeg", type: "number", defaultValue: "-6", desc: "stamp：収まった後の傾き（度）。" },
+  {
+    name: "shape",
+    type: '"rounded" | "circle" | "square" | "star"',
+    defaultValue: '"rounded"',
+    desc: "stamp：外枠の形。roundedはtheme.stampRadius任せの角丸（既定）。",
+  },
   { name: "with", type: "CelebrateVariant | ReactNode | (...)[]", desc: "重ねて同時に出すもの。登録済みの名前・生のReactNode・その配列（混在可）。" },
   { name: "theme", type: "CelebrateTheme", defaultValue: "Providerのtheme", desc: "この呼び出しだけ意匠を上書き。" },
   { name: "sound", type: "boolean", defaultValue: "true", desc: "効果音を鳴らすか。登録済みの名前にだけ効果を持つ。" },

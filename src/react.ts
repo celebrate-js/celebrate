@@ -15,7 +15,7 @@ export type { CelebrateFn, CelebrateOptions } from "./context";
 export { Celebrate } from "./Celebrate";
 export type { CelebrateProps } from "./Celebrate";
 export { Stamp } from "./Stamp";
-export type { StampProps, CelebrateSize } from "./Stamp";
+export type { StampProps, CelebrateSize, CelebrateStampShape } from "./Stamp";
 export { ConfettiBurst } from "./ConfettiBurst";
 export type { ConfettiBurstProps } from "./ConfettiBurst";
 export { RecordBanner } from "./RecordBanner";

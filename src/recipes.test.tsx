@@ -112,6 +112,20 @@ describe("options.rotateDeg（stampの傾きの上書き）", () => {
   });
 });
 
+describe("options.shape（stampの外枠の形の上書き）", () => {
+  it("shapeを指定すると、その形がStampまで届く", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("stamp", { text: "正", shape: "star" })}</>);
+    expect(html).toContain("celebrate-stamp--star");
+  });
+
+  it("指定しなければ既定のrounded（shape専用classNameなし）のまま", () => {
+    const html = renderToStaticMarkup(<>{renderCelebration("stamp", { text: "正" })}</>);
+    expect(html).not.toContain("celebrate-stamp--circle");
+    expect(html).not.toContain("celebrate-stamp--square");
+    expect(html).not.toContain("celebrate-stamp--star");
+  });
+});
+
 describe("playSoundsForCelebration（options.soundPreset）", () => {
   let capturedFrequencies: number[];
   let originalAudioContext: typeof window.AudioContext | undefined;

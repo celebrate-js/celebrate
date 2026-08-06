@@ -24,6 +24,7 @@ variantを動的に切り替える呼び出し方の場合はこの絞り込み�
 | `note` | `string` | - | `record`で大きい文字の下に添える一言（例：「れんぞく 7問」）。 |
 | `size` | `"md" \| "lg"` | `"md"` | `stamp`の印影の大きさ。 |
 | `rotateDeg` | `number` | `-6` | `stamp`：収まった後の傾き（度）。入り際はここからさらに8度分振れた角度から始まる。 |
+| `shape` | `"rounded" \| "circle" \| "square" \| "star"` | `"rounded"` | `stamp`：外枠の形。`rounded`は`theme.stampRadius`任せの角丸（既定・従来通り）。縦横比自体は3rem四方（`lg`は4.75rem四方）で固定。 |
 | `with` | `CelebrateVariant \| ReactNode \| (CelebrateVariant \| ReactNode)[]` | - | 重ねて同時に出すもの。登録済みの名前・生のReactNode・その配列（混在可）。 |
 | `theme` | `CelebrateTheme` | Providerのtheme | この呼び出しだけ意匠を上書き。 |
 | `sound` | `boolean` | `true` | 効果音を鳴らすか。登録済みの名前にだけ効果を持つ。 |
