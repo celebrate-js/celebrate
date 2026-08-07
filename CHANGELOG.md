@@ -16,3 +16,4 @@
 - `celebrate()`/`with`がReactNode（自作コンポーネント）を直接受け付ける合成機構
 - `rollRewardTier()`：可変比率の抽選ユーティリティ
 - `intensity`による見た目・音量・振動の連続的なスケーリング
+- `fireworkStyle`：`peony`/`willow`/`ring`に加え`kiku`（菊）/`star`（型物・星形）/`senrin`（千輪）/`hachi`（蜂）を追加

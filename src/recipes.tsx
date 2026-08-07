@@ -108,7 +108,11 @@ export interface CelebrateVariantOptions {
    * `confetti`/`sparkle`/`cracker`/`rain`/`firework`が対応。
    */
   colors?: readonly string[];
-  /** `firework`: 花火の種類。既定 "peony"。 */
+  /**
+   * `firework`: 花火の種類。既定 "peony"（牡丹）。他に willow（柳）・ring（輪）・
+   * kiku（菊）・star（型物/星形）・senrin（千輪）・hachi（蜂）。各styleの詳細は
+   * `firework.ts`のFireworkStyle定義部のコメント参照。
+   */
   fireworkStyle?: FireworkStyle;
   /** 演出の強度。見た目の拡大率・durationの伸び・音量・振動に連続的に反映される。 */
   intensity?: number;

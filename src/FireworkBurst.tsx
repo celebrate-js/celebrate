@@ -16,7 +16,12 @@ export interface FireworkBurstProps {
   className?: string;
   /** 再現可能なテスト・デモ用。 */
   seed?: number;
-  /** 花火の種類。既定 "peony"（丸く均等に広がる定番）。 */
+  /**
+   * 花火の種類。既定 "peony"（牡丹：丸く均等に広がる定番）。
+   * willow=柳（尾を引いて垂れる）・ring=輪・kiku=菊（線の尾）・
+   * star=型物/星形（星のシルエット）・senrin=千輪（小さな爆発が複数同時に咲く）・
+   * hachi=蜂（消えるまでチカチカ明滅）。各styleの詳細・実装意図は`firework.ts`参照。
+   */
   style?: FireworkStyle;
   /** 大きさの倍率。既定1。 */
   scale?: number;
