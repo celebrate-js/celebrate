@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  library:
+    name: lib（lint・format・typecheck・test・build）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run test:coverage
+      - run: npm run build
+
+  # demo/ はライブラリ本体とは別のpackage.json・別のnode_modulesを持つ独立したアプリなので、
+  # ルートのnpm ciとは別にインストールし直す必要がある（demo/がライブラリをsrc/直参照している
+  # ため、ビルド成果物ではなくソース側の型エラーもここでtscが拾う）。
+  demo:
+    name: demo（typecheck）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: demo/package-lock.json
+      - working-directory: demo
+        run: npm ci
+      - working-directory: demo
+        run: npx tsc --noEmit -p .
