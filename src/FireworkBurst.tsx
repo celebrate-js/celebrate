@@ -127,20 +127,21 @@ function particleRender(style: FireworkStyle, particle: FireworkParticle, color:
     );
   }
   if (style === "star") {
-    // 型物・星形：点を散らすだけだと頂点と谷の差が分かりにくいため、kikuと同じ「外向きの線」
-    // として描く。ただし長さをparticle.speed（＝到達距離。starRadiusMultiplierにより
-    // 頂点で長く・谷で短くなっている）に比例させることで、線の長さの違いそのもので
-    // 星の輪郭（長い槍・短い谷の交互）が見えるようにする。
+    // 型物・星形：中心から輪郭点まで届く長い線（スポーク）にすると、中心に収束する
+    // 放射状の模様（ウニ・アスタリスクのような見た目）になってしまう。実際の型物花火は
+    // 星形の輪郭に沿って短い火花が並び、輪郭からまつ毛・フリンジ状に短く飛び出すことで
+    // 縁取りとして見える。そのため、線は輪郭点の位置（＝粒の到達位置。starRadiusMultiplier
+    // で頂点・谷を作っている）に固定の短い長さで置くだけにし、中心とは繋げない。
     const rotateDeg = (particle.angleRad * 180) / Math.PI + 90;
-    const spokeLengthRem = particle.speed * particle.durationSeconds;
+    const tickLengthRem = particle.size * 2.4;
     return (
       <span
         data-firework-particle-streak=""
         className="celebrate-firework-particle celebrate-firework-particle--streak"
         style={
           {
-            width: "0.07rem",
-            height: `${spokeLengthRem}rem`,
+            width: "0.06rem",
+            height: `${tickLengthRem}rem`,
             background: color,
             transform: `rotate(${rotateDeg}deg)`,
           } as CSSProperties

@@ -44,13 +44,16 @@ describe("FireworkBurst", () => {
     }
   );
 
-  it("starの線は長さ（height）が粒ごとに違う（頂点で長く・谷で短い星形の輪郭）", () => {
+  it("starの線は短い固定長のティック（輪郭からのフリンジ）で、粒の到達距離では伸びない", () => {
+    // 中心から輪郭点まで届く長いスポークにすると放射状（ウニ状）に見えてしまうため、
+    // 線の長さはparticle.size由来の短い一定長にとどめ、星の輪郭は粒の「位置」
+    // （firework.test.tsのstarRadiusMultiplier関連テストで検証）だけで表現する。
     const html = renderToStaticMarkup(<FireworkBurst seed={1} style="star" />);
     const heights = [...html.matchAll(/celebrate-firework-particle--streak"[^>]*style="[^"]*height:([\d.]+)rem/g)].map(
       (m) => Number(m[1])
     );
     expect(heights.length).toBeGreaterThan(0);
-    expect(Math.max(...heights)).toBeGreaterThan(Math.min(...heights) * 1.3);
+    expect(Math.max(...heights)).toBeLessThan(1);
   });
 
   it("peony等の他スタイルは線を使わない", () => {
