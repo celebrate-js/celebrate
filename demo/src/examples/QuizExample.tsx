@@ -50,7 +50,9 @@ export function QuizExample() {
     } else {
       setStreak(0);
       setAnswerState("wrong");
-      // 不正解には演出を出さない（celebrateはあくまで「できた」瞬間のためのもの）。
+      // 不正解には「できた」演出とは違う、失敗を示す軽いフィードバックを返す
+      // （画面全体を揺らす。音は鳴らさず振動だけ）。
+      celebrate("shake");
     }
   };
 
@@ -70,7 +72,7 @@ export function QuizExample() {
     <ExamplePageLayout
       icon="📝"
       title="クイズ"
-      description={`正解すると celebrate("stamp", { with: ["sparkle"] }) 、${STREAK_CELEBRATION_THRESHOLD}問連続正解すると celebrate("record", { with: ["confetti"] }) に切り替わる。不正解には何も演出を出さない（celebrateは「できた」瞬間専用）のがポイント。`}
+      description={`正解すると celebrate("stamp", { with: ["sparkle"] }) 、${STREAK_CELEBRATION_THRESHOLD}問連続正解すると celebrate("record", { with: ["confetti"] }) に切り替わる。不正解には celebrate("shake") で画面を揺らすだけの軽いフィードバックを返す（音は鳴らさず振動だけ。「できた」演出と混同しないよう明確に違う見た目にするのがポイント）。`}
     >
       <section className="doc-section">
         {!isFinished && question && (
@@ -96,7 +98,7 @@ export function QuizExample() {
             </div>
             {answerState !== "unanswered" && (
               <div className="quiz-feedback">
-                <p>{answerState === "correct" ? "🎉 正解！" : "😢 残念、不正解…"}</p>
+                <p>{answerState === "correct" ? "正解！" : "残念、不正解…"}</p>
                 <button className="combo-button" onClick={goNext}>
                   次の問題へ
                 </button>
