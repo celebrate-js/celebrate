@@ -1,6 +1,7 @@
 {
   "name": "@celebrate-js/celebrate",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "description": "React向けの「決まった瞬間」の演出ライブラリ（印影スタンプ・紙吹雪・花火・ボーダーエフェクトなど）。",
   "license": "MIT",
@@ -27,6 +28,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -38,16 +42,18 @@
       "import": "./dist/react.js",
       "require": "./dist/react.cjs"
     },
-    "./celebrate.css": "./src/celebrate.css"
+    "./celebrate.css": "./dist/celebrate.css"
   },
   "files": [
     "dist",
-    "src/celebrate.css",
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node -e \"require('fs').copyFileSync('src/celebrate.css','dist/celebrate.css')\"",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write .",
