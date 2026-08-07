@@ -57,6 +57,48 @@ export const FIREWORK_SHELL_COUNT = 3;
 export const FIREWORK_PARTICLES_PER_SHELL = 12;
 export const FIREWORK_DURATION_MS = 1300;
 
+// 型物・星形：半径を角度でなめらかに波打たせる（cos(5θ)）だけだと丸まった5弁の花のような
+// シルエットになり、星の「尖り」が出ない。実際の星型（五芒星）の輪郭に沿うよう、
+// 外側の頂点（5点）と内側の谷（5点）を交互に直線でつなぐ区分線形の半径関数にする。
+const STAR_POINTS = 5;
+const STAR_INNER_RADIUS_RATIO = 0.42;
+
+/** 星形の半径倍率（0〜1）を角度から求める区分線形関数。テストのため公開している。 */
+export function starRadiusMultiplier(angleRad: number): number {
+  const segmentCount = STAR_POINTS * 2; // 頂点10個（外側5・内側5）＝10区間
+  const segmentWidth = (Math.PI * 2) / segmentCount;
+  const normalized = ((angleRad % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  const segmentIndex = Math.floor(normalized / segmentWidth);
+  const withinSegment = (normalized - segmentIndex * segmentWidth) / segmentWidth;
+  const isRisingToOuter = segmentIndex % 2 === 1; // 谷→頂点へ向かう区間か
+  const from = isRisingToOuter ? STAR_INNER_RADIUS_RATIO : 1;
+  const to = isRisingToOuter ? 1 : STAR_INNER_RADIUS_RATIO;
+  return from + (to - from) * withinSegment;
+}
+
+// 型物・星形：cos(5θ)の丸い波では輪郭を12点だけで拾いきれずボヤけるため、
+// 尖った頂点・谷を密にサンプリングできるよう専用の粒数を使う。
+export const STAR_PARTICLE_COUNT = 40;
+
+function createStarParticles(random: RandomFn, shellDelaySeconds: number, scale: number): readonly FireworkParticle[] {
+  return Array.from({ length: STAR_PARTICLE_COUNT }, (_, id) => {
+    // 角度そのものをジッターさせると輪郭の頂点・谷の位置がなまってしまうため、
+    // 角度は均等固定にし、距離だけにごくわずかな揺らぎを持たせる。
+    const angleRad = (Math.PI * 2 * id) / STAR_PARTICLE_COUNT;
+    const distance = (1.6 + starRadiusMultiplier(angleRad) * 2.6 + (random() - 0.5) * 0.15) * scale;
+    return {
+      id,
+      angleRad,
+      speed: distance / FIREWORK_PARTICLE_DURATION_SECONDS,
+      gravity: (1 + random() * 1) * scale,
+      durationSeconds: FIREWORK_PARTICLE_DURATION_SECONDS,
+      size: (0.16 + random() * 0.08) * scale,
+      tone: Math.floor(random() * 4),
+      delaySeconds: shellDelaySeconds + random() * 0.03,
+    };
+  });
+}
+
 // 千輪：1つのshellを、小さな爆発の中心（クラスタ）いくつかに分けて咲かせる。
 const SENRIN_CLUSTER_COUNT = 4;
 
@@ -106,6 +148,7 @@ function createShellParticles(
   scale: number
 ): readonly FireworkParticle[] {
   if (style === "senrin") return createSenrinParticles(random, shellDelaySeconds, scale);
+  if (style === "star") return createStarParticles(random, shellDelaySeconds, scale);
 
   return Array.from({ length: FIREWORK_PARTICLES_PER_SHELL }, (_, id) => {
     const baseAngle = (Math.PI * 2 * id) / FIREWORK_PARTICLES_PER_SHELL;
@@ -131,12 +174,6 @@ function createShellParticles(
         // 菊：外向きの線の尾で描く前提なので、輪郭が乱れすぎないよう角度のジッターは控えめに。
         angleRad = baseAngle + (random() - 0.5) * 0.12;
         baseDistance = 2.8 + random() * 2.6;
-        gravityBase = 1.5;
-        gravityRange = 1.5;
-        break;
-      case "star":
-        // 型物（星形）：半径を角度で5回波打たせて星形の輪郭を作る。角度は乱さず均等のまま。
-        baseDistance = 1.8 + (0.55 + 0.45 * Math.cos(5 * baseAngle)) * 2.8;
         gravityBase = 1.5;
         gravityRange = 1.5;
         break;

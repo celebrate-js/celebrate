@@ -36,13 +36,22 @@ describe("FireworkBurst", () => {
     expect(html).not.toContain(DEFAULT_CELEBRATE_THEME.confettiColors[0]);
   });
 
-  it.each(["kiku", "willow"] as const)(
+  it.each(["kiku", "willow", "star"] as const)(
     "style='%s'は点ではなく線（celebrate-firework-particle--streak）で描画する",
     (style) => {
       const html = renderToStaticMarkup(<FireworkBurst seed={1} style={style} />);
       expect(html).toContain("celebrate-firework-particle--streak");
     }
   );
+
+  it("starの線は長さ（height）が粒ごとに違う（頂点で長く・谷で短い星形の輪郭）", () => {
+    const html = renderToStaticMarkup(<FireworkBurst seed={1} style="star" />);
+    const heights = [...html.matchAll(/celebrate-firework-particle--streak"[^>]*style="[^"]*height:([\d.]+)rem/g)].map(
+      (m) => Number(m[1])
+    );
+    expect(heights.length).toBeGreaterThan(0);
+    expect(Math.max(...heights)).toBeGreaterThan(Math.min(...heights) * 1.3);
+  });
 
   it("peony等の他スタイルは線を使わない", () => {
     const html = renderToStaticMarkup(<FireworkBurst seed={1} style="peony" />);

@@ -4,6 +4,8 @@ import {
   createSeededFireworkRandom,
   FIREWORK_SHELL_COUNT,
   FIREWORK_PARTICLES_PER_SHELL,
+  STAR_PARTICLE_COUNT,
+  starRadiusMultiplier,
 } from "./firework";
 
 describe("firework shells", () => {
@@ -72,9 +74,10 @@ describe("firework shells（追加style: kiku/star/senrin/hachi）", () => {
     });
   });
 
-  it("starスタイルは角度ジッターが無い（星形の輪郭が乱れない）", () => {
+  it("starスタイルは専用の粒数（STAR_PARTICLE_COUNT）を使い、角度ジッターが無い（輪郭が乱れない）", () => {
     const [shell] = createFireworkShells(createSeededFireworkRandom(2), "star");
-    const expectedStep = (Math.PI * 2) / FIREWORK_PARTICLES_PER_SHELL;
+    expect(shell!.particles).toHaveLength(STAR_PARTICLE_COUNT);
+    const expectedStep = (Math.PI * 2) / STAR_PARTICLE_COUNT;
     shell!.particles.forEach((p, i) => {
       expect(p.angleRad).toBeCloseTo(expectedStep * i, 10);
     });
@@ -85,6 +88,36 @@ describe("firework shells（追加style: kiku/star/senrin/hachi）", () => {
     const speeds = shell!.particles.map((p) => p.speed);
     // 全部同じ距離（＝ringのような均等な輪）にはならず、頂点と谷で差がある。
     expect(Math.max(...speeds)).toBeGreaterThan(Math.min(...speeds) * 1.5);
+  });
+
+  describe("starRadiusMultiplier（星形の半径プロファイル：区分線形で頂点と谷を作る）", () => {
+    it("頂点（0°, 72°, 144°, ...）では最大値1になる", () => {
+      for (let i = 0; i < 5; i++) {
+        expect(starRadiusMultiplier((Math.PI * 2 * i) / 5)).toBeCloseTo(1, 10);
+      }
+    });
+
+    it("谷（頂点の中間、36°, 108°, ...）では最小値（内側比率）になる", () => {
+      const innerRatio = starRadiusMultiplier(Math.PI / 5); // 36° = 頂点0°と72°のちょうど中間
+      for (let i = 0; i < 5; i++) {
+        const valleyAngle = (Math.PI * 2 * i) / 5 + Math.PI / 5;
+        expect(starRadiusMultiplier(valleyAngle)).toBeCloseTo(innerRatio, 10);
+      }
+      expect(innerRatio).toBeLessThan(1);
+      expect(innerRatio).toBeGreaterThan(0);
+    });
+
+    it("頂点と谷の間は単調に変化する（区分線形。cos波のような中間での揺り戻しが無い）", () => {
+      const samples = Array.from({ length: 19 }, (_, i) => starRadiusMultiplier((Math.PI / 5) * (i / 18)));
+      for (let i = 1; i < samples.length; i++) {
+        expect(samples[i]!).toBeLessThanOrEqual(samples[i - 1]! + 1e-10);
+      }
+    });
+
+    it("角度は2πで周期的", () => {
+      const angle = 1.234;
+      expect(starRadiusMultiplier(angle)).toBeCloseTo(starRadiusMultiplier(angle + Math.PI * 2), 10);
+    });
   });
 
   it("senrinスタイルは粒ごとにoriginOffsetを持ち、クラスタごとに値が異なる", () => {

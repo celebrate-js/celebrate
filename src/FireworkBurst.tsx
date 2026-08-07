@@ -68,7 +68,8 @@ export function withVelocityAlignedRotation(
 // 型物・星形（star）：広がりきったところで動きを止め、星のシルエットのまま少し留まってから
 // 消える（他のstyleと同じ「広がりながら線形にフェード」だと、輪郭が崩れきる前に薄くなって
 // 星形と分かりづらい）。位置の計算に使う経過時間をfreezeProgress以降で頭打ちにして広がりを止め、
-// opacityはholdProgressまで1のまま、そこから最後に向けてフェードする。
+// opacityはholdProgressまで1のまま、そこから最後に向けてフェードする。rotateも0で固定する
+// （中心から各頂点へ伸びる線として描く前提のため、kikuのwithoutSpinと同じ理由）。
 export function withHoldThenFade(
   motion: MotionProfile<BallisticMotionParams>,
   freezeProgress = 0.4,
@@ -79,7 +80,7 @@ export function withHoldThenFade(
     const positionT = Math.min(t, params.durationSeconds * freezeProgress);
     const state = motion(positionT, params);
     const opacity = progress < holdProgress ? 1 : 1 - (progress - holdProgress) / (1 - holdProgress);
-    return { ...state, opacity };
+    return { ...state, opacity, rotate: 0 };
   };
 }
 
@@ -122,6 +123,28 @@ function particleRender(style: FireworkStyle, particle: FireworkParticle, color:
         data-firework-particle-streak=""
         className="celebrate-firework-particle celebrate-firework-particle--streak"
         style={{ width: `${particle.size * 3.6}rem`, height: "0.075rem", background: color } as CSSProperties}
+      />
+    );
+  }
+  if (style === "star") {
+    // 型物・星形：点を散らすだけだと頂点と谷の差が分かりにくいため、kikuと同じ「外向きの線」
+    // として描く。ただし長さをparticle.speed（＝到達距離。starRadiusMultiplierにより
+    // 頂点で長く・谷で短くなっている）に比例させることで、線の長さの違いそのもので
+    // 星の輪郭（長い槍・短い谷の交互）が見えるようにする。
+    const rotateDeg = (particle.angleRad * 180) / Math.PI + 90;
+    const spokeLengthRem = particle.speed * particle.durationSeconds;
+    return (
+      <span
+        data-firework-particle-streak=""
+        className="celebrate-firework-particle celebrate-firework-particle--streak"
+        style={
+          {
+            width: "0.07rem",
+            height: `${spokeLengthRem}rem`,
+            background: color,
+            transform: `rotate(${rotateDeg}deg)`,
+          } as CSSProperties
+        }
       />
     );
   }
