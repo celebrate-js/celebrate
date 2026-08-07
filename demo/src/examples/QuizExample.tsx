@@ -32,7 +32,7 @@ export function QuizExample() {
   const question = QUESTIONS[questionIndex];
   const isFinished = questionIndex >= QUESTIONS.length;
 
-  const handleAnswer = (choiceIndex: number) => {
+  const handleAnswer = (choiceIndex: number, buttonEl: HTMLButtonElement) => {
     if (!question || answerState !== "unanswered") return;
     const isCorrect = choiceIndex === question.correctIndex;
 
@@ -42,10 +42,13 @@ export function QuizExample() {
       setScore((s) => s + 1);
       setAnswerState("correct");
       if (nextStreak >= STREAK_CELEBRATION_THRESHOLD) {
-        // 連続正解が閾値に達したら、いつものstampではなく一段上のrecordを出す。
+        // 連続正解が閾値に達したら、いつものstampではなく一段上のrecordを画面中央に出す
+        // （これは「クリックした場所」ではなく「達成そのもの」を祝う演出なのでanchorしない）。
         celebrate("record", { text: "連続正解！", note: `${nextStreak}問れんぞく`, with: ["confetti"] });
       } else {
-        celebrate("stamp", { text: "正解", with: ["sparkle"] });
+        // クリックした選択肢のすぐ上で演出が起きるようanchorする。中央に薄く出るだけだと
+        // 「操作と反応が繋がっている」感が弱く、クリックした本人には効果が実感しづらい。
+        celebrate("stamp", { text: "正解", with: ["sparkle"], anchor: { current: buttonEl } });
       }
     } else {
       setStreak(0);
@@ -72,7 +75,7 @@ export function QuizExample() {
     <ExamplePageLayout
       icon="📝"
       title="クイズ"
-      description={`正解すると celebrate("stamp", { with: ["sparkle"] }) 、${STREAK_CELEBRATION_THRESHOLD}問連続正解すると celebrate("record", { with: ["confetti"] }) に切り替わる。不正解には celebrate("shake") で画面を揺らすだけの軽いフィードバックを返す（音は鳴らさず振動だけ。「できた」演出と混同しないよう明確に違う見た目にするのがポイント）。`}
+      description={`正解すると celebrate("stamp", { with: ["sparkle"], anchor }) がクリックした選択肢の上で起きる（画面中央に薄く出すだけだと操作との繋がりが弱いので、anchorでクリック位置に紐付ける）。${STREAK_CELEBRATION_THRESHOLD}問連続正解すると celebrate("record", { with: ["confetti"] }) に切り替わる（これは画面中央）。不正解には celebrate("shake") で画面を揺らすフィードバックを返す。テキストで「正解！」と重ねて言わず、演出そのものと選択肢の色分けだけで結果を伝えるのがポイント。`}
     >
       <section className="doc-section">
         {!isFinished && question && (
@@ -86,7 +89,7 @@ export function QuizExample() {
                 <button
                   key={choice}
                   className="quiz-choice-button"
-                  onClick={() => handleAnswer(i)}
+                  onClick={(e) => handleAnswer(i, e.currentTarget)}
                   disabled={answerState !== "unanswered"}
                   data-state={
                     answerState === "unanswered" ? undefined : i === question.correctIndex ? "correct" : "neutral"
@@ -98,7 +101,8 @@ export function QuizExample() {
             </div>
             {answerState !== "unanswered" && (
               <div className="quiz-feedback">
-                <p>{answerState === "correct" ? "正解！" : "残念、不正解…"}</p>
+                {/* 正誤はcelebrate()の演出（stamp+sparkle／shake）と選択肢の色分けで伝わるため、
+                    「正解！」のような重複するテキストは出さない。効果そのものが結果を語る。 */}
                 <button className="combo-button" onClick={goNext}>
                   次の問題へ
                 </button>
