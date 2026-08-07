@@ -857,6 +857,12 @@ html.celebrate-vignette-active::before {
   border-radius: 999px;
 }
 
+/* 菊（kiku）：.celebrate-firework-particleと同じクラスに、細い線用の
+   width/height/transform:rotate()をFireworkBurst.tsxがインラインstyleで追加する。
+   専用のclassNameを別途付けているのは見た目の差分ではなく、テスト・利用側からの
+   目印として（回転はrotate:0固定＝FireworkBurst.tsxのwithoutSpinで、角度はここの
+   transform:rotate()だけで決まる）。 */
+
 @keyframes celebrate-firework-flash {
   0% {
     opacity: 0;

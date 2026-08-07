@@ -1,8 +1,14 @@
 import { useState, type CSSProperties } from "react";
 import { clsx } from "./clsx";
-import { createFireworkShells, createSeededFireworkRandom, type FireworkShell, type FireworkStyle } from "./firework";
+import {
+  createFireworkShells,
+  createSeededFireworkRandom,
+  type FireworkShell,
+  type FireworkStyle,
+  type FireworkParticle,
+} from "./firework";
 import { ParticleField, type ParticleSpec } from "./ParticleField";
-import { ballisticMotion, type BallisticMotionParams } from "./motionProfile";
+import { ballisticMotion, type BallisticMotionParams, type MotionProfile } from "./motionProfile";
 import { DEFAULT_CELEBRATE_THEME, type CelebrateTheme } from "./theme";
 
 export interface FireworkBurstProps {
@@ -16,6 +22,67 @@ export interface FireworkBurstProps {
   scale?: number;
   /** 色パレットを上書きする（省略時は theme.confettiColors）。 */
   colors?: readonly string[];
+}
+
+// 千輪（senrin）：粒ごとの小爆発中心のオフセットを、弾道計算の結果にそのまま足し込む。
+function withOriginOffset(
+  motion: MotionProfile<BallisticMotionParams>,
+  offsetXRem: number,
+  offsetYRem: number
+): MotionProfile<BallisticMotionParams> {
+  return (t, p) => {
+    const state = motion(t, p);
+    return { ...state, x: state.x + offsetXRem, y: state.y + offsetYRem };
+  };
+}
+
+// 蜂（hachi）：飛んでいる間ずっとopacityにsin波の明滅を掛け合わせ、チカチカさせる。
+function withFlicker(motion: MotionProfile<BallisticMotionParams>): MotionProfile<BallisticMotionParams> {
+  return (t, p) => {
+    const state = motion(t, p);
+    return { ...state, opacity: state.opacity * (0.55 + 0.45 * Math.sin(t * 45)) };
+  };
+}
+
+// 菊（kiku）：外向きの線の尾で描くため、ballisticMotion既定の「飛びながら回転する」演出（rotate）を
+// 打ち消す（線が回転すると尾の向きが角度からずれて見た目が崩れるため）。
+function withoutSpin(motion: MotionProfile<BallisticMotionParams>): MotionProfile<BallisticMotionParams> {
+  return (t, p) => ({ ...motion(t, p), rotate: 0 });
+}
+
+function resolveMotion(style: FireworkStyle, particle: FireworkParticle): MotionProfile<BallisticMotionParams> {
+  if (style === "senrin")
+    return withOriginOffset(ballisticMotion, particle.originOffsetXRem ?? 0, particle.originOffsetYRem ?? 0);
+  if (style === "hachi") return withFlicker(ballisticMotion);
+  if (style === "kiku") return withoutSpin(ballisticMotion);
+  return ballisticMotion;
+}
+
+function particleRender(style: FireworkStyle, particle: FireworkParticle, color: string) {
+  if (style === "kiku") {
+    // 点ではなく、粒が飛ぶ方向（外向きの角度）に沿った細い線として描く。
+    const rotateDeg = (particle.angleRad * 180) / Math.PI + 90;
+    return (
+      <span
+        data-firework-particle-streak=""
+        className="celebrate-firework-particle celebrate-firework-particle--streak"
+        style={
+          {
+            width: "0.09rem",
+            height: `${particle.size * 3.2}rem`,
+            background: color,
+            transform: `rotate(${rotateDeg}deg)`,
+          } as CSSProperties
+        }
+      />
+    );
+  }
+  return (
+    <span
+      className="celebrate-firework-particle"
+      style={{ width: `${particle.size}rem`, height: `${particle.size}rem`, background: color } as CSSProperties}
+    />
+  );
 }
 
 /**
@@ -58,7 +125,7 @@ export function FireworkBurst({
           />
           <ParticleField
             particles={shell.particles.map((particle): ParticleSpec<BallisticMotionParams> => ({
-              motion: ballisticMotion,
+              motion: resolveMotion(style, particle),
               params: {
                 angleRad: particle.angleRad,
                 speed: particle.speed,
@@ -67,18 +134,7 @@ export function FireworkBurst({
               },
               durationSeconds: particle.durationSeconds,
               delaySeconds: particle.delaySeconds,
-              render: (
-                <span
-                  className="celebrate-firework-particle"
-                  style={
-                    {
-                      width: `${particle.size}rem`,
-                      height: `${particle.size}rem`,
-                      background: palette[particle.tone % palette.length],
-                    } as CSSProperties
-                  }
-                />
-              ),
+              render: particleRender(style, particle, palette[particle.tone % palette.length]!),
             }))}
           />
         </span>

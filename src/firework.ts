@@ -10,7 +10,14 @@ import { createSeededRandom, type RandomFn } from "./random";
 // 実際の色は呼び出し側の colors 配列 or theme.confettiColors を使う＝confetti/sparkle
 // と同じ「色はここに書かない」設計を踏襲）。
 
-export type FireworkStyle = "peony" | "willow" | "ring";
+// 日本の花火の分類（割物：菊・牡丹・型物、小割物：千輪、ポカ物：柳・蜂 等）を参考にした
+// バリエーション。peony=牡丹（均等な丸い粒）・willow=柳（重力強めで尾が垂れる）・
+// ring=輪（重力なしの均等な輪）は既存。以下を追加：
+//   kiku  = 菊（点ではなく外向きの線の尾を引く）
+//   star  = 型物・星形（半径を角度で5回波打たせて星形の輪郭にする）
+//   senrin= 千輪（1つの大きな爆発ではなく、小さな爆発が複数同時に咲く）
+//   hachi = 蜂（消える前までずっとチカチカ明滅しながら不規則に散る）
+export type FireworkStyle = "peony" | "willow" | "ring" | "kiku" | "star" | "senrin" | "hachi";
 
 const FIREWORK_PARTICLE_DURATION_SECONDS = 0.85;
 
@@ -28,6 +35,12 @@ export interface FireworkParticle {
   /** パレットの何番目を使うか（0以上。実際の色数で呼び出し側が mod を取る）。 */
   tone: number;
   delaySeconds: number;
+  /**
+   * `senrin`専用：この粒が属す小爆発の中心の、shell中心からの相対オフセット（rem）。
+   * 他のstyleでは常に0（shell中心の1点から爆発）。
+   */
+  originOffsetXRem?: number;
+  originOffsetYRem?: number;
 }
 
 export interface FireworkShell {
@@ -44,25 +57,98 @@ export const FIREWORK_SHELL_COUNT = 3;
 export const FIREWORK_PARTICLES_PER_SHELL = 12;
 export const FIREWORK_DURATION_MS = 1300;
 
+// 千輪：1つのshellを、小さな爆発の中心（クラスタ）いくつかに分けて咲かせる。
+const SENRIN_CLUSTER_COUNT = 4;
+
+function createSenrinParticles(
+  random: RandomFn,
+  shellDelaySeconds: number,
+  scale: number
+): readonly FireworkParticle[] {
+  const clusterOrigins = Array.from({ length: SENRIN_CLUSTER_COUNT }, () => ({
+    x: (random() - 0.5) * 3.2 * scale,
+    y: (random() - 0.5) * 2.2 * scale,
+  }));
+  return Array.from({ length: FIREWORK_PARTICLES_PER_SHELL }, (_, id) => {
+    const cluster = clusterOrigins[id % SENRIN_CLUSTER_COUNT]!;
+    const baseAngle = (Math.PI * 2 * id) / FIREWORK_PARTICLES_PER_SHELL;
+    const angleRad = baseAngle + (random() - 0.5) * 0.8;
+    const distance = (0.7 + random() * 0.7) * scale;
+    return {
+      id,
+      angleRad,
+      speed: distance / FIREWORK_PARTICLE_DURATION_SECONDS,
+      gravity: (3 + random() * 2) * scale,
+      durationSeconds: FIREWORK_PARTICLE_DURATION_SECONDS,
+      size: (0.16 + random() * 0.14) * scale,
+      tone: Math.floor(random() * 4),
+      delaySeconds: shellDelaySeconds + random() * 0.05,
+      originOffsetXRem: cluster.x,
+      originOffsetYRem: cluster.y,
+    };
+  });
+}
+
 function createShellParticles(
   random: RandomFn,
   shellDelaySeconds: number,
   style: FireworkStyle,
   scale: number
 ): readonly FireworkParticle[] {
+  if (style === "senrin") return createSenrinParticles(random, shellDelaySeconds, scale);
+
   return Array.from({ length: FIREWORK_PARTICLES_PER_SHELL }, (_, id) => {
     const baseAngle = (Math.PI * 2 * id) / FIREWORK_PARTICLES_PER_SHELL;
-    // ring はきっちり均等な輪にするため角度のジッターを入れない。
-    const angleRad = style === "ring" ? baseAngle : baseAngle + (random() - 0.5) * 0.3;
-    const baseDistance = style === "ring" ? 3.4 : 2.2 + random() * 2;
+    let angleRad = baseAngle;
+    let baseDistance = 2.2 + random() * 2;
+    let gravityBase = 3;
+    let gravityRange = 2.5;
+
+    switch (style) {
+      case "ring":
+        // きっちり均等な輪にするため角度のジッターを入れず、重力もゼロにする。
+        baseDistance = 3.4;
+        gravityBase = 0;
+        gravityRange = 0;
+        break;
+      case "willow":
+        // 大きな重力で下に尾を引かせる（枝垂れ）。
+        angleRad = baseAngle + (random() - 0.5) * 0.3;
+        gravityBase = 10;
+        gravityRange = 6;
+        break;
+      case "kiku":
+        // 菊：外向きの線の尾で描く前提なので、輪郭が乱れすぎないよう角度のジッターは控えめに。
+        angleRad = baseAngle + (random() - 0.5) * 0.12;
+        baseDistance = 2.8 + random() * 2.6;
+        gravityBase = 1.5;
+        gravityRange = 1.5;
+        break;
+      case "star":
+        // 型物（星形）：半径を角度で5回波打たせて星形の輪郭を作る。角度は乱さず均等のまま。
+        baseDistance = 1.8 + (0.55 + 0.45 * Math.cos(5 * baseAngle)) * 2.8;
+        gravityBase = 1.5;
+        gravityRange = 1.5;
+        break;
+      case "hachi":
+        // 蜂：不規則な散らばり（見た目のチカチカ明滅はFireworkBurst.tsx側のmotionで付与）。
+        angleRad = baseAngle + (random() - 0.5) * 0.6;
+        baseDistance = 1.8 + random() * 1.6;
+        gravityBase = 4;
+        gravityRange = 3;
+        break;
+      default:
+        // peony（牡丹）：均等な丸い広がり。
+        angleRad = baseAngle + (random() - 0.5) * 0.3;
+        break;
+    }
+
     const distance = baseDistance * scale;
-    // willow（枝垂れ）だけ大きく重力で下に尾を引かせる。ringは重力なし＝均等な輪のまま。
-    const gravity = style === "ring" ? 0 : (style === "willow" ? 10 + random() * 6 : 3 + random() * 2.5) * scale;
     return {
       id,
       angleRad,
       speed: distance / FIREWORK_PARTICLE_DURATION_SECONDS,
-      gravity,
+      gravity: (gravityBase + random() * gravityRange) * scale,
       durationSeconds: FIREWORK_PARTICLE_DURATION_SECONDS,
       size: (0.18 + random() * 0.16) * scale,
       tone: Math.floor(random() * 4),

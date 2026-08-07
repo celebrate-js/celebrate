@@ -28,4 +28,20 @@ describe("FireworkBurst", () => {
     expect(html).toContain("#ff8800");
     expect(html).not.toContain(DEFAULT_CELEBRATE_THEME.confettiColors[0]);
   });
+
+  it("kikuスタイルは点ではなく線（celebrate-firework-particle--streak）で描画する", () => {
+    const html = renderToStaticMarkup(<FireworkBurst seed={1} style="kiku" />);
+    expect(html).toContain("celebrate-firework-particle--streak");
+  });
+
+  it("peony等の他スタイルは線を使わない", () => {
+    const html = renderToStaticMarkup(<FireworkBurst seed={1} style="peony" />);
+    expect(html).not.toContain("celebrate-firework-particle--streak");
+  });
+
+  it.each(["star", "senrin", "hachi"] as const)("style='%s'もshellの数ぶん描画される", (style) => {
+    const html = renderToStaticMarkup(<FireworkBurst seed={1} style={style} />);
+    expect((html.match(/celebrate-firework-shell/g) ?? []).length).toBe(FIREWORK_SHELL_COUNT);
+    expect(html).toContain(`data-firework-burst="${style}"`);
+  });
 });

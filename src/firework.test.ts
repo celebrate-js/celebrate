@@ -62,3 +62,53 @@ describe("firework shells", () => {
     expect(particles.every((p) => p.size > 0)).toBe(true);
   });
 });
+
+describe("firework shells（追加style: kiku/star/senrin/hachi）", () => {
+  it("kiku/star/senrin/hachiも同じseedなら同じ結果になる", () => {
+    (["kiku", "star", "senrin", "hachi"] as const).forEach((style) => {
+      expect(createFireworkShells(createSeededFireworkRandom(6), style)).toEqual(
+        createFireworkShells(createSeededFireworkRandom(6), style)
+      );
+    });
+  });
+
+  it("starスタイルは角度ジッターが無い（星形の輪郭が乱れない）", () => {
+    const [shell] = createFireworkShells(createSeededFireworkRandom(2), "star");
+    const expectedStep = (Math.PI * 2) / FIREWORK_PARTICLES_PER_SHELL;
+    shell!.particles.forEach((p, i) => {
+      expect(p.angleRad).toBeCloseTo(expectedStep * i, 10);
+    });
+  });
+
+  it("starスタイルは角度によって破裂距離（＝speed）が均一ではない（星形のシルエット）", () => {
+    const [shell] = createFireworkShells(createSeededFireworkRandom(2), "star");
+    const speeds = shell!.particles.map((p) => p.speed);
+    // 全部同じ距離（＝ringのような均等な輪）にはならず、頂点と谷で差がある。
+    expect(Math.max(...speeds)).toBeGreaterThan(Math.min(...speeds) * 1.5);
+  });
+
+  it("senrinスタイルは粒ごとにoriginOffsetを持ち、クラスタごとに値が異なる", () => {
+    const [shell] = createFireworkShells(createSeededFireworkRandom(4), "senrin");
+    const offsets = shell!.particles.map((p) => `${p.originOffsetXRem},${p.originOffsetYRem}`);
+    expect(new Set(offsets).size).toBeGreaterThan(1);
+    shell!.particles.forEach((p) => {
+      expect(p.originOffsetXRem).toBeDefined();
+      expect(p.originOffsetYRem).toBeDefined();
+    });
+  });
+
+  it("senrin以外のスタイルはoriginOffsetを持たない", () => {
+    const [shell] = createFireworkShells(createSeededFireworkRandom(4), "peony");
+    shell!.particles.forEach((p) => {
+      expect(p.originOffsetXRem).toBeUndefined();
+      expect(p.originOffsetYRem).toBeUndefined();
+    });
+  });
+
+  it("hachiスタイルもspeed/sizeは常に正の値", () => {
+    const shells = createFireworkShells(createSeededFireworkRandom(8), "hachi");
+    const particles = shells.flatMap((s) => s.particles);
+    expect(particles.every((p) => p.speed > 0)).toBe(true);
+    expect(particles.every((p) => p.size > 0)).toBe(true);
+  });
+});

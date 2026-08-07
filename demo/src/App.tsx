@@ -1710,9 +1710,9 @@ const CELEBRATE_OPTIONS: readonly ApiRow[] = [
   },
   {
     name: "fireworkStyle",
-    type: '"peony" | "willow" | "ring"',
+    type: '"peony" | "willow" | "ring" | "kiku" | "star" | "senrin" | "hachi"',
     defaultValue: '"peony"',
-    desc: "firework：花火の種類。",
+    desc: "firework：花火の種類（牡丹・柳・輪・菊・型物/星形・千輪・蜂）。",
   },
   {
     name: "intensity",

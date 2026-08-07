@@ -6,7 +6,7 @@ import { ExamplePageLayout } from "./ExamplePageLayout";
 // 打ち上げ位置（画面内の相対位置）。celebrate()のanchorはRefObject<HTMLElement>を
 // 要求するため、実体を持たない「発射台」をあらかじめ複数置いておき、使い回す。
 const PAD_COUNT = 5;
-const FIREWORK_STYLES: readonly FireworkStyle[] = ["peony", "willow", "ring"];
+const FIREWORK_STYLES: readonly FireworkStyle[] = ["peony", "willow", "ring", "kiku", "star", "senrin", "hachi"];
 const PALETTES: readonly (readonly string[])[] = [
   ["#ffd166", "#f4a261", "#e76f51"],
   ["#06d6a0", "#118ab2", "#073b4c"],
