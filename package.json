@@ -5,6 +5,9 @@
   "description": "React向けの「決まった瞬間」の演出ライブラリ（印影スタンプ・紙吹雪・花火・ボーダーエフェクトなど）。",
   "license": "MIT",
   "author": "sato mikoto",
+  "engines": {
+    "node": ">=18"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sato0825/celebrate-js.git"
