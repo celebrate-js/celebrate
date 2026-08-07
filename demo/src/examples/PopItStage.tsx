@@ -309,10 +309,10 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
   },
 ];
 
-function StageHeader({ config }: { config: PopItTileConfig }) {
+function StageHeader({ config, backTo }: { config: PopItTileConfig; backTo: string }) {
   return (
     <div className="popit-stage-header">
-      <Link to="/examples/popit" className="popit-stage-back">
+      <Link to={backTo} className="popit-stage-back">
         ← ポップイットに戻る
       </Link>
       <p className="popit-stage-title">
@@ -326,14 +326,14 @@ function StageHeader({ config }: { config: PopItTileConfig }) {
 // 🥎以外の全タイル共通：舞台のどこをタップしても、そのタイル用のconfig.fireがその場で起きる。
 // 花火なら花火、水面なら波紋…と、タップするたびに（多くはランダムに変化しながら）
 // 何度でも見られる、専用ページの実装例。
-function GenericStage({ config }: { config: PopItTileConfig }) {
+function GenericStage({ config, backTo }: { config: PopItTileConfig; backTo: string }) {
   const celebrate = useCelebrate();
   const surfaceRef = useRef<HTMLButtonElement | null>(null);
   const [tapCount, setTapCount] = useState(0);
 
   return (
     <section className="doc-section">
-      <StageHeader config={config} />
+      <StageHeader config={config} backTo={backTo} />
       <button
         ref={surfaceRef}
         className="popit-stage-surface"
@@ -366,7 +366,7 @@ function randomBallPosition(id: number): BallTargetPosition {
   return { id, leftPercent: 10 + Math.random() * 80, topPercent: 10 + Math.random() * 70 };
 }
 
-function BallStage({ config }: { config: PopItTileConfig }) {
+function BallStage({ config, backTo }: { config: PopItTileConfig; backTo: string }) {
   const celebrate = useCelebrate();
   const targetRef = useRef<HTMLButtonElement | null>(null);
   const timeoutIds = useRef<number[]>([]);
@@ -415,7 +415,7 @@ function BallStage({ config }: { config: PopItTileConfig }) {
 
   return (
     <section className="doc-section">
-      <StageHeader config={config} />
+      <StageHeader config={config} backTo={backTo} />
       <div className="game-stats">
         <span>ポップ数: {popCount}</span>
         <span>コンボ: {combo}</span>
@@ -436,15 +436,36 @@ function BallStage({ config }: { config: PopItTileConfig }) {
   );
 }
 
-/** ポップイットの各タイルの専用ページ（/examples/popit/:themeId）。 */
-export function PopItStage() {
+/** グリッド（一覧）の見た目。ドキュメント埋め込み版と切り出し単体アプリ版の両方から使う。
+ * basePathは各タイルへのリンク先の接頭辞（ドキュメント版は"/examples/popit"、単体アプリ版は""）。 */
+export function PopItGrid({ basePath }: { basePath: string }) {
+  return (
+    <div className="popit-grid">
+      {POPIT_TILES.map((tile) => (
+        <Link
+          key={tile.id}
+          to={`${basePath}/${tile.id}`}
+          className="popit-tile"
+          style={{ background: tile.idleBg } as CSSProperties}
+        >
+          <span className="popit-tile-icon">{tile.icon}</span>
+          <span className="popit-tile-label">{tile.label}</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+/** ポップイットの各タイルの専用ページ。ドキュメント埋め込み版（/examples/popit/:themeId）と
+ * 単体アプリ版（/:themeId）の両方から使うため、一覧への戻りリンク先をbackToで受け取る。 */
+export function PopItStage({ backTo = "/examples/popit" }: { backTo?: string }) {
   const { themeId } = useParams<{ themeId: string }>();
   const config = POPIT_TILES.find((tile) => tile.id === themeId);
 
   if (!config) {
     return (
       <section className="doc-section">
-        <Link to="/examples/popit" className="popit-stage-back">
+        <Link to={backTo} className="popit-stage-back">
           ← ポップイットに戻る
         </Link>
         <p className="section-hint">「{themeId}」という舞台は無いみたい。</p>
@@ -452,5 +473,9 @@ export function PopItStage() {
     );
   }
 
-  return config.id === "pop" ? <BallStage config={config} /> : <GenericStage config={config} />;
+  return config.id === "pop" ? (
+    <BallStage config={config} backTo={backTo} />
+  ) : (
+    <GenericStage config={config} backTo={backTo} />
+  );
 }
