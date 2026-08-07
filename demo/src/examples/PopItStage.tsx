@@ -91,6 +91,26 @@ function Swirl() {
 const FIREWORK_STAGE_STYLES = ["peony", "willow", "kiku", "star", "senrin", "hachi"] as const;
 const WATER_COLORS = ["#1f7fb8", "#3aa0d1", "#0c5f8f", "#5cc4e8"];
 const POP_COLORS = ["#ff9d4d", "#ffb347", "#ff7a5c", "#ffcc70"];
+const SPARKLE_COLOR_PALETTES = [
+  ["#ffe066", "#fff3bf", "#ffd43b"],
+  ["#ff8fab", "#ffd6e8", "#ff6b9d"],
+  ["#74e0c9", "#c4fff5", "#3ec9ab"],
+];
+const CRACKER_COLOR_PALETTES = [
+  ["#ff6b81", "#ffb8c6", "#ff4757"],
+  ["#ffa94d", "#ffe0b3", "#ff8c00"],
+  ["#a29bfe", "#dcd6ff", "#6c5ce7"],
+];
+const RAIN_COLOR_PALETTES = [
+  ["#4a6fa5", "#7c9cc9", "#2e4a6f"],
+  ["#5d7a8c", "#9db4c0", "#3a5666"],
+];
+const RECORD_MESSAGES = [
+  { text: "自己ベスト！", note: "ポップイットで新記録" },
+  { text: "MAX!", note: "最高到達点" },
+  { text: "GREAT!", note: "絶好調" },
+  { text: "SUPER!", note: "止まらない" },
+];
 
 export interface PopItTileConfig {
   id: string;
@@ -211,6 +231,81 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     stageTextColor: "rgba(10,70,45,0.55)",
     stageHint: "タップで渦",
     fire: (celebrate, anchor) => celebrate(<Swirl />, { anchor, durationMs: SWIRL_DURATION_MS }),
+  },
+  {
+    id: "sparkle",
+    icon: "✨",
+    label: "きらめき",
+    idleBg: "#fff9d6",
+    stageBg: "linear-gradient(180deg, #fffbe0 0%, #ffe066 100%)",
+    stageTextColor: "rgba(90,70,10,0.55)",
+    stageHint: "タップできらめく",
+    fire: (celebrate, anchor) => celebrate("sparkle", { anchor, colors: pickRandom(SPARKLE_COLOR_PALETTES) }),
+  },
+  {
+    id: "cracker",
+    icon: "🧨",
+    label: "クラッカー",
+    idleBg: "#ffe0ea",
+    stageBg: "linear-gradient(180deg, #ffe0ea 0%, #ff8fa3 100%)",
+    stageTextColor: "rgba(100,20,40,0.55)",
+    stageHint: "タップでクラッカー",
+    fire: (celebrate, anchor) => celebrate("cracker", { anchor, colors: pickRandom(CRACKER_COLOR_PALETTES) }),
+  },
+  {
+    id: "rain",
+    icon: "☔️",
+    label: "雨",
+    idleBg: "#e6ecf5",
+    stageBg: "linear-gradient(180deg, #7c8ba1 0%, #333d4d 100%)",
+    stageTextColor: "rgba(255,255,255,0.7)",
+    stageHint: "タップで雨",
+    // rainもlightningと同じ画面全体演出（isFullScreenContent）なのでanchorしない。
+    fire: (celebrate) => celebrate("rain", { colors: pickRandom(RAIN_COLOR_PALETTES) }),
+  },
+  {
+    id: "shatter",
+    icon: "💔",
+    label: "ひび割れ",
+    idleBg: "#e8e4f0",
+    stageBg: "linear-gradient(180deg, #4a4458 0%, #1c1826 100%)",
+    stageTextColor: "rgba(255,255,255,0.7)",
+    stageHint: "タップでひび割れ",
+    // shatterも画面全体演出（isFullScreenContent）なのでanchorしない。
+    fire: (celebrate) => celebrate("shatter"),
+  },
+  {
+    id: "record",
+    icon: "🏆",
+    label: "自己ベスト",
+    idleBg: "#fff4d6",
+    stageBg: "linear-gradient(180deg, #fff4d6 0%, #ffd76b 100%)",
+    stageTextColor: "rgba(100,70,10,0.6)",
+    stageHint: "タップで更新",
+    fire: (celebrate, anchor) => {
+      const message = pickRandom(RECORD_MESSAGES);
+      celebrate("record", { anchor, text: message.text, note: message.note, with: ["confetti"] });
+    },
+  },
+  {
+    id: "heart",
+    icon: "💝",
+    label: "ハート",
+    idleBg: "#ffe0ec",
+    stageBg: "linear-gradient(180deg, #ffe0ec 0%, #ff9dc0 100%)",
+    stageTextColor: "rgba(120,20,60,0.55)",
+    stageHint: "タップでハート",
+    fire: (celebrate, anchor) => celebrate("heart", { anchor }),
+  },
+  {
+    id: "float",
+    icon: "☁️",
+    label: "ふわふわ",
+    idleBg: "#eef7ff",
+    stageBg: "linear-gradient(180deg, #eef7ff 0%, #cfe6ff 100%)",
+    stageTextColor: "rgba(30,60,100,0.5)",
+    stageHint: "タップでふわり",
+    fire: (celebrate, anchor) => celebrate("float", { anchor }),
   },
 ];
 
