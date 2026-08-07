@@ -558,6 +558,33 @@
         gap: 0.5rem;
       }
 
+      .fireworks-control-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+      }
+
+      .fireworks-continuous-button {
+        border-radius: 999px;
+        border: 1px solid var(--accent);
+        background: #fff;
+        color: var(--accent);
+        font-weight: 800;
+        font-size: 1rem;
+        padding: 0.85rem 1.6rem;
+        cursor: pointer;
+      }
+
+      .fireworks-continuous-button[data-active] {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .fireworks-continuous-button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
       /* ---- クイズ ---- */
 
       .quiz-progress {
@@ -657,6 +684,81 @@
         display: flex;
         align-items: center;
         justify-content: center;
+      }
+
+      /* ---- ポップイット ---- */
+
+      .popit-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+        gap: 1rem;
+      }
+
+      .popit-tile {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 1.25rem;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        cursor: pointer;
+        box-shadow:
+          inset 0 -0.25rem 0 rgba(0, 0, 0, 0.06),
+          0 4px 10px -4px rgba(40, 30, 20, 0.25);
+        transition: transform 0.08s ease-out;
+      }
+
+      .popit-tile:active {
+        transform: scale(0.94);
+      }
+
+      .popit-tile-icon {
+        font-size: 2.2rem;
+        line-height: 1;
+      }
+
+      .popit-tile-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #5a4a3a;
+      }
+
+      .popit-tile--stage {
+        padding: 0;
+        background: radial-gradient(circle at 50% 40%, #2a1f4a 0%, #14142b 100%);
+        box-shadow: none;
+      }
+
+      .popit-tile-stage-surface {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 1.25rem;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .popit-tile-stage-close {
+        position: absolute;
+        top: 0.3rem;
+        right: 0.4rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 999px;
+        border: none;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-size: 0.9rem;
+        line-height: 1;
+        cursor: pointer;
       }
     </style>
   </head>

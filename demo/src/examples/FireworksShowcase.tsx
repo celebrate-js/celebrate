@@ -21,6 +21,27 @@ const PALETTES: readonly (readonly string[])[] = [
 const VOLLEYS: readonly (readonly number[])[] = [[2], [1, 3], [0, 2, 4], [1, 3], [0, 2, 4], [0, 1, 2, 3, 4]];
 const VOLLEY_INTERVAL_MS = 700;
 
+// 打ち上げ花火モード：フィナーレのような決まった尺ではなく、止めるまでずっと打ち上がり
+// 続ける。組の候補をプールしておき、毎回ランダムに選ぶ（5台同時の大玉は稀に、
+// 1〜2発は頻繁に混ぜることで「ずっと見ていられる」自然な花火大会っぽさを出す）。
+const CONTINUOUS_VOLLEY_POOL: readonly (readonly number[])[] = [
+  [0],
+  [1],
+  [2],
+  [3],
+  [4],
+  [0, 2],
+  [1, 3],
+  [2, 4],
+  [0, 4],
+  [1, 2],
+  [0, 2, 4],
+  [1, 2, 3],
+  [0, 1, 2, 3, 4],
+];
+const CONTINUOUS_MIN_INTERVAL_MS = 350;
+const CONTINUOUS_MAX_INTERVAL_MS = 850;
+
 function pickRandom<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)]!;
 }
@@ -30,49 +51,91 @@ export function FireworksShowcase() {
   const celebrate = useCelebrate();
   const padRefs = useRef<Array<HTMLDivElement | null>>([]);
   const timeoutIds = useRef<number[]>([]);
+  // setTimeoutの再帰ループは古いクロージャの中で動き続けるため、「今もモードがONか」を
+  // 判定するのにReact stateではなくrefを使う（stateだとループ開始時点の値のまま固定されてしまう）。
+  const continuousModeRef = useRef(false);
   const [volleysRemaining, setVolleysRemaining] = useState(0);
+  const [continuousMode, setContinuousMode] = useState(false);
   const [totalLaunched, setTotalLaunched] = useState(0);
+
+  const clearPendingLaunches = () => {
+    timeoutIds.current.forEach((id) => window.clearTimeout(id));
+    timeoutIds.current = [];
+  };
 
   // ページを離れるときに未発火分のタイマーを止める（アンマウント後のcelebrate呼び出しを防ぐ）。
   useEffect(() => {
     return () => {
-      timeoutIds.current.forEach((id) => window.clearTimeout(id));
-      timeoutIds.current = [];
+      continuousModeRef.current = false;
+      clearPendingLaunches();
     };
   }, []);
 
+  const launchVolley = (padIndexes: readonly number[], scale: number) => {
+    // 同じ組の中は全部同時に撃つ（呼び出しをまとめて連続実行するだけで、
+    // 個々のcelebrate()呼び出し自体は普通に1発ずつと同じ）。
+    padIndexes.forEach((padIndex) => {
+      celebrate("firework", {
+        anchor: { current: padRefs.current[padIndex] },
+        fireworkStyle: pickRandom(FIREWORK_STYLES),
+        colors: pickRandom(PALETTES),
+        scale,
+        soundPreset: Math.floor(Math.random() * 10),
+      });
+      setTotalLaunched((prev) => prev + 1);
+    });
+  };
+
   const launchFinale = () => {
-    timeoutIds.current.forEach((id) => window.clearTimeout(id));
-    timeoutIds.current = [];
+    continuousModeRef.current = false;
+    setContinuousMode(false);
+    clearPendingLaunches();
     setVolleysRemaining(VOLLEYS.length);
 
     VOLLEYS.forEach((padIndexes, volleyIndex) => {
       const isFinaleVolley = volleyIndex === VOLLEYS.length - 1;
       const delay = volleyIndex * VOLLEY_INTERVAL_MS;
       const id = window.setTimeout(() => {
-        // 同じ組の中は全部同時に撃つ（呼び出しをまとめて連続実行するだけで、
-        // 個々のcelebrate()呼び出し自体は普通に1発ずつと同じ）。
-        padIndexes.forEach((padIndex) => {
-          celebrate("firework", {
-            anchor: { current: padRefs.current[padIndex] },
-            fireworkStyle: pickRandom(FIREWORK_STYLES),
-            colors: pickRandom(PALETTES),
-            scale: isFinaleVolley ? 1.8 : 1 + Math.random() * 0.4,
-            soundPreset: Math.floor(Math.random() * 10),
-          });
-          setTotalLaunched((prev) => prev + 1);
-        });
+        launchVolley(padIndexes, isFinaleVolley ? 1.8 : 1 + Math.random() * 0.4);
         setVolleysRemaining((prev) => Math.max(0, prev - 1));
       }, delay);
       timeoutIds.current.push(id);
     });
   };
 
+  // 打ち上げ花火モード：決まった尺のフィナーレと違い、止めるまでランダムな組を
+  // 打ち上げ続ける。次の1回を打った直後に、またランダムな間隔で自分自身を予約する
+  // （setIntervalではなく再帰setTimeoutにしているのは、間隔自体を毎回ランダムに
+  // 変えたい＝一定周期にしたくないため）。
+  const scheduleNextContinuousLaunch = () => {
+    if (!continuousModeRef.current) return;
+    const padIndexes = pickRandom(CONTINUOUS_VOLLEY_POOL);
+    launchVolley(padIndexes, padIndexes.length >= 5 ? 1.8 : 1 + Math.random() * 0.4);
+    const nextDelay =
+      CONTINUOUS_MIN_INTERVAL_MS + Math.random() * (CONTINUOUS_MAX_INTERVAL_MS - CONTINUOUS_MIN_INTERVAL_MS);
+    const id = window.setTimeout(scheduleNextContinuousLaunch, nextDelay);
+    timeoutIds.current.push(id);
+  };
+
+  const toggleContinuousMode = () => {
+    if (continuousModeRef.current) {
+      continuousModeRef.current = false;
+      setContinuousMode(false);
+      clearPendingLaunches();
+      return;
+    }
+    clearPendingLaunches();
+    setVolleysRemaining(0);
+    continuousModeRef.current = true;
+    setContinuousMode(true);
+    scheduleNextContinuousLaunch();
+  };
+
   return (
     <ExamplePageLayout
       icon="🎆"
       title="花火大会"
-      description="「打ち上げ開始」でfireworkを組にして時間差で打ち上げる。1発→2発同時→3発同時（三角形）→…と徐々に規模を上げ、最後は5台全部を同時発火するフィナーレ。実装のポイントは、複数の発射台（anchor用の空div）を用意し、同じ組の呼び出しをまとめて連続実行するだけで「同時発火」になること。"
+      description="「打ち上げ開始」は1発→2発同時→…と規模を上げて最後にフィナーレで終わる決まった尺の演出。「打ち上げ花火モード」は止めるまでランダムな組を打ち上げ続ける。どちらも実装のポイントは同じで、複数の発射台（anchor用の空div）を用意し、同じ組の呼び出しをまとめて連続実行するだけで「同時発火」になること。"
     >
       <section className="doc-section">
         <div className="fireworks-stage">
@@ -88,9 +151,19 @@ export function FireworksShowcase() {
           ))}
         </div>
         <div className="fireworks-controls">
-          <button className="combo-button" onClick={launchFinale} disabled={volleysRemaining > 0}>
-            {volleysRemaining > 0 ? `打ち上げ中… 残り${volleysRemaining}組` : "🎆 打ち上げ開始"}
-          </button>
+          <div className="fireworks-control-row">
+            <button className="combo-button" onClick={launchFinale} disabled={volleysRemaining > 0 || continuousMode}>
+              {volleysRemaining > 0 ? `打ち上げ中… 残り${volleysRemaining}組` : "🎆 打ち上げ開始"}
+            </button>
+            <button
+              className="fireworks-continuous-button"
+              onClick={toggleContinuousMode}
+              disabled={volleysRemaining > 0}
+              data-active={continuousMode || undefined}
+            >
+              {continuousMode ? "⏹ 打ち上げ花火モードを止める" : "🎇 打ち上げ花火モード"}
+            </button>
+          </div>
           <p className="section-hint">これまでの打ち上げ数: {totalLaunched}発</p>
         </div>
       </section>
