@@ -65,15 +65,25 @@ function createSenrinParticles(
   shellDelaySeconds: number,
   scale: number
 ): readonly FireworkParticle[] {
-  const clusterOrigins = Array.from({ length: SENRIN_CLUSTER_COUNT }, () => ({
-    x: (random() - 0.5) * 3.2 * scale,
-    y: (random() - 0.5) * 2.2 * scale,
-  }));
+  // クラスタ中心を完全ランダムに置くと偶然近い位置に固まり「複数の小爆発」に見えないことが
+  // あったため、均等角度（90°ずつ）＋ジッターで確実に分散させる。各クラスタの発火にも
+  // 少し時間差（cascade）を付け、順番に咲いていくように見せる。
+  const clusterOrigins = Array.from({ length: SENRIN_CLUSTER_COUNT }, (_, i) => {
+    const clusterAngle = (Math.PI * 2 * i) / SENRIN_CLUSTER_COUNT + (random() - 0.5) * 0.6;
+    const clusterDistance = (1.6 + random() * 0.8) * scale;
+    return {
+      x: Math.cos(clusterAngle) * clusterDistance,
+      y: Math.sin(clusterAngle) * clusterDistance,
+      delay: i * 0.07 + random() * 0.03,
+    };
+  });
   return Array.from({ length: FIREWORK_PARTICLES_PER_SHELL }, (_, id) => {
     const cluster = clusterOrigins[id % SENRIN_CLUSTER_COUNT]!;
     const baseAngle = (Math.PI * 2 * id) / FIREWORK_PARTICLES_PER_SHELL;
-    const angleRad = baseAngle + (random() - 0.5) * 0.8;
-    const distance = (0.7 + random() * 0.7) * scale;
+    const angleRad = baseAngle + (random() - 0.5) * 0.9;
+    // クラスタ自体が離れて配置されるようになった分、個々の小爆発は小さめに保つ
+    // （大きいと隣のクラスタと重なって「1つの大きな爆発」に見えてしまう）。
+    const distance = (0.55 + random() * 0.55) * scale;
     return {
       id,
       angleRad,
@@ -82,7 +92,7 @@ function createSenrinParticles(
       durationSeconds: FIREWORK_PARTICLE_DURATION_SECONDS,
       size: (0.16 + random() * 0.14) * scale,
       tone: Math.floor(random() * 4),
-      delaySeconds: shellDelaySeconds + random() * 0.05,
+      delaySeconds: shellDelaySeconds + cluster.delay,
       originOffsetXRem: cluster.x,
       originOffsetYRem: cluster.y,
     };
