@@ -37,6 +37,7 @@ import {
   type MotionProfile,
   type RadialBurstShape,
   type RadialLayer,
+  type FireworkStyle,
 } from "../../src/index";
 
 // カタログ（Tier1・25 variant）を公式ドキュメントとして提示するセクション。
@@ -134,16 +135,42 @@ const CATALOG_CATEGORIES: readonly CatalogCategory[] = [
   },
 ];
 
-function catalogCallSnippet(spec: CatalogVariantSpec): string {
+// firework専用：カタログカードに種類（fireworkStyle）選択ドロップダウンを出すための一覧。
+const FIREWORK_STYLE_OPTIONS: readonly { value: FireworkStyle; label: string }[] = [
+  { value: "peony", label: "peony（牡丹）" },
+  { value: "willow", label: "willow（柳）" },
+  { value: "ring", label: "ring（輪）" },
+  { value: "kiku", label: "kiku（菊）" },
+  { value: "star", label: "star（型物・星形）" },
+  { value: "senrin", label: "senrin（千輪）" },
+  { value: "hachi", label: "hachi（蜂）" },
+];
+const DEFAULT_FIREWORK_STYLE: FireworkStyle = "peony";
+
+function catalogCallSnippet(spec: CatalogVariantSpec, fireworkStyle?: FireworkStyle): string {
   const optionLines: string[] = [];
   if (spec.text) optionLines.push(`text: "${spec.text}"`);
   if (spec.note) optionLines.push(`note: "${spec.note}"`);
+  if (fireworkStyle && fireworkStyle !== DEFAULT_FIREWORK_STYLE) optionLines.push(`fireworkStyle: "${fireworkStyle}"`);
   const options = optionLines.length > 0 ? `, { ${optionLines.join(", ")} }` : "";
   return `celebrate("${spec.variant}"${options});`;
 }
 
 function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
   const celebrate = useCelebrate();
+  const [fireworkStyle, setFireworkStyle] = useState<FireworkStyle>(DEFAULT_FIREWORK_STYLE);
+  const isFirework = spec.variant === "firework";
+
+  const fire = () => {
+    // spec.variantは（一覧から来る）変数なのでリテラルでの絞り込みができず、celebrate()の
+    // 型はCelebrateVariantOptions全体を緩く受け付ける側になる。ここでは変数に組み立ててから
+    // 渡す（オブジェクトリテラルを直接渡すと、text/note/fireworkStyleのように別variant同士の
+    // optionを混在させた時にexcess propertyでコンパイルエラーになるため）。
+    const options: CelebrateVariantOptions = { text: spec.text, note: spec.note };
+    if (isFirework) options.fireworkStyle = fireworkStyle;
+    celebrate(spec.variant, options);
+  };
+
   return (
     <div className="catalog-card">
       <div className="catalog-card-head">
@@ -155,13 +182,22 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
         )}
       </div>
       <p className="catalog-card-description">{spec.description}</p>
+      {isFirework && (
+        <label className="catalog-card-style-select">
+          種類
+          <select value={fireworkStyle} onChange={(e) => setFireworkStyle(e.target.value as FireworkStyle)}>
+            {FIREWORK_STYLE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <pre className="catalog-card-code">
-        <code>{catalogCallSnippet(spec)}</code>
+        <code>{catalogCallSnippet(spec, isFirework ? fireworkStyle : undefined)}</code>
       </pre>
-      <button
-        className="catalog-card-trigger"
-        onClick={() => celebrate(spec.variant, { text: spec.text, note: spec.note })}
-      >
+      <button className="catalog-card-trigger" onClick={fire}>
         試す
       </button>
     </div>
