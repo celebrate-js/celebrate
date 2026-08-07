@@ -705,6 +705,7 @@
         justify-content: center;
         gap: 0.4rem;
         cursor: pointer;
+        text-decoration: none;
         box-shadow:
           inset 0 -0.25rem 0 rgba(0, 0, 0, 0.06),
           0 4px 10px -4px rgba(40, 30, 20, 0.25);
@@ -726,38 +727,38 @@
         color: #5a4a3a;
       }
 
-      .popit-tile--stage {
-        padding: 0;
-        background: radial-gradient(circle at 50% 40%, #2a1f4a 0%, #14142b 100%);
-        box-shadow: none;
+      /* ---- ポップイットの各テーマ専用ページ（/examples/popit/:themeId） ---- */
+
+      .popit-stage-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
       }
 
-      .popit-tile-stage-surface {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        border: none;
-        border-radius: 1.25rem;
-        background: transparent;
-        color: rgba(255, 255, 255, 0.65);
-        font-size: 0.75rem;
+      .popit-stage-back {
         font-weight: 700;
-        cursor: pointer;
+        font-size: 0.85rem;
+        text-decoration: none;
       }
 
-      .popit-tile-stage-close {
-        position: absolute;
-        top: 0.3rem;
-        right: 0.4rem;
-        width: 1.5rem;
-        height: 1.5rem;
-        border-radius: 999px;
+      .popit-stage-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .popit-stage-surface {
+        display: block;
+        width: 100%;
+        height: 18rem;
         border: none;
-        background: rgba(255, 255, 255, 0.15);
-        color: #fff;
-        font-size: 0.9rem;
-        line-height: 1;
+        border-radius: 1rem;
+        font-size: 1rem;
+        font-weight: 700;
         cursor: pointer;
       }
     </style>
