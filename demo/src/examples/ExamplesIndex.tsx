@@ -27,6 +27,13 @@ const EXAMPLES: readonly ExampleCard[] = [
     description:
       "出てくるターゲットをクリックするゲーム。1ヒットごとの軽い演出と、スコア到達時の派手な演出を使い分ける実装例。",
   },
+  {
+    path: "/examples/popit",
+    icon: "🫧",
+    title: "ポップイット",
+    description:
+      "タップするだけで可愛いミニエフェクトが見れるタイル集め。カタログのvariantをanchorで発火するものと、カタログに無い独自の動きをReactNodeでそのまま発火するものが混在する実装例。",
+  },
 ];
 
 /** 実装例ページの一覧。 */

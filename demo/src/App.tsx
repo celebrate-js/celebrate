@@ -5,6 +5,7 @@ import { ExamplesIndex } from "./examples/ExamplesIndex";
 import { FireworksShowcase } from "./examples/FireworksShowcase";
 import { QuizExample } from "./examples/QuizExample";
 import { GameExample } from "./examples/GameExample";
+import { PopIt } from "./examples/PopIt";
 import {
   CelebrateProvider,
   useCelebrate,
@@ -2162,6 +2163,7 @@ export function App() {
           <Route path="/examples/fireworks" element={<FireworksShowcase />} />
           <Route path="/examples/quiz" element={<QuizExample />} />
           <Route path="/examples/game" element={<GameExample />} />
+          <Route path="/examples/popit" element={<PopIt />} />
         </Routes>
       </CelebrateProvider>
     </BrowserRouter>
