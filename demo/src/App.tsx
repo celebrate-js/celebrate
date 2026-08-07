@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { ExamplesIndex } from "./examples/ExamplesIndex";
+import { FireworksShowcase } from "./examples/FireworksShowcase";
+import { QuizExample } from "./examples/QuizExample";
+import { GameExample } from "./examples/GameExample";
 import {
   CelebrateProvider,
   useCelebrate,
@@ -1508,6 +1513,9 @@ function DocsHeader() {
           <span>{BORDER_EFFECT_KINDS.length}</span>
         </span>
       </div>
+      <p className="docs-examples-link">
+        <Link to="/examples">🎮 実装例を見る（花火大会・クイズ・ミニゲーム）→</Link>
+      </p>
     </header>
   );
 }
@@ -2072,9 +2080,10 @@ function ApiReferenceSection() {
   );
 }
 
-export function App() {
+/** ドキュメントページ本体（旧App）。ルーティングはApp.tsx側で行う。 */
+export function DocsPage() {
   return (
-    <CelebrateProvider>
+    <>
       <DocsHeader />
       <Quickstart />
       <Features />
@@ -2101,6 +2110,24 @@ export function App() {
       <ReactNodeDemo />
       <ScopedDemo />
       <ApiReferenceSection />
-    </CelebrateProvider>
+    </>
+  );
+}
+
+// CelebrateProviderはルート1箇所（ここ）だけに置く。各ページはその内側の
+// ルートで切り替わるだけなので、ページ遷移をまたいでもProviderは再マウントされない。
+export function App() {
+  return (
+    <BrowserRouter>
+      <CelebrateProvider>
+        <Routes>
+          <Route path="/" element={<DocsPage />} />
+          <Route path="/examples" element={<ExamplesIndex />} />
+          <Route path="/examples/fireworks" element={<FireworksShowcase />} />
+          <Route path="/examples/quiz" element={<QuizExample />} />
+          <Route path="/examples/game" element={<GameExample />} />
+        </Routes>
+      </CelebrateProvider>
+    </BrowserRouter>
   );
 }
