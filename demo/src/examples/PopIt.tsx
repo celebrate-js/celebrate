@@ -88,34 +88,68 @@ function Swirl() {
   return <ParticleField particles={particles} />;
 }
 
-interface SimpleTileConfig {
+const FIREWORK_STAGE_STYLES = ["peony", "willow", "kiku", "star", "hachi"] as const;
+
+interface TileConfig {
   id: string;
   icon: string;
   label: string;
-  bg: string;
+  /** タップ前（アイコンだけの状態）の背景色。 */
+  idleBg: string;
+  /** タップ後、舞台になったときの背景（グラデーション）。 */
+  stageBg: string;
+  /** 舞台の上に出す案内文言の色（暗い舞台には明るい文字、明るい舞台には暗い文字）。 */
+  stageTextColor: string;
+  /** 舞台の上の案内文言。 */
+  stageHint: string;
+  /** 舞台をタップするたびに呼ばれる。 */
   fire: (celebrate: ReturnType<typeof useCelebrate>, anchor: RefObject<HTMLElement | null>) => void;
 }
 
-const SIMPLE_TILES: readonly SimpleTileConfig[] = [
+const TILES: readonly TileConfig[] = [
+  {
+    id: "fireworks",
+    icon: "🎆",
+    label: "花火",
+    idleBg: "#ffe4e0",
+    stageBg: "radial-gradient(circle at 50% 40%, #2a1f4a 0%, #14142b 100%)",
+    stageTextColor: "rgba(255,255,255,0.7)",
+    stageHint: "タップで打ち上げ",
+    fire: (celebrate, anchor) =>
+      celebrate("firework", {
+        anchor,
+        fireworkStyle: FIREWORK_STAGE_STYLES[Math.floor(Math.random() * FIREWORK_STAGE_STYLES.length)],
+        scale: 0.7,
+      }),
+  },
   {
     id: "water",
     icon: "💦",
     label: "水面",
-    bg: "#e0f4ff",
-    fire: (celebrate, anchor) => celebrate("ripple", { anchor, color: "#4fb0e8" }),
+    idleBg: "#e0f4ff",
+    stageBg: "linear-gradient(180deg, #d6f1ff 0%, #6fc3e8 100%)",
+    stageTextColor: "rgba(20,50,70,0.6)",
+    stageHint: "タップで波紋",
+    fire: (celebrate, anchor) => celebrate("ripple", { anchor, color: "#1f7fb8" }),
   },
   {
     id: "sakura",
     icon: "🌸",
     label: "桜",
-    bg: "#ffe8f0",
+    idleBg: "#ffe8f0",
+    stageBg: "linear-gradient(180deg, #fff0f5 0%, #ffc2d6 100%)",
+    stageTextColor: "rgba(120,40,70,0.55)",
+    stageHint: "タップで桜が舞う",
     fire: (celebrate, anchor) => celebrate("sakura", { anchor }),
   },
   {
     id: "lightning",
     icon: "⚡️",
     label: "雷",
-    bg: "#fff6d8",
+    idleBg: "#fff6d8",
+    stageBg: "linear-gradient(180deg, #3a3a55 0%, #14142b 100%)",
+    stageTextColor: "rgba(255,255,255,0.7)",
+    stageHint: "タップで雷",
     // lightningは画面全体を貫く演出（isFullScreenContent）なので、タップした位置に関わらず
     // 画面全体に落ちる。anchorを渡しても意味を持たないため渡していない。
     fire: (celebrate) => celebrate("lightning"),
@@ -124,7 +158,10 @@ const SIMPLE_TILES: readonly SimpleTileConfig[] = [
     id: "snow",
     icon: "❄️",
     label: "雪",
-    bg: "#eef3ff",
+    idleBg: "#eef3ff",
+    stageBg: "linear-gradient(180deg, #eaf4ff 0%, #a9c9e8 100%)",
+    stageTextColor: "rgba(30,50,80,0.55)",
+    stageHint: "タップで雪",
     // カタログに無い独自の動き（SnowFall）をReactNodeとしてそのまま発火する例。
     fire: (celebrate, anchor) => celebrate(<SnowFall />, { anchor, durationMs: SNOW_DURATION_MS }),
   },
@@ -132,50 +169,39 @@ const SIMPLE_TILES: readonly SimpleTileConfig[] = [
     id: "pop",
     icon: "🥎",
     label: "ポン",
-    bg: "#fff0e0",
+    idleBg: "#fff0e0",
+    stageBg: "linear-gradient(180deg, #fff3e6 0%, #ffcf9e 100%)",
+    stageTextColor: "rgba(90,50,10,0.55)",
+    stageHint: "タップでポン",
     fire: (celebrate, anchor) => celebrate("pop", { anchor, color: "#ff9d4d" }),
   },
   {
     id: "party",
     icon: "🎉",
     label: "パーティー",
-    bg: "#f1e8ff",
+    idleBg: "#f1e8ff",
+    stageBg: "linear-gradient(180deg, #f3e8ff 0%, #d9b8ff 100%)",
+    stageTextColor: "rgba(60,30,90,0.55)",
+    stageHint: "タップで乾杯",
     fire: (celebrate, anchor) => celebrate("confetti", { anchor }),
   },
   {
     id: "swirl",
     icon: "🌀",
     label: "渦",
-    bg: "#e8fff2",
+    idleBg: "#e8fff2",
+    stageBg: "linear-gradient(180deg, #e6fff2 0%, #9ef0c4 100%)",
+    stageTextColor: "rgba(10,70,45,0.55)",
+    stageHint: "タップで渦",
     fire: (celebrate, anchor) => celebrate(<Swirl />, { anchor, durationMs: SWIRL_DURATION_MS }),
   },
 ];
 
-function SimpleTile({ config }: { config: SimpleTileConfig }) {
-  const celebrate = useCelebrate();
-  const tileRef = useRef<HTMLButtonElement | null>(null);
-
-  return (
-    <button
-      ref={tileRef}
-      className="popit-tile"
-      style={{ background: config.bg } as CSSProperties}
-      onClick={() => config.fire(celebrate, tileRef)}
-      aria-label={config.label}
-    >
-      <span className="popit-tile-icon">{config.icon}</span>
-      <span className="popit-tile-label">{config.label}</span>
-    </button>
-  );
-}
-
-const FIREWORK_STAGE_STYLES = ["peony", "willow", "kiku", "star", "hachi"] as const;
-
-// ==== 🎆 花火：他のタイルと違い、タップ1回目は「発火」ではなく「暗い舞台に切り替える」
-// 演出そのもの。舞台になってから改めてタップすると、その場でfireworkが打ち上がる
-// （/examples/fireworksのような専用ページに移動しなくても、その場でミニ花火大会が
-// 楽しめる、という体験の実演）。
-function FireworksTile() {
+// 全タイル共通：タップ1回目は発火ではなく「舞台に切り替える」演出そのもの。舞台になって
+// からは、タップするたびにconfig.fireがその場（舞台の上）で起きる。専用ページ
+// （/examples/fireworksのような）に移動しなくても、その場でミニ演出が楽しめる、という
+// 「ポップイット」全体の体験を1つのコンポーネントに共通化している。
+function StageTile({ config }: { config: TileConfig }) {
   const celebrate = useCelebrate();
   const [stageOpen, setStageOpen] = useState(false);
   const stageRef = useRef<HTMLButtonElement | null>(null);
@@ -184,31 +210,26 @@ function FireworksTile() {
     return (
       <button
         className="popit-tile"
-        style={{ background: "#ffe4e0" } as CSSProperties}
+        style={{ background: config.idleBg } as CSSProperties}
         onClick={() => setStageOpen(true)}
-        aria-label="花火"
+        aria-label={config.label}
       >
-        <span className="popit-tile-icon">🎆</span>
-        <span className="popit-tile-label">花火</span>
+        <span className="popit-tile-icon">{config.icon}</span>
+        <span className="popit-tile-label">{config.label}</span>
       </button>
     );
   }
 
   return (
-    <div className="popit-tile popit-tile--stage">
+    <div className="popit-tile popit-tile--stage" style={{ background: config.stageBg } as CSSProperties}>
       <button
         ref={stageRef}
         className="popit-tile-stage-surface"
-        onClick={() =>
-          celebrate("firework", {
-            anchor: stageRef,
-            fireworkStyle: FIREWORK_STAGE_STYLES[Math.floor(Math.random() * FIREWORK_STAGE_STYLES.length)],
-            scale: 0.7,
-          })
-        }
-        aria-label="タップで花火を打ち上げる"
+        style={{ color: config.stageTextColor } as CSSProperties}
+        onClick={() => config.fire(celebrate, stageRef)}
+        aria-label={config.stageHint}
       >
-        タップで打ち上げ
+        {config.stageHint}
       </button>
       <button
         className="popit-tile-stage-close"
@@ -230,13 +251,12 @@ export function PopIt() {
     <ExamplePageLayout
       icon="🫧"
       title="ポップイット"
-      description={`シリコンのプチプチ（Pop It）のように、タップするだけで可愛いエフェクトが見れるタイル集め。💦🌸🥎🎉はカタログの既存variantをanchorでそのタイルの上に発火しているだけ。❄️🌀はカタログに無い独自の動き（ParticleField + 自作/既存のMotionProfile）をcelebrate(<SnowFall/>)のようにReactNodeとしてそのまま渡している。🎆だけは仕組みが違い、1回目のタップは発火ではなくタイル自体を暗い舞台に切り替える演出で、舞台になってから改めてタップするたびにその場でfireworkが打ち上がる。`}
+      description="シリコンのプチプチ（Pop It）のように、タップするだけで可愛いエフェクトが見れるタイル集め。どのタイルも仕組みは同じで、1回目のタップは発火ではなくタイル自体をそのテーマの舞台（暗い夜空・水面・雪景色…）に切り替える演出。舞台になってから改めてタップするたびに、その場で演出が起きる。💦🌸🥎🎉⚡️🎆はカタログの既存variantをanchorで舞台の上に発火し、❄️🌀だけはカタログに無い独自の動き（ParticleField + 自作/既存のMotionProfile）をcelebrate(<SnowFall/>)のようにReactNodeとしてそのまま渡している。"
     >
       <section className="doc-section">
         <div className="popit-grid">
-          <FireworksTile />
-          {SIMPLE_TILES.map((tile) => (
-            <SimpleTile key={tile.id} config={tile} />
+          {TILES.map((tile) => (
+            <StageTile key={tile.id} config={tile} />
           ))}
         </div>
       </section>
