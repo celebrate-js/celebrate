@@ -16,7 +16,12 @@ export interface ConfettiBurstProps {
   colors?: readonly string[];
 }
 
-function toParticleSpec(piece: ConfettiPiece, index: number, palette: readonly string[], theme: CelebrateTheme): ParticleSpec<RadialMotionParams> {
+function toParticleSpec(
+  piece: ConfettiPiece,
+  index: number,
+  palette: readonly string[],
+  theme: CelebrateTheme
+): ParticleSpec<RadialMotionParams> {
   return {
     motion: radialMotion,
     params: { angleRad: piece.angleRad, speed: piece.speed, durationSeconds: CONFETTI_DURATION_SECONDS },

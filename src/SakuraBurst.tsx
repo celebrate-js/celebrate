@@ -17,7 +17,12 @@ const DEFAULT_SAKURA_COLOR = "#f4b6c2";
 function toParticleSpec(petal: SakuraPetal, color: string): ParticleSpec<FallMotionParams> {
   return {
     motion: fallMotion,
-    params: { fallSpeed: petal.fallSpeed, startX: petal.startX, swayAmplitude: petal.swayAmplitude, durationSeconds: petal.durationSeconds },
+    params: {
+      fallSpeed: petal.fallSpeed,
+      startX: petal.startX,
+      swayAmplitude: petal.swayAmplitude,
+      durationSeconds: petal.durationSeconds,
+    },
     durationSeconds: petal.durationSeconds,
     delaySeconds: petal.delaySeconds,
     render: (

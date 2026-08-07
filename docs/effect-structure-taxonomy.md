@@ -16,6 +16,7 @@ emission/shape/velocity-over-lifetime のようにモジュール化されてい
 ## 8つの軸
 
 ### A. 配信方式（どこに描画されるか）
+
 訂正版・3値。**「画面全体か1点か」は軸Aではなく軸Bの原点位置＋サイズのパラメータに過ぎない**
 （vignette/hitstop = RadialBurstの巨大版、rain = ParticleBurstの原点が線になっただけ、
 lightning = StrokeDrawのviewBoxが画面サイズなだけ）。
@@ -25,19 +26,23 @@ lightning = StrokeDrawのviewBoxが画面サイズなだけ）。
 - `container-modifier` — 描画コンテンツを持たず、既存表示を揺らす等の外乱のみ（`shake`）
 
 ### B. 発生源の形状（Unity Shapeモジュール相当）
+
 - `point` / `line-edge`（画面端など） / `area-scatter`（散布・画面全体含む） / `cone`（扇形） / `ring`（円周） / `path`（あらかじめ決めた経路。剣の軌跡など）
 - サブフラグ：**原点固定 or 原点が経路上を移動**（スポットライト掃引）
 
 ### C. 要素数
+
 - `single` / `multi-layer`（少数・個別パラメータ、ring/ripple/firework-shellsなど） / `particle-field`（多数・統計的生成）
 
 ### D. 要素ごとの動き
+
 - `static-scale`（その場でscale+opacity） / `radial-velocity`（等速直進、重力なし） /
   `ballistic`（初速+重力の放物線） / `drift-sway`（横揺れしながら移動） /
   `orbit-twinkle`（その場で明滅・微小回転、移動なし） / `fall-only`（重力のみ） /
   `stroke-reveal`（形ではなく輪郭線がdashoffsetで描かれる） / `path-follow`（原点が経路上を移動）
 
 ### E. 塗り方（新しく描き足す場合）
+
 - `fill` / `outline` / `glow-gradient` / `glyph-text` / `icon-svg-shape` / `decorative-frame`（conic-gradient等） /
   `custom-component`（呼び出し側が用意した任意のReactNode。画像・自作スプライト・既存コンポーネント丸ごと）
   ※「落下コンポーネントの衝撃エフェクト」検証で発覚した抜け。ライブラリ側の決め打ちshapeでは
@@ -45,6 +50,7 @@ lightning = StrokeDrawのviewBoxが画面サイズなだけ）。
   **実装済み**：`ParticleField`の`render`（`ReactNode | (state) => ReactNode`）がこれに当たる。
 
 ### F. 時間的な扱い
+
 - `one-shot-fade`（現れて消える。現状の大半） / `enter-and-persist`（居座る。stamp/medal/record。
   **実装済み**：`enterSettle.ts`の`enterSettleStyle()`。checkmarkは見た目が似ているため
   当初ここに分類していたが、実装を調べ直した結果`stroke-reveal`（軸D、StrokePath）だと判明し訂正した） /
@@ -52,12 +58,14 @@ lightning = StrokeDrawのviewBoxが画面サイズなだけ）。
   `staged-sequence`（局面が順番に変わる。shatter、剣の切り裂き）
 
 ### G. 合成のされ方
+
 - `standalone` / `layerable-via-with`（`options.with`で重ねられる） /
   `nested-multi-instance`（自分の内部で同じ構造を時間差で複数回使う。firework = ParticleBurstを3回）
 - ※詳細は下記「合成層（sequence/parallel）」参照。`with`は`parallel`の一部でしかなく、
   今の`with`は登録済みvariant名しか並べられない（アドホックなパラメータ違いを並列実行できない）制約がある
 
 ### H. 計算方式（軸Dの動きを"どう実現するか"。軸Dとは直交）
+
 - `css-keyframe`（静的な近似。baked values。安っぽさの原因になりやすい）
 - `js-raf-closed-form`（rAFで閉じた式＝解析解を毎フレーム評価。誤差が蓄積しない。`ballistic.ts`で実装済み）
 - `js-raf-integration`（rAFで毎フレーム積分。誤差蓄積の可能性、通常は closed-form を優先）
@@ -66,6 +74,7 @@ lightning = StrokeDrawのviewBoxが画面サイズなだけ）。
   今回は解析解（closed-form）で十分な精度が出るためwasmは不要と判断した）
 
 ### I. マスク・リビール（既存表示の変形・除去）※新規追加
+
 軸Eは「新しく何かを描く」前提だったが、**既存の描画（アプリ本体 or 他のleafが描いた覆い）を
 変形・除去する**系の効果はここに属せなかった。「画面が暗くなった後、剣の軌跡に沿って覆いが
 剥がれて元の画面が見えるようになる」のような効果がこれに当たる（軸Eでは表現不可能だった）。
@@ -103,6 +112,7 @@ parallel(leaf1, leaf2, ...)   // 同時実行。各leafが独立した視覚/音
 ## 追加の検証例（軸を再訂正した2件）
 
 ### 落下コンポーネント＋着地衝撃（画面が揺れて、コンポーネントは画面外へ）
+
 「あるコンポーネントが落ちてきて画面下端に当たり、水面に落ちるような衝撃エフェクトが出て、
 画面が揺れて、コンポーネントは画面外に落ちていく」という例で2つの抜けが見つかった。
 
@@ -117,11 +127,13 @@ parallel(leaf1, leaf2, ...)   // 同時実行。各leafが独立した視覚/音
    ライブラリの管轄外（次項のスコープ境界を参照）。
 
 ### トーストの❌ボタンで風船のように破裂する
+
 軸だけで表現できる（`self-rendered-overlay` + `point` + `particle-field` + `radial-velocity` の
 破片バーストを、閉じるボタンの位置に`anchor`で出すだけ）。新しい軸は不要だった＝
 既存の合成可能性の裏付けになった例。
 
 ### スコープ境界の原則（上記2例から確定）
+
 **ライブラリが提供するのはバースト／オーバーレイ演出そのものだけ**であり、
 「既存コンポーネント自身の退場・入場アニメーション（画面外へ落ちる、フェードで消える等）」は
 **呼び出し側の責務**であって`celebrate`のスコープではない。トーストの例で言えば、
@@ -182,13 +194,13 @@ checkmarkは`StrokePath`（軸D=`stroke-reveal`）に統合済み（円弧・チ
 `RadialBurst`（pop/ripple/ring/flash）と同じ構造の重複が、`useCelebrateBorder`側の10種類にもある。
 CSS実装（`celebrate.css`内の`.celebrate-border-*`）を見ると、**機構は実質4種類**しかない。
 
-| 機構 | 該当kind | 実体 | パラメータ差でしかないもの |
-|---|---|---|---|
-| **box-shadowのパルス/フリッカー** | `glow` / `neon` / `fire` / `ice` / `electric` | `box-shadow`を0〜複数ステップでアニメーションさせるだけ | 色（`--celebrate-border-color`）とキーフレームのステップ数・タイミングカーブが違うだけ。`glow`=1段パルス、`neon`/`fire`/`ice`=3段フリッカー、`electric`=`steps(1,end)`の荒いジッター。**同じ「グロー」primitiveに`flickerSteps`＋`color`を渡す形に統合できる** |
-| **conic-gradientの回転** | `spin` / `rainbow` | `border-image`に`conic-gradient`を敷いて`--celebrate-border-angle`を0→360degさせる | `spin`は単色→透明のグラデ、`rainbow`は虹色グラデ。**色相配列を渡すパラメータ違いに統合できる** |
-| **ダッシュ境界線の行進** | `ants` | `border: dashed`を`background-position`風にずらしながらフェード | 現状1種類のみ（重複なし） |
-| **二重リングの拡張** | `ring` | `::before`/`::after`の2つの疑似要素を異なる遅延で拡大フェード（`RadialBurst`のoutline層と同型） | 現状1種類のみだが、**構造的には軸Bのring形状＋軸D static-scaleそのもの**＝将来的に`RadialBurst`と共通化できる可能性がある |
-| **一過性のスイープ** | `shine` | `::after`の光の帯を左から右へスライド | 現状1種類のみ（重複なし） |
+| 機構                              | 該当kind                                      | 実体                                                                                            | パラメータ差でしかないもの                                                                                                                                                                                                                                     |
+| --------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **box-shadowのパルス/フリッカー** | `glow` / `neon` / `fire` / `ice` / `electric` | `box-shadow`を0〜複数ステップでアニメーションさせるだけ                                         | 色（`--celebrate-border-color`）とキーフレームのステップ数・タイミングカーブが違うだけ。`glow`=1段パルス、`neon`/`fire`/`ice`=3段フリッカー、`electric`=`steps(1,end)`の荒いジッター。**同じ「グロー」primitiveに`flickerSteps`＋`color`を渡す形に統合できる** |
+| **conic-gradientの回転**          | `spin` / `rainbow`                            | `border-image`に`conic-gradient`を敷いて`--celebrate-border-angle`を0→360degさせる              | `spin`は単色→透明のグラデ、`rainbow`は虹色グラデ。**色相配列を渡すパラメータ違いに統合できる**                                                                                                                                                                 |
+| **ダッシュ境界線の行進**          | `ants`                                        | `border: dashed`を`background-position`風にずらしながらフェード                                 | 現状1種類のみ（重複なし）                                                                                                                                                                                                                                      |
+| **二重リングの拡張**              | `ring`                                        | `::before`/`::after`の2つの疑似要素を異なる遅延で拡大フェード（`RadialBurst`のoutline層と同型） | 現状1種類のみだが、**構造的には軸Bのring形状＋軸D static-scaleそのもの**＝将来的に`RadialBurst`と共通化できる可能性がある                                                                                                                                      |
+| **一過性のスイープ**              | `shine`                                       | `::after`の光の帯を左から右へスライド                                                           | 現状1種類のみ（重複なし）                                                                                                                                                                                                                                      |
 
 **実装済み**：`glow`/`neon`/`fire`/`ice`/`electric`は`borderGlow.ts`の`BorderGlowPreset`
 （`{stops: {offset, boxShadow}[], durationMs, easing?}`）に統合した。CSSの`@keyframes`は
@@ -242,32 +254,32 @@ GSAPのtimelineと同じ層構造）。
 
 ## 既存variantの軸マッピング（検証・抜粋）
 
-| variant | A | B | C | D | E/I | F |
-|---|---|---|---|---|---|---|
-| pop | self-rendered-overlay | point | single | static-scale | fill | one-shot-fade |
-| ripple | self-rendered-overlay | point | multi-layer(3) | static-scale | outline | one-shot-fade |
-| confetti | self-rendered-overlay | point | particle-field | radial-velocity | fill | one-shot-fade |
-| cracker | self-rendered-overlay | cone | particle-field | ballistic | fill(streamer) | one-shot-fade |
-| sakura | self-rendered-overlay | point | particle-field | drift-sway | fill(petal) | one-shot-fade |
-| rain | self-rendered-overlay | line-edge（画面幅） | particle-field | fall-only | fill | one-shot-fade |
-| lightning | self-rendered-overlay | point→path（画面サイズ） | single | stroke-reveal | icon-svg-shape | one-shot-fade |
-| shatter(crack) | self-rendered-overlay | point（画面サイズ） | single | stroke-reveal | icon-svg-shape | staged-sequence |
-| shatter(shard) | self-rendered-overlay | area-scatter | multi-layer(9) | ballistic | fill | staged-sequence |
-| checkmark | self-rendered-overlay | point | multi-layer(2) | stroke-reveal | icon-svg-shape | enter-and-persist |
-| stamp/medal/record | self-rendered-overlay | point | single | static-scale | fill+glyph | enter-and-persist |
-| hitstop | self-rendered-overlay | area-scatter（画面全体） | single | static-scale(scale固定) | fill | one-shot-fade |
-| vignette | self-rendered-overlay | area-scatter（画面全体） | single | static-scale(inset反転) | glow-gradient | one-shot-fade |
-| border: spin/ants | external-decorate | ring | single | stroke-reveal相当 | decorative-frame | bounded-repeat可 |
-| shake | container-modifier | — | — | — | — | one-shot |
+| variant            | A                     | B                        | C              | D                       | E/I              | F                 |
+| ------------------ | --------------------- | ------------------------ | -------------- | ----------------------- | ---------------- | ----------------- |
+| pop                | self-rendered-overlay | point                    | single         | static-scale            | fill             | one-shot-fade     |
+| ripple             | self-rendered-overlay | point                    | multi-layer(3) | static-scale            | outline          | one-shot-fade     |
+| confetti           | self-rendered-overlay | point                    | particle-field | radial-velocity         | fill             | one-shot-fade     |
+| cracker            | self-rendered-overlay | cone                     | particle-field | ballistic               | fill(streamer)   | one-shot-fade     |
+| sakura             | self-rendered-overlay | point                    | particle-field | drift-sway              | fill(petal)      | one-shot-fade     |
+| rain               | self-rendered-overlay | line-edge（画面幅）      | particle-field | fall-only               | fill             | one-shot-fade     |
+| lightning          | self-rendered-overlay | point→path（画面サイズ） | single         | stroke-reveal           | icon-svg-shape   | one-shot-fade     |
+| shatter(crack)     | self-rendered-overlay | point（画面サイズ）      | single         | stroke-reveal           | icon-svg-shape   | staged-sequence   |
+| shatter(shard)     | self-rendered-overlay | area-scatter             | multi-layer(9) | ballistic               | fill             | staged-sequence   |
+| checkmark          | self-rendered-overlay | point                    | multi-layer(2) | stroke-reveal           | icon-svg-shape   | enter-and-persist |
+| stamp/medal/record | self-rendered-overlay | point                    | single         | static-scale            | fill+glyph       | enter-and-persist |
+| hitstop            | self-rendered-overlay | area-scatter（画面全体） | single         | static-scale(scale固定) | fill             | one-shot-fade     |
+| vignette           | self-rendered-overlay | area-scatter（画面全体） | single         | static-scale(inset反転) | glow-gradient    | one-shot-fade     |
+| border: spin/ants  | external-decorate     | ring                     | single         | stroke-reveal相当       | decorative-frame | bounded-repeat可  |
+| shake              | container-modifier    | —                        | —              | —                       | —                | one-shot          |
 
 ## 新規提案の軸マッピング
 
-| 案 | A | B | C | D | E/I | F |
-|---|---|---|---|---|---|---|
-| レーザー | self-rendered-overlay | cone | particle-field | radial-velocity | glow(beam) | one-shot-fade |
-| スポットライト | self-rendered-overlay | point（**原点移動**） | single | path-follow | glow-gradient | one-shot-fade |
-| ミラーボール | self-rendered-overlay | area-scatter（画面全体） | particle-field | orbit-twinkle | fill | **bounded-repeat** |
-| 剣の切り裂きリビール | self-rendered-overlay | path（剣の軌跡） | multi-layer(2) | stroke-reveal + path-follow | glow（刃）＋ **clip-reveal（覆いの除去）** | staged-sequence |
+| 案                   | A                     | B                        | C              | D                           | E/I                                        | F                  |
+| -------------------- | --------------------- | ------------------------ | -------------- | --------------------------- | ------------------------------------------ | ------------------ |
+| レーザー             | self-rendered-overlay | cone                     | particle-field | radial-velocity             | glow(beam)                                 | one-shot-fade      |
+| スポットライト       | self-rendered-overlay | point（**原点移動**）    | single         | path-follow                 | glow-gradient                              | one-shot-fade      |
+| ミラーボール         | self-rendered-overlay | area-scatter（画面全体） | particle-field | orbit-twinkle               | fill                                       | **bounded-repeat** |
+| 剣の切り裂きリビール | self-rendered-overlay | path（剣の軌跡）         | multi-layer(2) | stroke-reveal + path-follow | glow（刃）＋ **clip-reveal（覆いの除去）** | staged-sequence    |
 
 ## 次にやること（未着手）
 
@@ -320,6 +332,7 @@ GSAPのtimelineと同じ層構造）。
 実装として妥当だったため、ゼロから書き直さずこの構成の上に追加した。
 
 ### 完了した項目（旧リストより）
+
 - ~~`options.with`を「登録済みvariant名」だけでなく「アドホックなleaf」も受け付けるよう拡張する~~
   → ReactNodeを受け付けるようになった（完了）
 - ~~ドキュメント（README駆動）を先に書き、Tier1〜3の書き心地を実装前に検証する~~

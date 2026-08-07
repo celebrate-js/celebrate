@@ -165,10 +165,7 @@ const SCALE_REFERENCE_SIZE_REM: Partial<Record<CelebrateVariant, number>> = {
 };
 
 /** `options.scale`と`options.sizeRem`のどちらが指定されていても、実際に使うscaleを1つに解決する。 */
-function resolveScale(
-  variant: CelebrateVariant,
-  options: Pick<CelebrateVariantOptions, "scale" | "sizeRem">
-): number {
+function resolveScale(variant: CelebrateVariant, options: Pick<CelebrateVariantOptions, "scale" | "sizeRem">): number {
   if (options.sizeRem !== undefined) {
     const reference = SCALE_REFERENCE_SIZE_REM[variant] ?? 1;
     return options.sizeRem / reference;
@@ -186,7 +183,12 @@ export const RECIPES = {
   // ①入力フィードバック：ボタン等を押した「軽いタップ確認」。
   pop: {
     render: ({ theme, scale, sizeRem, color }) => (
-      <RadialBurst layers={RADIAL_BURST_PRESETS.pop.layers} theme={theme} scale={resolveScale("pop", { scale, sizeRem })} color={color} />
+      <RadialBurst
+        layers={RADIAL_BURST_PRESETS.pop.layers}
+        theme={theme}
+        scale={resolveScale("pop", { scale, sizeRem })}
+        color={color}
+      />
     ),
     durationMs: POP_DURATION_MS,
     sound: fixedChime(3),
@@ -194,7 +196,12 @@ export const RECIPES = {
   },
   ripple: {
     render: ({ theme, scale, sizeRem, color }) => (
-      <RadialBurst layers={RADIAL_BURST_PRESETS.ripple.layers} theme={theme} scale={resolveScale("ripple", { scale, sizeRem })} color={color} />
+      <RadialBurst
+        layers={RADIAL_BURST_PRESETS.ripple.layers}
+        theme={theme}
+        scale={resolveScale("ripple", { scale, sizeRem })}
+        color={color}
+      />
     ),
     durationMs: RIPPLE_DURATION_MS,
     sound: fixedChime(5),
@@ -259,14 +266,24 @@ export const RECIPES = {
   },
   flash: {
     render: ({ theme, scale, sizeRem, color }) => (
-      <RadialBurst layers={RADIAL_BURST_PRESETS.flash.layers} theme={theme} scale={resolveScale("flash", { scale, sizeRem })} color={color} />
+      <RadialBurst
+        layers={RADIAL_BURST_PRESETS.flash.layers}
+        theme={theme}
+        scale={resolveScale("flash", { scale, sizeRem })}
+        color={color}
+      />
     ),
     durationMs: FLASH_DURATION_MS,
     sound: fixedChime(11),
   },
   ring: {
     render: ({ theme, scale, sizeRem, color }) => (
-      <RadialBurst layers={RADIAL_BURST_PRESETS.ring.layers} theme={theme} scale={resolveScale("ring", { scale, sizeRem })} color={color} />
+      <RadialBurst
+        layers={RADIAL_BURST_PRESETS.ring.layers}
+        theme={theme}
+        scale={resolveScale("ring", { scale, sizeRem })}
+        color={color}
+      />
     ),
     durationMs: RING_DURATION_MS,
     sound: fixedChime(6),
@@ -274,7 +291,13 @@ export const RECIPES = {
   firework: {
     render: ({ theme, seed, scale, sizeRem, colors, fireworkStyle }) => (
       <span className="celebrate-anchor">
-        <FireworkBurst theme={theme} seed={seed} scale={resolveScale("firework", { scale, sizeRem })} colors={colors} style={fireworkStyle} />
+        <FireworkBurst
+          theme={theme}
+          seed={seed}
+          scale={resolveScale("firework", { scale, sizeRem })}
+          colors={colors}
+          style={fireworkStyle}
+        />
       </span>
     ),
     durationMs: FIREWORK_DURATION_MS,
@@ -460,9 +483,7 @@ function recipeFor(content: CelebrateVariant | ReactNode): Recipe | undefined {
   return isRecipeName(content) ? RECIPES[content] : undefined;
 }
 
-function withLayers(
-  withOption: CelebrateVariantOptions["with"]
-): readonly (CelebrateVariant | ReactNode)[] {
+function withLayers(withOption: CelebrateVariantOptions["with"]): readonly (CelebrateVariant | ReactNode)[] {
   if (withOption === undefined) return [];
   return Array.isArray(withOption) ? withOption : [withOption as CelebrateVariant | ReactNode];
 }

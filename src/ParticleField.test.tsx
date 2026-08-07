@@ -41,9 +41,7 @@ afterEach(() => {
 });
 
 function makeParticles(): ParticleSpec<StaticScaleParams>[] {
-  return [
-    { motion: staticScaleMotion, params: { scaleFrom: 0, scaleTo: 1, durationSeconds: 1 }, durationSeconds: 1 },
-  ];
+  return [{ motion: staticScaleMotion, params: { scaleFrom: 0, scaleTo: 1, durationSeconds: 1 }, durationSeconds: 1 }];
 }
 
 describe("ParticleField", () => {

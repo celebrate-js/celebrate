@@ -131,18 +131,7 @@
   border-radius: 0;
   background: var(--celebrate-stamp-color);
   color: var(--celebrate-stamp-star-text-color, #fff);
-  clip-path: polygon(
-    50% 0%,
-    61% 35%,
-    98% 35%,
-    68% 57%,
-    79% 91%,
-    50% 70%,
-    21% 91%,
-    32% 57%,
-    2% 35%,
-    39% 35%
-  );
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
 }
 
 .celebrate-stamp-text {
@@ -337,9 +326,7 @@
     opacity: 1;
   }
   100% {
-    transform:
-      translate(calc(-50% + var(--celebrate-glyph-x)), calc(-50% + var(--celebrate-glyph-y)))
-      scale(1)
+    transform: translate(calc(-50% + var(--celebrate-glyph-x)), calc(-50% + var(--celebrate-glyph-y))) scale(1)
       rotate(var(--celebrate-glyph-rotate));
     opacity: 0;
   }
@@ -412,7 +399,6 @@
   clip-path: polygon(0 0, 100% 0, 100% 80%, 40% 100%);
 }
 
-
 /* ==== checkmark ==== */
 
 .celebrate-checkmark {
@@ -443,7 +429,6 @@
 
 /* リボン自体の見た目（太さ・長さ・色・回転）はCrackerBurst.tsxがParticleFieldの
    renderへインラインstyleで直接渡す。位置・移動・フェードはParticleField/radialMotionが担う。 */
-
 
 /* ==== shake / hitstop（④環境・演出：画面全体側。<html> に付く class） ==== */
 
@@ -565,14 +550,12 @@ html.celebrate-vignette-active::before {
   opacity: var(--celebrate-stroke-opacity, 1);
   stroke-dasharray: var(--celebrate-stroke-dash, 160);
   stroke-dashoffset: var(--celebrate-stroke-dash, 160);
-  animation: celebrate-stroke-draw var(--celebrate-stroke-duration, 0.2s) var(--celebrate-stroke-delay, 0ms)
-    ease-out forwards;
+  animation: celebrate-stroke-draw var(--celebrate-stroke-duration, 0.2s) var(--celebrate-stroke-delay, 0ms) ease-out
+    forwards;
 }
 
 .celebrate-stroke-path--glow-electric {
-  filter:
-    drop-shadow(0 0 3px #fff)
-    drop-shadow(0 0 10px var(--celebrate-stroke-color))
+  filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 10px var(--celebrate-stroke-color))
     drop-shadow(0 0 22px var(--celebrate-stroke-color));
 }
 
@@ -951,7 +934,8 @@ html.celebrate-vignette-active::before {
     opacity: 1;
   }
   100% {
-    transform: translate(var(--celebrate-shatter-fall-x), var(--celebrate-shatter-fall-y)) rotate(var(--celebrate-shatter-rotate));
+    transform: translate(var(--celebrate-shatter-fall-x), var(--celebrate-shatter-fall-y))
+      rotate(var(--celebrate-shatter-rotate));
     opacity: 0;
   }
 }
@@ -1119,7 +1103,10 @@ html.celebrate-vignette-active::before {
   inset: -0.18rem;
   border-radius: inherit;
   padding: 0.18rem;
-  background: conic-gradient(from var(--celebrate-border-angle), var(--celebrate-border-conic-stops, #ff5f6d, #ffc371, #47cf73, #4aa8ff, #ff5f6d));
+  background: conic-gradient(
+    from var(--celebrate-border-angle),
+    var(--celebrate-border-conic-stops, #ff5f6d, #ffc371, #47cf73, #4aa8ff, #ff5f6d)
+  );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);

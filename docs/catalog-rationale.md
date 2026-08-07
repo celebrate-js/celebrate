@@ -79,16 +79,16 @@ CCI（教育アプリ文脈）だけでは⑥環境演出を支持しきれな�
 
 ## カテゴリと理論の対応表
 
-| カテゴリ | variant | 主な理論的根拠 |
-|---|---|---|
-| ①入力フィードバック | pop/ripple/checkmark | Game Feel（juice）、Microinteractions（Feedback） |
-| ②達成 | stamp/medal/bounce | Octalysis（達成動因）、SDT（有能感） |
-| ③報酬 | confetti/sparkle/record/flash/ring/firework | Octalysis（報酬動因）、可変比率強化 |
-| ④リアクション | heart/star/emoji | Bartle（socializer）、BJET 2023（絵文字への反応速度） |
-| ⑤キャラクター・ナラティブ | cracker/float | Material Design（キャラクター性）、Piaget（象徴遊び） |
-| ⑥環境演出 | sakura/shake/hitstop/vignette/rain/lightning | Game Feel（juice）、ゲームデザインの定番パターン |
-| ⑦段階エフェクト | shatter | staged-sequence（構造分解メモ参照） |
-| ⑧テキストチャネル | popup | Microinteractions（Feedback） |
+| カテゴリ                  | variant                                      | 主な理論的根拠                                        |
+| ------------------------- | -------------------------------------------- | ----------------------------------------------------- |
+| ①入力フィードバック       | pop/ripple/checkmark                         | Game Feel（juice）、Microinteractions（Feedback）     |
+| ②達成                     | stamp/medal/bounce                           | Octalysis（達成動因）、SDT（有能感）                  |
+| ③報酬                     | confetti/sparkle/record/flash/ring/firework  | Octalysis（報酬動因）、可変比率強化                   |
+| ④リアクション             | heart/star/emoji                             | Bartle（socializer）、BJET 2023（絵文字への反応速度） |
+| ⑤キャラクター・ナラティブ | cracker/float                                | Material Design（キャラクター性）、Piaget（象徴遊び） |
+| ⑥環境演出                 | sakura/shake/hitstop/vignette/rain/lightning | Game Feel（juice）、ゲームデザインの定番パターン      |
+| ⑦段階エフェクト           | shatter                                      | staged-sequence（構造分解メモ参照）                   |
+| ⑧テキストチャネル         | popup                                        | Microinteractions（Feedback）                         |
 
 関連：[構造分解メモ](./effect-structure-taxonomy.md)（実装の構造的な分類）、
 [recipes.tsx](../src/recipes.tsx)（このカテゴリ分けの実装本体）。

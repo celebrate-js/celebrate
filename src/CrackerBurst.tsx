@@ -1,6 +1,11 @@
 import { useState, type CSSProperties } from "react";
 import { clsx } from "./clsx";
-import { createCrackerStreamers, createSeededCrackerRandom, CRACKER_DURATION_MS, type CrackerStreamer } from "./cracker";
+import {
+  createCrackerStreamers,
+  createSeededCrackerRandom,
+  CRACKER_DURATION_MS,
+  type CrackerStreamer,
+} from "./cracker";
 import { ParticleField, type ParticleSpec } from "./ParticleField";
 import { radialMotion, type RadialMotionParams } from "./motionProfile";
 import { DEFAULT_CELEBRATE_THEME, type CelebrateTheme } from "./theme";

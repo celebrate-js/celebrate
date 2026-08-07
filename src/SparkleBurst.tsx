@@ -19,7 +19,11 @@ export interface SparkleBurstProps {
   colors?: readonly string[];
 }
 
-function toParticleSpec(particle: SparkleParticle, palette: readonly string[], theme: CelebrateTheme): ParticleSpec<RadialMotionParams> {
+function toParticleSpec(
+  particle: SparkleParticle,
+  palette: readonly string[],
+  theme: CelebrateTheme
+): ParticleSpec<RadialMotionParams> {
   const durationSeconds = SPARKLE_DURATION_MS / 1000;
   return {
     motion: radialMotion,

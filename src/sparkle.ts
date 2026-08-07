@@ -31,9 +31,7 @@ export const createSeededSparkleRandom = createSeededRandom;
  * 発火ごとのキラキラ粒子を生成する純関数。
  * Math.random は既定値にだけ置き、テストでは random を注入する。
  */
-export function createSparkleParticles(
-  random: SparkleRandom = Math.random
-): readonly SparkleParticle[] {
+export function createSparkleParticles(random: SparkleRandom = Math.random): readonly SparkleParticle[] {
   const durationSeconds = SPARKLE_DURATION_MS / 1000;
   return Array.from({ length: SPARKLE_PARTICLE_COUNT }, (_, id) => {
     const angleRad = (Math.PI * 2 * id) / SPARKLE_PARTICLE_COUNT + (random() - 0.5) * 0.2;

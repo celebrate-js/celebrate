@@ -23,12 +23,7 @@ export interface RecordBannerProps {
 }
 
 /** 自己ベスト更新を祝う帯（＋紙吹雪）。 */
-export function RecordBanner({
-  text,
-  note,
-  theme = DEFAULT_CELEBRATE_THEME,
-  className,
-}: RecordBannerProps) {
+export function RecordBanner({ text, note, theme = DEFAULT_CELEBRATE_THEME, className }: RecordBannerProps) {
   return (
     <div
       // 演出が実際に出たことを e2e が機械的に確認するための目印（見た目には影響しない）。

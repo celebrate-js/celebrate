@@ -23,15 +23,11 @@ export const SPARKLE_SOUND_PRESETS: readonly SparkleSoundPreset[] = [
 ];
 
 export function sparkleSoundIndex(randomValue: number): number {
-  const normalized = Number.isFinite(randomValue)
-    ? Math.min(Math.max(randomValue, 0), 1 - Number.EPSILON)
-    : 0;
+  const normalized = Number.isFinite(randomValue) ? Math.min(Math.max(randomValue, 0), 1 - Number.EPSILON) : 0;
   return Math.floor(normalized * SPARKLE_SOUND_PRESETS.length);
 }
 
-export function chooseSparkleSound(
-  random: () => number = Math.random
-): SparkleSoundPreset {
+export function chooseSparkleSound(random: () => number = Math.random): SparkleSoundPreset {
   return SPARKLE_SOUND_PRESETS[sparkleSoundIndex(random())]!;
 }
 
@@ -69,9 +65,12 @@ export function playChime(presetIndex: number, gainScale = 1): void {
     });
 
     void context.resume().catch(() => undefined);
-    window.setTimeout(() => {
-      void context.close().catch(() => undefined);
-    }, Math.ceil((preset.durationSeconds + 0.08) * 1000));
+    window.setTimeout(
+      () => {
+        void context.close().catch(() => undefined);
+      },
+      Math.ceil((preset.durationSeconds + 0.08) * 1000)
+    );
   } catch {
     // 音は演出の付加価値。ブラウザ制約で失敗してもUI操作へ例外を伝播させない。
   }

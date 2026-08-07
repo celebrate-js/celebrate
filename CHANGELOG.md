@@ -7,6 +7,7 @@
 初回リリース。break_even_toolsからの分離・独立パッケージ化。
 
 ### 追加
+
 - Tier 1カタログ：25種類の演出（`stamp`/`confetti`/`sparkle`/`pop`/`ripple`/`ring`/`flash`/`sakura`/`bounce`/`heart`/`star`/`medal`/`checkmark`/`emoji`/`firework`/`cracker`/`float`/`lightning`/`shatter`/`shake`/`hitstop`/`vignette`/`rain`/`record`/`popup`）
 - Tier 3構造テンプレート：`RadialBurst`（中心から広がる）、`ParticleField`（任意の動き・見た目の粒子エンジン）、`StrokePath`（経路の描き下ろし）
 - ボーダーエフェクト（`useCelebrateBorder`）：既存コンポーネントの境界線を装飾する10種類

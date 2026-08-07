@@ -23,11 +23,11 @@ function SubmitButton() {
 
 このライブラリは3つの層でできています。下に降りるほど自由度が上がり、書く量も増えます。
 
-| 層 | 何をするか | 例 |
-|---|---|---|
-| **Tier 1：カタログ** | 登録済みの名前を選ぶだけ | `celebrate("confetti")` |
-| **Tier 2：合成** | 名前や自作コンポーネントを重ねる | `celebrate("stamp", { with: ["confetti"] })` |
-| **Tier 3：構造テンプレート** | 生のパラメータで組み立てる | `<RadialBurst><RadialBurstLayer .../></RadialBurst>` |
+| 層                           | 何をするか                       | 例                                                   |
+| ---------------------------- | -------------------------------- | ---------------------------------------------------- |
+| **Tier 1：カタログ**         | 登録済みの名前を選ぶだけ         | `celebrate("confetti")`                              |
+| **Tier 2：合成**             | 名前や自作コンポーネントを重ねる | `celebrate("stamp", { with: ["confetti"] })`         |
+| **Tier 3：構造テンプレート** | 生のパラメータで組み立てる       | `<RadialBurst><RadialBurstLayer .../></RadialBurst>` |
 
 `stamp`・`pop`・`ripple`・`ring`・`flash`のような名前（Tier 1）は、実装としては`RadialBurst`や個別コンポーネント（Tier 3）にパラメータを渡しているだけの「プリセット」です。カタログにない見た目が欲しい場合は、名前を探すのではなくTier 3のプリミティブを直接使ってください。
 
@@ -37,9 +37,9 @@ function SubmitButton() {
 
 ```tsx
 const celebrate = useCelebrate();
-celebrate("stamp", { text: "合格" });              // 画面中央
-celebrate("confetti", { anchor: buttonRef });       // 指定した要素の位置
-celebrate(<MyBadge />);                             // 登録名の代わりに生のReactNodeも渡せる
+celebrate("stamp", { text: "合格" }); // 画面中央
+celebrate("confetti", { anchor: buttonRef }); // 指定した要素の位置
+celebrate(<MyBadge />); // 登録名の代わりに生のReactNodeも渡せる
 celebrate("stamp", { with: ["confetti", <MyBadge />] }); // 重ね合わせ（名前とReactNodeを混在可）
 ```
 
@@ -52,16 +52,16 @@ props・optionsの全フィールドは[API リファレンス](./api-reference.
 （軽いタップ確認／報酬）を持つので別名で残している。並び順もこの意味カテゴリでグルーピングしてある
 （`RECIPES`オブジェクトの定義順＝実装順・思いつき順ではない）。
 
-| カテゴリ | 名前 |
-|---|---|
-| 入力フィードバック（軽いタップ確認） | `pop` `ripple` `checkmark` |
-| 達成（正解・完了・順位） | `stamp` `medal` `bounce` |
-| 報酬（ご褒美・大当たり） | `confetti` `sparkle` `record` `flash` `ring` `firework` |
-| リアクション（絵文字で気持ちを表す） | `heart` `star` `emoji` |
-| キャラクター・ナラティブ | `cracker` `float` |
-| 環境演出（画面全体） | `sakura` `shake` `hitstop` `vignette` `rain` `lightning` |
-| 段階エフェクト | `shatter` |
-| テキストチャネル | `popup` |
+| カテゴリ                             | 名前                                                     |
+| ------------------------------------ | -------------------------------------------------------- |
+| 入力フィードバック（軽いタップ確認） | `pop` `ripple` `checkmark`                               |
+| 達成（正解・完了・順位）             | `stamp` `medal` `bounce`                                 |
+| 報酬（ご褒美・大当たり）             | `confetti` `sparkle` `record` `flash` `ring` `firework`  |
+| リアクション（絵文字で気持ちを表す） | `heart` `star` `emoji`                                   |
+| キャラクター・ナラティブ             | `cracker` `float`                                        |
+| 環境演出（画面全体）                 | `sakura` `shake` `hitstop` `vignette` `rain` `lightning` |
+| 段階エフェクト                       | `shatter`                                                |
+| テキストチャネル                     | `popup`                                                  |
 
 一覧は`CELEBRATE_VARIANT_NAMES`としてもexportされている（この表と同じ順）。
 
@@ -75,8 +75,24 @@ props・optionsの全フィールドは[API リファレンス](./api-reference.
 
 ```tsx
 <RadialBurst>
-  <RadialBurstLayer shape="outline" scaleFrom={0.3} scaleTo={2.4} size={2.4} color="#4aa8ff" durationMs={500} delayMs={0} />
-  <RadialBurstLayer shape="outline" scaleFrom={0.3} scaleTo={2.7} size={2.0} color="#4aa8ff" durationMs={500} delayMs={140} />
+  <RadialBurstLayer
+    shape="outline"
+    scaleFrom={0.3}
+    scaleTo={2.4}
+    size={2.4}
+    color="#4aa8ff"
+    durationMs={500}
+    delayMs={0}
+  />
+  <RadialBurstLayer
+    shape="outline"
+    scaleFrom={0.3}
+    scaleTo={2.7}
+    size={2.0}
+    color="#4aa8ff"
+    durationMs={500}
+    delayMs={140}
+  />
 </RadialBurst>
 ```
 
@@ -108,7 +124,9 @@ celebrate()のオーバーレイと違い、ref で渡した既存要素自身�
 
 ```tsx
 const { ref, celebrateBorder } = useCelebrateBorder<HTMLDivElement>();
-<div ref={ref} onClick={() => celebrateBorder("neon")}>...</div>
+<div ref={ref} onClick={() => celebrateBorder("neon")}>
+  ...
+</div>;
 
 // Tier3：カタログの名前の代わりに生のプリセットを直接渡すこともできる
 // （プリセット自身が mechanism を持っているので、celebrate(<ReactNode/>) と同じ感覚で渡せる）

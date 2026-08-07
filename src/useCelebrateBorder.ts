@@ -45,7 +45,8 @@ export interface UseCelebrateBorderResult<T extends HTMLElement> {
 }
 
 /** カタログ名（thunk入りのBORDER_EFFECTS）と生トリガーの両方を、同じ形に正規化する。 */
-type ResolvedTrigger = BorderGlowPreset | BorderConicRingPreset | { mechanism: "class"; className: string; durationMs: number };
+type ResolvedTrigger =
+  BorderGlowPreset | BorderConicRingPreset | { mechanism: "class"; className: string; durationMs: number };
 
 function resolveTrigger(trigger: BorderTrigger): ResolvedTrigger {
   if (typeof trigger !== "string") return trigger;

@@ -1,7 +1,12 @@
 import { createContext, useContext } from "react";
 import type { ReactNode, RefObject } from "react";
 import type { CelebrateTheme } from "./theme";
-import type { CelebrateVariant, CelebrateVariantOptions, UniversalCelebrateOptions, VariantOptionsMap } from "./recipes";
+import type {
+  CelebrateVariant,
+  CelebrateVariantOptions,
+  UniversalCelebrateOptions,
+  VariantOptionsMap,
+} from "./recipes";
 
 // Provider が配る中身を宣言的 <Celebrate> と命令的 useCelebrate() の両方から参照するため、
 // context だけを独立したファイルに置く（Provider と Celebrate の相互 import を避ける）。

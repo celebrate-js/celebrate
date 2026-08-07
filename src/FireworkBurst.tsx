@@ -52,28 +52,34 @@ export function FireworkBurst({
             } as CSSProperties
           }
         >
-          <span className="celebrate-firework-flash" style={{ animationDelay: `${shell.delaySeconds}s` } as CSSProperties} />
+          <span
+            className="celebrate-firework-flash"
+            style={{ animationDelay: `${shell.delaySeconds}s` } as CSSProperties}
+          />
           <ParticleField
-            particles={shell.particles.map(
-              (particle): ParticleSpec<BallisticMotionParams> => ({
-                motion: ballisticMotion,
-                params: { angleRad: particle.angleRad, speed: particle.speed, gravity: particle.gravity, durationSeconds: particle.durationSeconds },
+            particles={shell.particles.map((particle): ParticleSpec<BallisticMotionParams> => ({
+              motion: ballisticMotion,
+              params: {
+                angleRad: particle.angleRad,
+                speed: particle.speed,
+                gravity: particle.gravity,
                 durationSeconds: particle.durationSeconds,
-                delaySeconds: particle.delaySeconds,
-                render: (
-                  <span
-                    className="celebrate-firework-particle"
-                    style={
-                      {
-                        width: `${particle.size}rem`,
-                        height: `${particle.size}rem`,
-                        background: palette[particle.tone % palette.length],
-                      } as CSSProperties
-                    }
-                  />
-                ),
-              })
-            )}
+              },
+              durationSeconds: particle.durationSeconds,
+              delaySeconds: particle.delaySeconds,
+              render: (
+                <span
+                  className="celebrate-firework-particle"
+                  style={
+                    {
+                      width: `${particle.size}rem`,
+                      height: `${particle.size}rem`,
+                      background: palette[particle.tone % palette.length],
+                    } as CSSProperties
+                  }
+                />
+              ),
+            }))}
           />
         </span>
       ))}

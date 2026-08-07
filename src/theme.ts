@@ -36,10 +36,5 @@ export const DEFAULT_CELEBRATE_THEME: CelebrateTheme = {
   stampRadius: "var(--r-lg)",
   stampFont: "inherit",
   pieceRadius: "var(--r-sm)",
-  confettiColors: [
-    "var(--accent)",
-    "var(--accent-weak)",
-    "var(--accent)",
-    "var(--ink-2)",
-  ],
+  confettiColors: ["var(--accent)", "var(--accent-weak)", "var(--accent)", "var(--ink-2)"],
 };

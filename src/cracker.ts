@@ -28,9 +28,7 @@ export const CRACKER_DURATION_MS = 900;
 const CRACKER_DURATION_SECONDS = CRACKER_DURATION_MS / 1000;
 
 /** 真上を中心に ±65deg のコーン状へ飛び出すリボンを生成する。 */
-export function createCrackerStreamers(
-  random: RandomFn = Math.random
-): readonly CrackerStreamer[] {
+export function createCrackerStreamers(random: RandomFn = Math.random): readonly CrackerStreamer[] {
   return Array.from({ length: CRACKER_STREAMER_COUNT }, (_, id) => {
     // 画面座標（0=右, 90deg=下）で「真上」は -90deg。そこを中心に±65degの扇。
     const spreadDeg = (random() - 0.5) * 130;

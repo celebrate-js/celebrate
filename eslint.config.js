@@ -3,6 +3,7 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 // src/ = ライブラリ本体（ブラウザ向け）、demo/ = ドキュメント兼サンプルサイト（別tsconfig）。
 // dist/はビルド成果物なので対象外（.gitignore同様、lintも通す意味がない）。
@@ -30,5 +31,8 @@ export default tseslint.config(
     languageOptions: {
       globals: { ...globals.node },
     },
-  }
+  },
+  // フォーマットに関わるルール（インデント・クォート等）はPrettierに一本化する。
+  // 必ず配列の最後に置き、上のconfigが有効化したstyle系ルールを打ち消す。
+  eslintConfigPrettier
 );

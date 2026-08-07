@@ -25,8 +25,21 @@ export function CheckmarkBurst({ theme = DEFAULT_CELEBRATE_THEME, className }: C
         viewBox="0 0 52 52"
         className="celebrate-checkmark-svg"
         lines={[
-          { d: CHECKMARK_CIRCLE_D, strokeWidth: 2.5, dashLength: CHECKMARK_CIRCLE_DASH_LENGTH, color: theme.stampColor, durationMs: 450 },
-          { d: CHECKMARK_CHECK_D, strokeWidth: 3.5, dashLength: CHECKMARK_CHECK_DASH_LENGTH, color: theme.stampColor, durationMs: 300, delayMs: 350 },
+          {
+            d: CHECKMARK_CIRCLE_D,
+            strokeWidth: 2.5,
+            dashLength: CHECKMARK_CIRCLE_DASH_LENGTH,
+            color: theme.stampColor,
+            durationMs: 450,
+          },
+          {
+            d: CHECKMARK_CHECK_D,
+            strokeWidth: 3.5,
+            dashLength: CHECKMARK_CHECK_DASH_LENGTH,
+            color: theme.stampColor,
+            durationMs: 300,
+            delayMs: 350,
+          },
         ]}
       />
     </span>

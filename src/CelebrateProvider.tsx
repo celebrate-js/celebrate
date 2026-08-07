@@ -82,38 +82,41 @@ export function CelebrateProvider({ children, theme, container }: CelebrateProvi
     setPortalTarget(container?.current ?? document.body);
   }, [container]);
 
-  const celebrate = useCallback<CelebrateFn>((content: CelebrateVariant | ReactNode, options: CelebrateOptions = {}) => {
-    const { anchor, ...variantOptions } = options;
-    // 基準要素の位置は発火した瞬間に測る（演出は1秒で消えるため追従は不要）。
-    // container が指定されている場合、overlay-root は viewport ではなく container 基準の
-    // 絶対配置になるため、中心座標も container の左上を原点にした相対座標に直す。
-    const rect = anchor?.current?.getBoundingClientRect() ?? null;
-    const containerRect = container?.current?.getBoundingClientRect() ?? null;
-    const center = rect
-      ? {
-          x: rect.left + rect.width / 2 - (containerRect?.left ?? 0),
-          y: rect.top + rect.height / 2 - (containerRect?.top ?? 0),
-        }
-      : null;
-    const id = nextId.current++;
-    const durationMs = durationForCelebration(content, variantOptions);
+  const celebrate = useCallback<CelebrateFn>(
+    (content: CelebrateVariant | ReactNode, options: CelebrateOptions = {}) => {
+      const { anchor, ...variantOptions } = options;
+      // 基準要素の位置は発火した瞬間に測る（演出は1秒で消えるため追従は不要）。
+      // container が指定されている場合、overlay-root は viewport ではなく container 基準の
+      // 絶対配置になるため、中心座標も container の左上を原点にした相対座標に直す。
+      const rect = anchor?.current?.getBoundingClientRect() ?? null;
+      const containerRect = container?.current?.getBoundingClientRect() ?? null;
+      const center = rect
+        ? {
+            x: rect.left + rect.width / 2 - (containerRect?.left ?? 0),
+            y: rect.top + rect.height / 2 - (containerRect?.top ?? 0),
+          }
+        : null;
+      const id = nextId.current++;
+      const durationMs = durationForCelebration(content, variantOptions);
 
-    playSoundsForCelebration(content, variantOptions);
-    playHapticsForCelebration(content, variantOptions);
+      playSoundsForCelebration(content, variantOptions);
+      playHapticsForCelebration(content, variantOptions);
 
-    const releases = containerModifierClassNames(content, variantOptions).map((className) =>
-      activateContainerModifier(className, durationMs)
-    );
-    for (const release of releases) containerModifierReleasers.current.add(release);
+      const releases = containerModifierClassNames(content, variantOptions).map((className) =>
+        activateContainerModifier(className, durationMs)
+      );
+      for (const release of releases) containerModifierReleasers.current.add(release);
 
-    setActiveList((prev) => [...prev, { id, content, options: variantOptions, center }]);
-    const timer = setTimeout(() => {
-      setActiveList((prev) => prev.filter((item) => item.id !== id));
-      timers.current.delete(id);
-      for (const release of releases) containerModifierReleasers.current.delete(release);
-    }, durationMs);
-    timers.current.set(id, timer);
-  }, [container]);
+      setActiveList((prev) => [...prev, { id, content, options: variantOptions, center }]);
+      const timer = setTimeout(() => {
+        setActiveList((prev) => prev.filter((item) => item.id !== id));
+        timers.current.delete(id);
+        for (const release of releases) containerModifierReleasers.current.delete(release);
+      }, durationMs);
+      timers.current.set(id, timer);
+    },
+    [container]
+  );
 
   const value = useMemo(() => ({ celebrate, theme: appTheme }), [celebrate, appTheme]);
 

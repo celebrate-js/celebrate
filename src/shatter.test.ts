@@ -9,9 +9,7 @@ describe("shatter scene", () => {
   });
 
   it("同じseedなら同じ場面になる", () => {
-    expect(createShatterScene(createSeededShatterRandom(9))).toEqual(
-      createShatterScene(createSeededShatterRandom(9))
-    );
+    expect(createShatterScene(createSeededShatterRandom(9))).toEqual(createShatterScene(createSeededShatterRandom(9)));
   });
 
   it("破片のIDが一意になる", () => {

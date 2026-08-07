@@ -1,14 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  createSeededSparkleRandom,
-  createSparkleParticles,
-  SPARKLE_PARTICLE_COUNT,
-} from "./sparkle";
-import {
-  chooseSparkleSound,
-  sparkleSoundIndex,
-  SPARKLE_SOUND_PRESETS,
-} from "./sparkleSound";
+import { createSeededSparkleRandom, createSparkleParticles, SPARKLE_PARTICLE_COUNT } from "./sparkle";
+import { chooseSparkleSound, sparkleSoundIndex, SPARKLE_SOUND_PRESETS } from "./sparkleSound";
 
 describe("sparkle particles", () => {
   it("32個を生成し、IDが一意になる", () => {
@@ -53,4 +45,3 @@ describe("sparkle sound", () => {
     expect(chooseSparkleSound(() => 0.51)).toBe(SPARKLE_SOUND_PRESETS[5]);
   });
 });
-

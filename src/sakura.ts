@@ -22,9 +22,7 @@ export const SAKURA_PETAL_COUNT = 14;
 export const SAKURA_DURATION_MS = 2000;
 
 /** 舞い落ちる花びらを生成する純関数。 */
-export function createSakuraPetals(
-  random: RandomFn = Math.random
-): readonly SakuraPetal[] {
+export function createSakuraPetals(random: RandomFn = Math.random): readonly SakuraPetal[] {
   return Array.from({ length: SAKURA_PETAL_COUNT }, (_, id) => {
     const durationSeconds = 1.3 + random() * 0.7;
     const fallY = 5.5 + random() * 2.5;

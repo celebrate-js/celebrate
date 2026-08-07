@@ -31,10 +31,7 @@ export interface RewardTier<W = unknown> {
  * celebrate("stamp", { with: tier.with });
  * ```
  */
-export function rollRewardTier<T extends RewardTier>(
-  tiers: readonly T[],
-  random: RandomFn = Math.random
-): T {
+export function rollRewardTier<T extends RewardTier>(tiers: readonly T[], random: RandomFn = Math.random): T {
   if (tiers.length === 0) {
     throw new Error("rollRewardTier には最低1つ tier が必要です");
   }

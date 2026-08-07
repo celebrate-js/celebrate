@@ -17,16 +17,7 @@ import { electricPreset, firePreset, glowPreset, icePreset, neonPreset, type Bor
 import { rainbowPreset, spinPreset, type BorderConicRingPreset } from "./borderConicRing";
 
 export type BorderEffectKind =
-  | "glow"
-  | "spin"
-  | "ring"
-  | "ants"
-  | "shine"
-  | "neon"
-  | "rainbow"
-  | "fire"
-  | "ice"
-  | "electric";
+  "glow" | "spin" | "ring" | "ants" | "shine" | "neon" | "rainbow" | "fire" | "ice" | "electric";
 
 export const BORDER_EFFECT_DURATIONS_MS: Readonly<Record<BorderEffectKind, number>> = {
   glow: 900,

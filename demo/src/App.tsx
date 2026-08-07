@@ -77,7 +77,12 @@ const CATALOG_CATEGORIES: readonly CatalogCategory[] = [
     variants: [
       { variant: "confetti", description: "紙吹雪が舞う、定番の祝福演出。" },
       { variant: "sparkle", description: "きらめきが散る。" },
-      { variant: "record", description: "自己ベスト更新を示す全画面バナー。", text: "Congratulations!", note: "れんぞく 7問" },
+      {
+        variant: "record",
+        description: "自己ベスト更新を示す全画面バナー。",
+        text: "Congratulations!",
+        note: "れんぞく 7問",
+      },
       { variant: "flash", description: "一瞬強く光る。" },
       { variant: "ring", description: "二重の輪が外へ広がって消える。" },
       { variant: "firework", description: "複数の破裂点が時間差で咲く花火。" },
@@ -197,10 +202,9 @@ function BorderEffectDemo() {
         <span>ボーダーエフェクト（カタログ・Tier 1）</span>
       </p>
       <p className="section-hint">
-        オーバーレイを重ねるのではなく、このカード自身の境界線を光らせる／回転させる、
-        celebrate()とは別の小さなAPI（<code>useCelebrateBorder()</code>）。
-        アイコンライブラリのように名前で選ぶだけ（{BORDER_EFFECT_KINDS.length}種類。
-        中身は後述の「ボーダー」構造テンプレートと同じ2機構）。intensityはglow/conicRing/class
+        オーバーレイを重ねるのではなく、このカード自身の境界線を光らせる／回転させる、 celebrate()とは別の小さなAPI（
+        <code>useCelebrateBorder()</code>）。 アイコンライブラリのように名前で選ぶだけ（{BORDER_EFFECT_KINDS.length}
+        種類。 中身は後述の「ボーダー」構造テンプレートと同じ2機構）。intensityはglow/conicRing/class
         3機構すべてに同じduration倍率で効く。
       </p>
       <label className="section-hint" style={{ display: "block", marginBottom: "0.5rem" }}>
@@ -319,14 +323,23 @@ function EngineDemo() {
         <span>自作の動き（Tier 3・MotionProfile）</span>
       </p>
       <p className="section-hint">
-        celebrate()を経由せず<code>ParticleField</code>を直接置く。<code>motion</code>は
-        <code>MOTION_PROFILES</code>に登録されていない自作関数（渦巻き）でも、型さえ満たせばそのまま渡せる。
-        見た目（<code>render</code>）も自由なReactNode。
+        celebrate()を経由せず<code>ParticleField</code>を直接置く。<code>motion</code>は<code>MOTION_PROFILES</code>
+        に登録されていない自作関数（渦巻き）でも、型さえ満たせばそのまま渡せる。 見た目（<code>render</code>
+        ）も自由なReactNode。
       </p>
       <button className="combo-button" onClick={() => setFireKey((k) => k + 1)}>
         spiral 発火
       </button>
-      <div style={{ position: "relative", height: "11rem", marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          position: "relative",
+          height: "11rem",
+          marginTop: "1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <ParticleField
           key={fireKey}
           particles={Array.from({ length: 36 }, (_, i) => ({
@@ -403,7 +416,16 @@ function ScopedTrigger() {
   const celebrate = useCelebrate();
   const trigger = useContainerModifier();
   return (
-    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "0.5rem",
+      }}
+    >
       <button className="combo-button" onClick={() => celebrate("rain")}>
         この枠内だけrain
       </button>
@@ -428,7 +450,8 @@ function ScopedDemo() {
       <p className="section-hint">
         <code>{"<CelebrateProvider container={ref}>"}</code>
         にすると、rain/lightning/shatterのような全画面variantを画面全体ではなくこの枠の中だけに閉じ込められる。
-        右のボタンは比較用（shake/hitstopは<code>useContainerModifier()</code>を直接使うTier3の例で、常に画面全体が対象）。
+        右のボタンは比較用（shake/hitstopは<code>useContainerModifier()</code>
+        を直接使うTier3の例で、常に画面全体が対象）。
       </p>
       <div
         ref={boxRef}
@@ -502,8 +525,8 @@ function RadialBurstBuilder() {
         <span>構造テンプレート：RadialBurst</span>
       </p>
       <p className="section-hint">
-        variantのカタログ（名前）を経由せず、構造テンプレートに生のパラメータを渡して組み立てる。
-        pop / ripple / ring / flash は全部これのプリセット違いでしかない＝カタログにない組み合わせもここで自由に作れる。
+        variantのカタログ（名前）を経由せず、構造テンプレートに生のパラメータを渡して組み立てる。 pop / ripple / ring /
+        flash は全部これのプリセット違いでしかない＝カタログにない組み合わせもここで自由に作れる。
       </p>
       <div className="playground-grid">
         <div className="playground-controls">
@@ -519,27 +542,69 @@ function RadialBurstBuilder() {
           </label>
           <label>
             scaleFrom: {scaleFrom.toFixed(2)}
-            <input type="range" min="0" max="2" step="0.05" value={scaleFrom} onChange={(e) => setScaleFrom(Number(e.target.value))} />
+            <input
+              type="range"
+              min="0"
+              max="2"
+              step="0.05"
+              value={scaleFrom}
+              onChange={(e) => setScaleFrom(Number(e.target.value))}
+            />
           </label>
           <label>
             scaleTo（layer 0基準）: {scaleTo.toFixed(2)}
-            <input type="range" min="0.5" max="4" step="0.05" value={scaleTo} onChange={(e) => setScaleTo(Number(e.target.value))} />
+            <input
+              type="range"
+              min="0.5"
+              max="4"
+              step="0.05"
+              value={scaleTo}
+              onChange={(e) => setScaleTo(Number(e.target.value))}
+            />
           </label>
           <label>
             size（rem・layer 0基準）: {size.toFixed(2)}
-            <input type="range" min="0.5" max="6" step="0.1" value={size} onChange={(e) => setSize(Number(e.target.value))} />
+            <input
+              type="range"
+              min="0.5"
+              max="6"
+              step="0.1"
+              value={size}
+              onChange={(e) => setSize(Number(e.target.value))}
+            />
           </label>
           <label>
             durationMs: {durationMs}
-            <input type="range" min="150" max="1500" step="50" value={durationMs} onChange={(e) => setDurationMs(Number(e.target.value))} />
+            <input
+              type="range"
+              min="150"
+              max="1500"
+              step="50"
+              value={durationMs}
+              onChange={(e) => setDurationMs(Number(e.target.value))}
+            />
           </label>
           <label>
             layers: {layerCount}
-            <input type="range" min="1" max="5" step="1" value={layerCount} onChange={(e) => setLayerCount(Number(e.target.value))} />
+            <input
+              type="range"
+              min="1"
+              max="5"
+              step="1"
+              value={layerCount}
+              onChange={(e) => setLayerCount(Number(e.target.value))}
+            />
           </label>
           <label>
             layer間のdelayMs: {layerDelayMs}
-            <input type="range" min="0" max="400" step="10" value={layerDelayMs} onChange={(e) => setLayerDelayMs(Number(e.target.value))} />
+            <input
+              type="range"
+              min="0"
+              max="400"
+              step="10"
+              value={layerDelayMs}
+              onChange={(e) => setLayerDelayMs(Number(e.target.value))}
+            />
           </label>
           <label>
             color
@@ -711,27 +776,69 @@ function ParticleFallBuilder() {
         <div className="playground-controls">
           <label>
             個数: {count}
-            <input type="range" min="4" max="60" step="1" value={count} onChange={(e) => setCount(Number(e.target.value))} />
+            <input
+              type="range"
+              min="4"
+              max="60"
+              step="1"
+              value={count}
+              onChange={(e) => setCount(Number(e.target.value))}
+            />
           </label>
           <label>
             fallSpeed（rem/秒）: {fallSpeed}
-            <input type="range" min="1" max="20" step="0.5" value={fallSpeed} onChange={(e) => setFallSpeed(Number(e.target.value))} />
+            <input
+              type="range"
+              min="1"
+              max="20"
+              step="0.5"
+              value={fallSpeed}
+              onChange={(e) => setFallSpeed(Number(e.target.value))}
+            />
           </label>
           <label>
             swayAmplitude（横揺れ幅）: {swayAmplitude.toFixed(1)}
-            <input type="range" min="0" max="4" step="0.1" value={swayAmplitude} onChange={(e) => setSwayAmplitude(Number(e.target.value))} />
+            <input
+              type="range"
+              min="0"
+              max="4"
+              step="0.1"
+              value={swayAmplitude}
+              onChange={(e) => setSwayAmplitude(Number(e.target.value))}
+            />
           </label>
           <label>
             swayFrequency（横揺れの速さ）: {swayFrequency.toFixed(1)}
-            <input type="range" min="0.5" max="6" step="0.1" value={swayFrequency} onChange={(e) => setSwayFrequency(Number(e.target.value))} />
+            <input
+              type="range"
+              min="0.5"
+              max="6"
+              step="0.1"
+              value={swayFrequency}
+              onChange={(e) => setSwayFrequency(Number(e.target.value))}
+            />
           </label>
           <label>
             durationSeconds: {durationSeconds.toFixed(1)}
-            <input type="range" min="0.5" max="4" step="0.1" value={durationSeconds} onChange={(e) => setDurationSeconds(Number(e.target.value))} />
+            <input
+              type="range"
+              min="0.5"
+              max="4"
+              step="0.1"
+              value={durationSeconds}
+              onChange={(e) => setDurationSeconds(Number(e.target.value))}
+            />
           </label>
           <label>
             spreadX（横方向の広がり）: {spreadX}
-            <input type="range" min="2" max="24" step="1" value={spreadX} onChange={(e) => setSpreadX(Number(e.target.value))} />
+            <input
+              type="range"
+              min="2"
+              max="24"
+              step="1"
+              value={spreadX}
+              onChange={(e) => setSpreadX(Number(e.target.value))}
+            />
           </label>
           <label className="playground-checkbox">
             <input type="checkbox" checked={natural} onChange={(e) => setNatural(e.target.checked)} />
@@ -963,8 +1070,8 @@ function ClipRevealDemo() {
         <span>構造テンプレート：ClipReveal（軸I=マスク・リビール）</span>
       </p>
       <p className="section-hint">
-        RadialBurst（scale+opacity）/ParticleField（粒）/StrokePath（線）とは別の軸：
-        覆いを<code>clip-path</code>で動かして中身を出し入れする（緞帳ワイプ）。
+        RadialBurst（scale+opacity）/ParticleField（粒）/StrokePath（線）とは別の軸： 覆いを<code>clip-path</code>
+        で動かして中身を出し入れする（緞帳ワイプ）。
         <code>direction="cover"</code>は同じ経路の逆再生（覆いが閉じる）。
       </p>
       <div className="playground-grid">
@@ -1058,8 +1165,8 @@ function SequenceDemo() {
       </p>
       <p className="section-hint">
         <code>with</code>（parallel相当・同時に重ねる）とは別軸：前段が終わってから次段が始まり、
-        前段の実行結果（ここでは「落下地点のx座標」）を次段の<code>render</code>へ渡せる。
-        各ステップの<code>onEnter</code>で効果音・振動をステップ単位に鳴らせる（ここではログ表示で代用）。
+        前段の実行結果（ここでは「落下地点のx座標」）を次段の<code>render</code>へ渡せる。 各ステップの
+        <code>onEnter</code>で効果音・振動をステップ単位に鳴らせる（ここではログ表示で代用）。
       </p>
       <button className="combo-button" onClick={fire}>
         🚀 発火（celebrate()を経由しない）
@@ -1087,7 +1194,10 @@ function SequenceDemo() {
             {
               render: (result) => <span>💥 x={result?.landedAtRem}rem</span>,
               onEnter: (result) =>
-                setLog((prev) => [...prev, `2段目：着地（前段の結果 landedAtRem=${result?.landedAtRem} を受け取った）`]),
+                setLog((prev) => [
+                  ...prev,
+                  `2段目：着地（前段の結果 landedAtRem=${result?.landedAtRem} を受け取った）`,
+                ]),
             },
           ]}
         />
@@ -1250,7 +1360,11 @@ function Playground() {
           {supportsSize && (
             <>
               <label className="playground-checkbox">
-                <input type="checkbox" checked={sizeRem !== null} onChange={(e) => setSizeRem(e.target.checked ? 5 : null)} />
+                <input
+                  type="checkbox"
+                  checked={sizeRem !== null}
+                  onChange={(e) => setSizeRem(e.target.checked ? 5 : null)}
+                />
                 sizeRem を指定する（絶対サイズ）
               </label>
               {sizeRem !== null && (
@@ -1318,7 +1432,12 @@ function Playground() {
           {supportsNote && (
             <label>
               note
-              <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="例：れんぞく 7問" />
+              <input
+                type="text"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="例：れんぞく 7問"
+              />
             </label>
           )}
           <label>
@@ -1372,7 +1491,9 @@ function DocsHeader() {
   return (
     <header className="docs-header">
       <h1 className="docs-title">@celebrate-js/celebrate</h1>
-      <p className="docs-tagline">React向けの祝福・反応エフェクトライブラリ。名前で選ぶだけのカタログから、生のパラメータを直接いじる構造テンプレートまで、3段階の自由度で使える。</p>
+      <p className="docs-tagline">
+        React向けの祝福・反応エフェクトライブラリ。名前で選ぶだけのカタログから、生のパラメータを直接いじる構造テンプレートまで、3段階の自由度で使える。
+      </p>
       <div className="docs-badges">
         <span className="docs-badge">
           <span>npm</span>
@@ -1416,9 +1537,10 @@ function Quickstart() {
       <p className="section-hint">
         <code>npm install @celebrate-js/celebrate</code>。あとは
         <code>{"<CelebrateProvider>"}</code>で包んで<code>useCelebrate()</code>を呼ぶだけ。
-        3段階（Tier）の自由度がある：①名前で選ぶカタログ（下記）、②複数局面を順番に切り替える合成層
-        （<code>with</code>/<code>Sequence</code>）、③構造テンプレートに生のパラメータを渡すTier 3。
-        詳細は<a href="#catalog">上のカタログ</a>と<a href="#api-reference">下のAPIリファレンス</a>参照（リポジトリの<code>docs/</code>にも同内容のmarkdown版がある）。
+        3段階（Tier）の自由度がある：①名前で選ぶカタログ（下記）、②複数局面を順番に切り替える合成層 （<code>with</code>/
+        <code>Sequence</code>）、③構造テンプレートに生のパラメータを渡すTier 3。 詳細は
+        <a href="#catalog">上のカタログ</a>と<a href="#api-reference">下のAPIリファレンス</a>参照（リポジトリの
+        <code>docs/</code>にも同内容のmarkdown版がある）。
       </p>
       <pre className="playground-code">
         <code>{QUICKSTART_CODE}</code>
@@ -1489,7 +1611,12 @@ function ApiSubsection({ title, note, children }: { title: string; note?: ReactN
 }
 
 const CELEBRATE_PROVIDER_PROPS: readonly ApiRow[] = [
-  { name: "theme", type: "CelebrateTheme", defaultValue: "組み込みの既定テーマ", desc: "意匠（色・角丸・書体）。個々のcelebrate()呼び出しで上書き可能。" },
+  {
+    name: "theme",
+    type: "CelebrateTheme",
+    defaultValue: "組み込みの既定テーマ",
+    desc: "意匠（色・角丸・書体）。個々のcelebrate()呼び出しで上書き可能。",
+  },
   {
     name: "container",
     type: "RefObject<HTMLElement | null>",
@@ -1498,8 +1625,17 @@ const CELEBRATE_PROVIDER_PROPS: readonly ApiRow[] = [
 ];
 
 const CELEBRATE_OPTIONS: readonly ApiRow[] = [
-  { name: "anchor", type: "RefObject<HTMLElement | null>", desc: "演出の基準にする要素。省略＝画面中央（グローバル）。渡す＝その要素の中心（ローカル）。" },
-  { name: "text", type: "string", defaultValue: '""', desc: "stamp / record / bounce / medal / popupで大きく出す文字。" },
+  {
+    name: "anchor",
+    type: "RefObject<HTMLElement | null>",
+    desc: "演出の基準にする要素。省略＝画面中央（グローバル）。渡す＝その要素の中心（ローカル）。",
+  },
+  {
+    name: "text",
+    type: "string",
+    defaultValue: '""',
+    desc: "stamp / record / bounce / medal / popupで大きく出す文字。",
+  },
   { name: "note", type: "string", desc: "recordで大きい文字の下に添える一言（例：「れんぞく 7問」）。" },
   { name: "size", type: '"md" | "lg"', defaultValue: '"md"', desc: "stampの印影の大きさ。" },
   { name: "rotateDeg", type: "number", defaultValue: "-6", desc: "stamp：収まった後の傾き（度）。" },
@@ -1509,21 +1645,85 @@ const CELEBRATE_OPTIONS: readonly ApiRow[] = [
     defaultValue: '"rounded"',
     desc: "stamp：外枠の形。roundedはtheme.stampRadius任せの角丸（既定）。",
   },
-  { name: "with", type: "CelebrateVariant | ReactNode | (...)[]", desc: "重ねて同時に出すもの。登録済みの名前・生のReactNode・その配列（混在可）。" },
+  {
+    name: "with",
+    type: "CelebrateVariant | ReactNode | (...)[]",
+    desc: "重ねて同時に出すもの。登録済みの名前・生のReactNode・その配列（混在可）。",
+  },
   { name: "theme", type: "CelebrateTheme", defaultValue: "Providerのtheme", desc: "この呼び出しだけ意匠を上書き。" },
   { name: "sound", type: "boolean", defaultValue: "true", desc: "効果音を鳴らすか。登録済みの名前にだけ効果を持つ。" },
-  { name: "haptic", type: "boolean", defaultValue: "true", desc: "端末を振動させるか。登録済みの名前にだけ効果を持つ。" },
-  { name: "seed", type: "number", defaultValue: "ランダム", desc: "sparkle/sakura/heart/star/emoji/cracker：再現可能なテスト・デモ用。" },
-  { name: "glyphs", type: "readonly string[]", defaultValue: "variantごとの定番セット", desc: "heart/star/emoji：撒く文字・絵文字を上書き。" },
-  { name: "glyph", type: "string", defaultValue: "CSSで描いた雲形", desc: "float：漂わせる文字を指定（絵文字ではなく雲がデフォルト）。" },
-  { name: "color", type: "string", defaultValue: "淡いピンク／theme", desc: "sakura：花びらの色。pop/ripple/ring/flash：色の既定値を上書き。" },
-  { name: "scale", type: "number", defaultValue: "1", desc: "見た目の大きさ倍率。firework/pop/ripple/ring/flashが対応。" },
-  { name: "sizeRem", type: "number", defaultValue: "-", desc: "見た目の大きさの絶対値（rem）。scaleと違い基準サイズを意識せず直接remで指定できる。両方指定するとsizeRemが優先される。" },
-  { name: "colors", type: "readonly string[]", defaultValue: "theme.confettiColors", desc: "confetti/sparkle/cracker/rain/firework：色パレットの上書き。theme.stampColorではなくtheme.confettiColorsで塗るため、単色を変えたい場合はcolorではなくこちら。" },
-  { name: "fireworkStyle", type: '"peony" | "willow" | "ring"', defaultValue: '"peony"', desc: "firework：花火の種類。" },
-  { name: "intensity", type: "number", defaultValue: "1", desc: "演出の強度。拡大率・duration・音量・振動に対数カーブで反映。" },
-  { name: "soundPreset", type: "number", defaultValue: "variantごとの既定音", desc: "効果音のpreset番号（SPARKLE_SOUND_PRESETSの添字）を上書きする。色やscaleと同じく、どの音を鳴らすかは呼び出し側が目的・用途に応じて決めるもの。" },
-  { name: "durationMs", type: "number", defaultValue: "自動計算", desc: "表示し続ける時間の明示的な上書き。withに生のReactNodeを渡した場合、そのdurationはカタログから引けないためここで指定する。" },
+  {
+    name: "haptic",
+    type: "boolean",
+    defaultValue: "true",
+    desc: "端末を振動させるか。登録済みの名前にだけ効果を持つ。",
+  },
+  {
+    name: "seed",
+    type: "number",
+    defaultValue: "ランダム",
+    desc: "sparkle/sakura/heart/star/emoji/cracker：再現可能なテスト・デモ用。",
+  },
+  {
+    name: "glyphs",
+    type: "readonly string[]",
+    defaultValue: "variantごとの定番セット",
+    desc: "heart/star/emoji：撒く文字・絵文字を上書き。",
+  },
+  {
+    name: "glyph",
+    type: "string",
+    defaultValue: "CSSで描いた雲形",
+    desc: "float：漂わせる文字を指定（絵文字ではなく雲がデフォルト）。",
+  },
+  {
+    name: "color",
+    type: "string",
+    defaultValue: "淡いピンク／theme",
+    desc: "sakura：花びらの色。pop/ripple/ring/flash：色の既定値を上書き。",
+  },
+  {
+    name: "scale",
+    type: "number",
+    defaultValue: "1",
+    desc: "見た目の大きさ倍率。firework/pop/ripple/ring/flashが対応。",
+  },
+  {
+    name: "sizeRem",
+    type: "number",
+    defaultValue: "-",
+    desc: "見た目の大きさの絶対値（rem）。scaleと違い基準サイズを意識せず直接remで指定できる。両方指定するとsizeRemが優先される。",
+  },
+  {
+    name: "colors",
+    type: "readonly string[]",
+    defaultValue: "theme.confettiColors",
+    desc: "confetti/sparkle/cracker/rain/firework：色パレットの上書き。theme.stampColorではなくtheme.confettiColorsで塗るため、単色を変えたい場合はcolorではなくこちら。",
+  },
+  {
+    name: "fireworkStyle",
+    type: '"peony" | "willow" | "ring"',
+    defaultValue: '"peony"',
+    desc: "firework：花火の種類。",
+  },
+  {
+    name: "intensity",
+    type: "number",
+    defaultValue: "1",
+    desc: "演出の強度。拡大率・duration・音量・振動に対数カーブで反映。",
+  },
+  {
+    name: "soundPreset",
+    type: "number",
+    defaultValue: "variantごとの既定音",
+    desc: "効果音のpreset番号（SPARKLE_SOUND_PRESETSの添字）を上書きする。色やscaleと同じく、どの音を鳴らすかは呼び出し側が目的・用途に応じて決めるもの。",
+  },
+  {
+    name: "durationMs",
+    type: "number",
+    defaultValue: "自動計算",
+    desc: "表示し続ける時間の明示的な上書き。withに生のReactNodeを渡した場合、そのdurationはカタログから引けないためここで指定する。",
+  },
 ];
 
 const RADIAL_BURST_LAYER_PROPS: readonly ApiRow[] = [
@@ -1538,7 +1738,12 @@ const RADIAL_BURST_LAYER_PROPS: readonly ApiRow[] = [
 
 const RADIAL_BURST_PROPS: readonly ApiRow[] = [
   { name: "scale", type: "number", defaultValue: "1", desc: "見た目の大きさ倍率。各layerのsizeにだけ掛かる。" },
-  { name: "color", type: "string", defaultValue: "theme.stampColor", desc: "色の既定値。layer自身のcolorが優先される。" },
+  {
+    name: "color",
+    type: "string",
+    defaultValue: "theme.stampColor",
+    desc: "色の既定値。layer自身のcolorが優先される。",
+  },
   {
     name: "origin",
     type: "readonly RadialOriginKeyframe[]",
@@ -1548,11 +1753,20 @@ const RADIAL_BURST_PROPS: readonly ApiRow[] = [
 ];
 
 const PARTICLE_SPEC_PROPS: readonly ApiRow[] = [
-  { name: "motion", type: "MotionProfile<P>", desc: "(elapsedSeconds, params) => ParticleStateを満たす関数。プリセット（fallMotion等）か自作関数。" },
+  {
+    name: "motion",
+    type: "MotionProfile<P>",
+    desc: "(elapsedSeconds, params) => ParticleStateを満たす関数。プリセット（fallMotion等）か自作関数。",
+  },
   { name: "params", type: "P", desc: "motionに渡すパラメータ。" },
   { name: "durationSeconds", type: "number", desc: "この粒の表示時間。" },
   { name: "delaySeconds", type: "number", defaultValue: "0", desc: "発火からの遅延。" },
-  { name: "render", type: "ReactNode | ((state) => ReactNode)", defaultValue: "defaultRender", desc: "見た目。状態に応じて変えたい場合は関数で渡す。" },
+  {
+    name: "render",
+    type: "ReactNode | ((state) => ReactNode)",
+    defaultValue: "defaultRender",
+    desc: "見た目。状態に応じて変えたい場合は関数で渡す。",
+  },
 ];
 
 const STROKE_LINE_PROPS: readonly ApiRow[] = [
@@ -1562,36 +1776,84 @@ const STROKE_LINE_PROPS: readonly ApiRow[] = [
   { name: "dashLength", type: "number", desc: "stroke-dasharray/dashoffsetに使う値（経路のおおよその長さ）。" },
   { name: "color", type: "string", defaultValue: '"#fff"', desc: "線の色。" },
   { name: "opacity", type: "number", defaultValue: "1", desc: "不透明度。" },
-  { name: "glow", type: '"soft" | "electric"', desc: "グローの強さ。electric＝稲光相当、soft＝ヒビ相当。省略でグローなし。" },
+  {
+    name: "glow",
+    type: '"soft" | "electric"',
+    desc: "グローの強さ。electric＝稲光相当、soft＝ヒビ相当。省略でグローなし。",
+  },
   { name: "durationMs", type: "number", desc: "描き下ろしのアニメーション長。" },
   { name: "delayMs", type: "number", defaultValue: "0", desc: "発火からの遅延。" },
 ];
 
 const CLIP_REVEAL_PROPS: readonly ApiRow[] = [
-  { name: "edge", type: '"left" | "right" | "top" | "bottom" | "center"', defaultValue: '"left"', desc: "どの方向へワイプするか。centerは円形のワイプ。" },
-  { name: "direction", type: '"reveal" | "cover"', defaultValue: '"reveal"', desc: "reveal＝覆いが晴れて中身が見える。cover＝覆いが閉じて中身を隠す（同じ経路の逆再生）。" },
+  {
+    name: "edge",
+    type: '"left" | "right" | "top" | "bottom" | "center"',
+    defaultValue: '"left"',
+    desc: "どの方向へワイプするか。centerは円形のワイプ。",
+  },
+  {
+    name: "direction",
+    type: '"reveal" | "cover"',
+    defaultValue: '"reveal"',
+    desc: "reveal＝覆いが晴れて中身が見える。cover＝覆いが閉じて中身を隠す（同じ経路の逆再生）。",
+  },
   { name: "durationMs", type: "number", defaultValue: "500", desc: "アニメーション長。" },
   { name: "delayMs", type: "number", defaultValue: "0", desc: "発火からの遅延。" },
   { name: "color", type: "string", defaultValue: '"#000"', desc: "カーテン自体の色。" },
   { name: "children", type: "ReactNode", desc: "カーテンの下に見える内容。省略時は単色のカーテンだけを描く。" },
 ];
 
-const SEQUENCE_PROPS: readonly ApiRow[] = [{ name: "steps", type: "readonly SequenceStep<TResult>[]", desc: "ステップの一覧。順番に表示する。" }];
+const SEQUENCE_PROPS: readonly ApiRow[] = [
+  { name: "steps", type: "readonly SequenceStep<TResult>[]", desc: "ステップの一覧。順番に表示する。" },
+];
 
 const SEQUENCE_STEP_PROPS: readonly ApiRow[] = [
-  { name: "render", type: "(prevResult) => ReactNode", desc: "このステップの内容。前ステップの結果（初段はundefined）を受け取れる。" },
-  { name: "durationMs", type: "number", desc: "このステップの表示時間。省略時はこのステップで止まる（最後のステップに使う）。" },
-  { name: "computeResult", type: "(prevResult) => TResult", defaultValue: "前段の結果を引き継ぐ", desc: "次のステップに渡す値を計算する。" },
-  { name: "onEnter", type: "(prevResult) => void", desc: "このステップが始まった瞬間に1回だけ呼ばれる（効果音・振動などをステップ単位に持たせる）。" },
+  {
+    name: "render",
+    type: "(prevResult) => ReactNode",
+    desc: "このステップの内容。前ステップの結果（初段はundefined）を受け取れる。",
+  },
+  {
+    name: "durationMs",
+    type: "number",
+    desc: "このステップの表示時間。省略時はこのステップで止まる（最後のステップに使う）。",
+  },
+  {
+    name: "computeResult",
+    type: "(prevResult) => TResult",
+    defaultValue: "前段の結果を引き継ぐ",
+    desc: "次のステップに渡す値を計算する。",
+  },
+  {
+    name: "onEnter",
+    type: "(prevResult) => void",
+    desc: "このステップが始まった瞬間に1回だけ呼ばれる（効果音・振動などをステップ単位に持たせる）。",
+  },
 ];
 
 const ENTER_SETTLE_OPTIONS: readonly ApiRow[] = [
   { name: "scaleFrom", type: "number", defaultValue: "1", desc: "開始時のscale。" },
   { name: "scaleTo", type: "number", defaultValue: "1", desc: "終了時のscale。" },
-  { name: "translateYFromRem", type: "number", defaultValue: "0", desc: "開始時の縦方向オフセット（rem。負で上から）。" },
+  {
+    name: "translateYFromRem",
+    type: "number",
+    defaultValue: "0",
+    desc: "開始時の縦方向オフセット（rem。負で上から）。",
+  },
   { name: "rotateFromDeg", type: "number", defaultValue: "0", desc: "開始時の回転（度）。" },
-  { name: "rotateToDeg", type: "number", defaultValue: "0", desc: "終了時の回転（度）。傾いたまま留めたい場合（stamp）はここも指定する。" },
-  { name: "easing", type: '"settle" | "overshoot"', defaultValue: '"settle"', desc: "settle＝素直に収まる。overshoot＝行き過ぎてから戻るバネ的な動き（record相当）。" },
+  {
+    name: "rotateToDeg",
+    type: "number",
+    defaultValue: "0",
+    desc: "終了時の回転（度）。傾いたまま留めたい場合（stamp）はここも指定する。",
+  },
+  {
+    name: "easing",
+    type: '"settle" | "overshoot"',
+    defaultValue: '"settle"',
+    desc: "settle＝素直に収まる。overshoot＝行き過ぎてから戻るバネ的な動き（record相当）。",
+  },
   { name: "durationMs", type: "number", defaultValue: "300", desc: "アニメーション長。" },
 ];
 
@@ -1605,7 +1867,12 @@ const USE_CELEBRATE_BORDER_RETURN: readonly ApiRow[] = [
 ];
 
 const CELEBRATE_BORDER_OPTIONS: readonly ApiRow[] = [
-  { name: "intensity", type: "number", defaultValue: "1", desc: "演出の強度。durationに対数カーブで反映される（全機構＝glow/conicRing/class共通で効く）。" },
+  {
+    name: "intensity",
+    type: "number",
+    defaultValue: "1",
+    desc: "演出の強度。durationに対数カーブで反映される（全機構＝glow/conicRing/class共通で効く）。",
+  },
 ];
 
 interface BorderKindRow {
@@ -1713,11 +1980,20 @@ function ApiReferenceSection() {
         <span>API リファレンス</span>
       </p>
       <p className="section-hint">
-        各propsの型・既定値・説明の一覧（<code>docs/api-reference.md</code>と同内容）。使い方の説明・コード例はこのページの上のセクション、または
+        各propsの型・既定値・説明の一覧（<code>docs/api-reference.md</code>
+        と同内容）。使い方の説明・コード例はこのページの上のセクション、または
         <code>docs/guide.md</code>参照。
       </p>
 
-      <ApiSubsection title="CelebrateVariant 一覧" note={<>登録済みの{CELEBRATE_VARIANT_NAMES.length}variant。durationMs/sound/hapticは実装から実行時に取得した値（ハードコードではない）。</>}>
+      <ApiSubsection
+        title="CelebrateVariant 一覧"
+        note={
+          <>
+            登録済みの{CELEBRATE_VARIANT_NAMES.length}
+            variant。durationMs/sound/hapticは実装から実行時に取得した値（ハードコードではない）。
+          </>
+        }
+      >
         <VariantTable />
       </ApiSubsection>
 
@@ -1741,11 +2017,17 @@ function ApiReferenceSection() {
         <ApiTable rows={PARTICLE_SPEC_PROPS} />
       </ApiSubsection>
 
-      <ApiSubsection title="StrokeLine" note={<>pointsとdはどちらか一方を指定する（直線区間のみならpoints、円弧など曲線を含むならd）。</>}>
+      <ApiSubsection
+        title="StrokeLine"
+        note={<>pointsとdはどちらか一方を指定する（直線区間のみならpoints、円弧など曲線を含むならd）。</>}
+      >
         <ApiTable rows={STROKE_LINE_PROPS} />
       </ApiSubsection>
 
-      <ApiSubsection title="ClipReveal" note={<>覆いをclip-pathで動かして中身を出し入れするプリミティブ（軸I=clip-reveal）。</>}>
+      <ApiSubsection
+        title="ClipReveal"
+        note={<>覆いをclip-pathで動かして中身を出し入れするプリミティブ（軸I=clip-reveal）。</>}
+      >
         <ApiTable rows={CLIP_REVEAL_PROPS} />
       </ApiSubsection>
 
@@ -1757,7 +2039,12 @@ function ApiReferenceSection() {
         <ApiTable rows={SEQUENCE_STEP_PROPS} />
       </ApiSubsection>
 
-      <ApiSubsection title="enterSettleStyle(options)" note={<>「入って、そのまま残る」構造テンプレート（stamp/medal/recordが共有）。EnterSettleOptionsは全て省略可。</>}>
+      <ApiSubsection
+        title="enterSettleStyle(options)"
+        note={
+          <>「入って、そのまま残る」構造テンプレート（stamp/medal/recordが共有）。EnterSettleOptionsは全て省略可。</>
+        }
+      >
         <ApiTable rows={ENTER_SETTLE_OPTIONS} />
       </ApiSubsection>
 
