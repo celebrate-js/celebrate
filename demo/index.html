@@ -17,12 +17,19 @@
       body {
         margin: 0;
         padding: 2rem;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
         background: #f7f5f2;
         color: #2b2622;
         min-height: 100vh;
+      }
+
+      /* bodyの直接の子は#root（Reactのマウント先）1つだけなので、bodyにdisplay:flex+gapを
+         付けてもセクション間の余白としては効かない（子が1個しかないのでgapの出番が無い）。
+         実際にセクション（.doc-section等）を並べているのは#rootの中身なので、
+         flexレイアウトはここに付ける。 */
+      #root {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
       }
 
       h1 {
