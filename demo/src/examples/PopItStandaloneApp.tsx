@@ -4,14 +4,8 @@ import { PopItGrid, PopItStage } from "./PopItStage";
 import { LangProvider, useT, LanguageToggle } from "../i18n";
 
 const STANDALONE_INDEX_TEXT = {
-  ja: {
-    title: "ポップイット",
-    hint: "シリコンのプチプチのように、タップするだけで可愛いエフェクトが見れるタイル集め。タイルを押すとそのテーマ専用のページに入り、そこでタップするたびに何度でも演出が見られる。",
-  },
-  en: {
-    title: "Pop It",
-    hint: "A grid of tappable mini-effect tiles, like the silicone Pop It toy. Tap a tile to enter its themed stage, where tapping fires the effect again, as many times as you like.",
-  },
+  ja: { title: "ポップイット" },
+  en: { title: "Pop It" },
 };
 
 // ドキュメントサイト（demo/index.html）から切り出した、ポップイット単体のアプリ。
@@ -31,7 +25,6 @@ function PopItStandaloneIndex() {
           <span>🫧</span>
           <span>{t.title}</span>
         </p>
-        <p className="section-hint">{t.hint}</p>
       </header>
       <section className="doc-section">
         <PopItGrid basePath="" />

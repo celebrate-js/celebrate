@@ -38,13 +38,6 @@ const TEXT = {
         description:
           "出てくるターゲットをクリックするゲーム。1ヒットごとの軽い演出と、スコア到達時の派手な演出を使い分ける実装例。",
       },
-      {
-        path: "/examples/popit",
-        icon: "🫧",
-        title: "ポップイット",
-        description:
-          "タップするだけで可愛いミニエフェクトが見れるタイル集め。カタログのvariantをanchorで発火するものと、カタログに無い独自の動きをReactNodeでそのまま発火するものが混在する実装例。",
-      },
     ] satisfies ExampleCard[],
   },
   en: {
@@ -76,13 +69,6 @@ const TEXT = {
         title: "Mini game",
         description: "Click the targets as they appear — a light hit effect plus a bigger one on score milestones.",
       },
-      {
-        path: "/examples/popit",
-        icon: "🫧",
-        title: "Pop It",
-        description:
-          "A grid of tappable mini-effect tiles. Mixes catalog variants fired via anchor with custom one-off ReactNode effects not in the catalog.",
-      },
     ] satisfies ExampleCard[],
   },
 };
@@ -98,14 +84,14 @@ export function ExamplesIndex() {
       <p className="example-back-link">
         <Link to="/">{t.backLink}</Link>
       </p>
-      <header className="doc-section">
-        <p className="section-title">
-          <span>🎮</span>
-          <span>{t.title}</span>
-        </p>
-        <p className="section-hint">{t.hint}</p>
-      </header>
       <section className="doc-section">
+        <header>
+          <p className="section-title">
+            <span>🎮</span>
+            <span>{t.title}</span>
+          </p>
+          <p className="section-hint">{t.hint}</p>
+        </header>
         <div className="catalog-grid">
           {t.examples.map((example) => (
             <Link key={example.path} to={example.path} className="example-index-card">

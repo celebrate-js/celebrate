@@ -5,8 +5,6 @@ import { ExamplesIndex } from "./examples/ExamplesIndex";
 import { FireworksShowcase } from "./examples/FireworksShowcase";
 import { QuizExample } from "./examples/QuizExample";
 import { GameExample } from "./examples/GameExample";
-import { PopIt } from "./examples/PopIt";
-import { PopItStage } from "./examples/PopItStage";
 import { LangProvider, useLang, useT, LanguageToggle } from "./i18n";
 import {
   CelebrateProvider,
@@ -402,7 +400,7 @@ function BorderEffectDemo() {
   const t = useT(BORDER_EFFECT_DEMO_TEXT);
 
   return (
-    <section className="doc-section">
+    <section id="border-effects" className="doc-section">
       <p className="section-title">
         <span>🖼️</span>
         <span>{t.title}</span>
@@ -475,7 +473,7 @@ function ComboDemo() {
   };
 
   return (
-    <section className="doc-section">
+    <section id="intensity" className="doc-section">
       <p className="section-title">
         <span>🔥</span>
         <span>{t.title}</span>
@@ -850,7 +848,7 @@ function RadialBurstBuilder() {
     .join("\n")}\n</RadialBurst>`;
 
   return (
-    <section className="doc-section">
+    <section id="structural-templates" className="doc-section">
       <p className="section-title">
         <span>🧱</span>
         <span>{t.title}</span>
@@ -1642,7 +1640,7 @@ function SequenceDemo() {
   };
 
   return (
-    <section className="doc-section">
+    <section id="composite-layer" className="doc-section">
       <p className="section-title">
         <span>🎞️</span>
         <span>{t.title}</span>
@@ -1825,7 +1823,7 @@ function Playground() {
   const code = `celebrate("${variant}"${formatOptionsSnippet(options, withList)});`;
 
   return (
-    <section className="doc-section">
+    <section id="playground" className="doc-section">
       <p className="section-title">
         <span>🛝</span>
         <span>{t.title}</span>
@@ -2001,7 +1999,7 @@ const FEATURES_TEXT = {
 function Features() {
   const items = useT(FEATURES_TEXT);
   return (
-    <section className="doc-section">
+    <section id="features" className="doc-section">
       <p className="section-title">
         <span>✨</span>
         <span>Features</span>
@@ -2117,7 +2115,7 @@ function Quickstart() {
   const t = useT(QUICKSTART_TEXT);
   const code = useT(QUICKSTART_CODE_TEXT);
   return (
-    <section className="doc-section">
+    <section id="quickstart" className="doc-section">
       <p className="section-title">
         <span>🚀</span>
         <span>Quickstart</span>
@@ -2731,6 +2729,52 @@ const DOCS_PAGE_TEXT = {
   },
 };
 
+const TABLE_OF_CONTENTS_TEXT = {
+  ja: { title: "目次" },
+  en: { title: "Contents" },
+};
+
+/** ページ先頭の目次。長いページを一気に読ませず、興味のあるセクションへ直接飛べるようにする。
+ * 各リンクのラベルは、飛び先のセクション自身が持つTEXT辞書のtitleをそのまま参照する
+ * （タイトル文言のSSOTを1箇所に保つ。ここで別文言を持つと将来ズレる）。 */
+function TableOfContents() {
+  const t = useT(TABLE_OF_CONTENTS_TEXT);
+  const catalog = useT(CATALOG_SECTION_TEXT);
+  const border = useT(BORDER_EFFECT_DEMO_TEXT);
+  const playground = useT(PLAYGROUND_TEXT);
+  const combo = useT(COMBO_DEMO_TEXT);
+  const docsPage = useT(DOCS_PAGE_TEXT);
+  const apiRef = useT(API_REFERENCE_SECTION_TEXT);
+
+  const items: readonly { href: string; label: string }[] = [
+    { href: "#quickstart", label: "Quickstart" },
+    { href: "#features", label: "Features" },
+    { href: "#catalog", label: catalog.title },
+    { href: "#border-effects", label: border.title },
+    { href: "#playground", label: playground.title },
+    { href: "#intensity", label: combo.title },
+    { href: "#composite-layer", label: docsPage.tier2Title },
+    { href: "#structural-templates", label: docsPage.tier3Title },
+    { href: "#api-reference", label: apiRef.title },
+  ];
+
+  return (
+    <nav className="doc-section toc-nav" aria-label={t.title}>
+      <p className="section-title">
+        <span>🗺️</span>
+        <span>{t.title}</span>
+      </p>
+      <ul className="toc-list">
+        {items.map((item) => (
+          <li key={item.href}>
+            <a href={item.href}>{item.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 /** ドキュメントページ本体（旧App）。ルーティングはApp.tsx側で行う。 */
 export function DocsPage() {
   const t = useT(DOCS_PAGE_TEXT);
@@ -2740,6 +2784,7 @@ export function DocsPage() {
         <LanguageToggle />
       </div>
       <DocsHeader />
+      <TableOfContents />
       <Quickstart />
       <Features />
       <CatalogSection />
@@ -2761,6 +2806,47 @@ export function DocsPage() {
   );
 }
 
+const SCROLL_TOP_TEXT = {
+  ja: { label: "ページ上部へ戻る" },
+  en: { label: "Back to top" },
+};
+
+const SCROLL_TOP_THRESHOLD_PX = 480;
+
+// このドキュメント自体がライブラリの実演を兼ねる例：押した瞬間にpopが起きてから
+// ページ先頭へ戻る。カタログのカードだけでなく、こういう実用的なUI部品にも自然に
+// celebrate()を混ぜられることを、このページ自身で示す。
+function ScrollToTopButton() {
+  const celebrate = useCelebrate();
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const [visible, setVisible] = useState(false);
+  const t = useT(SCROLL_TOP_TEXT);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > SCROLL_TOP_THRESHOLD_PX);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      ref={buttonRef}
+      type="button"
+      className="scroll-top-button"
+      onClick={() => {
+        celebrate("pop", { anchor: buttonRef, scale: 0.8 });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }}
+      aria-label={t.label}
+    >
+      ↑
+    </button>
+  );
+}
+
 // CelebrateProviderはルート1箇所（ここ）だけに置く。各ページはその内側の
 // ルートで切り替わるだけなので、ページ遷移をまたいでもProviderは再マウントされない。
 // LangProviderも同様にルート1箇所（ここ）だけに置き、ページ遷移をまたいで言語選択を保持する。
@@ -2775,9 +2861,8 @@ export function App() {
             <Route path="/examples/fireworks" element={<FireworksShowcase />} />
             <Route path="/examples/quiz" element={<QuizExample />} />
             <Route path="/examples/game" element={<GameExample />} />
-            <Route path="/examples/popit" element={<PopIt />} />
-            <Route path="/examples/popit/:themeId" element={<PopItStage />} />
           </Routes>
+          <ScrollToTopButton />
         </CelebrateProvider>
       </LangProvider>
     </BrowserRouter>
