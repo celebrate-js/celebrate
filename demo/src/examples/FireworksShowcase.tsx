@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useCelebrate } from "../../../src/react";
 import type { FireworkStyle } from "../../../src/index";
 import { ExamplePageLayout } from "./ExamplePageLayout";
+import { useT } from "../i18n";
 
 // 打ち上げ位置（画面内の相対位置）。celebrate()のanchorはRefObject<HTMLElement>を
 // 要求するため、実体を持たない「発射台」をあらかじめ複数置いておき、使い回す。
@@ -46,9 +47,33 @@ function pickRandom<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)]!;
 }
 
+const FIREWORKS_TEXT = {
+  ja: {
+    title: "花火大会",
+    description:
+      "「打ち上げ開始」は1発→2発同時→…と規模を上げて最後にフィナーレで終わる決まった尺の演出。「打ち上げ花火モード」は止めるまでランダムな組を打ち上げ続ける。どちらも実装のポイントは同じで、複数の発射台（anchor用の空div）を用意し、同じ組の呼び出しをまとめて連続実行するだけで「同時発火」になること。",
+    launching: (n: number) => `打ち上げ中… 残り${n}組`,
+    launchFinale: "🎆 打ち上げ開始",
+    stopContinuous: "⏹ 打ち上げ花火モードを止める",
+    startContinuous: "🎇 打ち上げ花火モード",
+    totalLaunched: (n: number) => `これまでの打ち上げ数: ${n}発`,
+  },
+  en: {
+    title: "Fireworks show",
+    description:
+      "“Launch” builds up from 1 shot → 2 at once → ... ending in a finale, a fixed-length show. “Continuous fireworks mode” keeps launching random groups until you stop it. Both share the same implementation idea: set up several launch pads (empty divs used as anchors), and firing the same group's calls back-to-back is all it takes to get “simultaneous” launches.",
+    launching: (n: number) => `Launching… ${n} groups left`,
+    launchFinale: "🎆 Launch",
+    stopContinuous: "⏹ Stop continuous mode",
+    startContinuous: "🎇 Continuous fireworks mode",
+    totalLaunched: (n: number) => `Total launched so far: ${n}`,
+  },
+};
+
 /** 複数のfireworkを同時に組ませて打ち上げるフィナーレ演出の実装例。 */
 export function FireworksShowcase() {
   const celebrate = useCelebrate();
+  const t = useT(FIREWORKS_TEXT);
   const padRefs = useRef<Array<HTMLDivElement | null>>([]);
   const timeoutIds = useRef<number[]>([]);
   // setTimeoutの再帰ループは古いクロージャの中で動き続けるため、「今もモードがONか」を
@@ -132,11 +157,7 @@ export function FireworksShowcase() {
   };
 
   return (
-    <ExamplePageLayout
-      icon="🎆"
-      title="花火大会"
-      description="「打ち上げ開始」は1発→2発同時→…と規模を上げて最後にフィナーレで終わる決まった尺の演出。「打ち上げ花火モード」は止めるまでランダムな組を打ち上げ続ける。どちらも実装のポイントは同じで、複数の発射台（anchor用の空div）を用意し、同じ組の呼び出しをまとめて連続実行するだけで「同時発火」になること。"
-    >
+    <ExamplePageLayout icon="🎆" title={t.title} description={t.description}>
       <section className="doc-section">
         <div className="fireworks-stage">
           {Array.from({ length: PAD_COUNT }, (_, i) => (
@@ -153,7 +174,7 @@ export function FireworksShowcase() {
         <div className="fireworks-controls">
           <div className="fireworks-control-row">
             <button className="combo-button" onClick={launchFinale} disabled={volleysRemaining > 0 || continuousMode}>
-              {volleysRemaining > 0 ? `打ち上げ中… 残り${volleysRemaining}組` : "🎆 打ち上げ開始"}
+              {volleysRemaining > 0 ? t.launching(volleysRemaining) : t.launchFinale}
             </button>
             <button
               className="fireworks-continuous-button"
@@ -161,10 +182,10 @@ export function FireworksShowcase() {
               disabled={volleysRemaining > 0}
               data-active={continuousMode || undefined}
             >
-              {continuousMode ? "⏹ 打ち上げ花火モードを止める" : "🎇 打ち上げ花火モード"}
+              {continuousMode ? t.stopContinuous : t.startContinuous}
             </button>
           </div>
-          <p className="section-hint">これまでの打ち上げ数: {totalLaunched}発</p>
+          <p className="section-hint">{t.totalLaunched(totalLaunched)}</p>
         </div>
       </section>
     </ExamplePageLayout>

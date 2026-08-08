@@ -1,10 +1,42 @@
 import { useEffect, useRef, useState } from "react";
 import { useCelebrate } from "../../../src/react";
 import { ExamplePageLayout } from "./ExamplePageLayout";
+import { useT } from "../i18n";
 
 const GAME_DURATION_SECONDS = 15;
 const TARGET_LIFETIME_MS = 1100;
 const FIREWORK_MILESTONE = 5;
+
+const GAME_TEXT = {
+  ja: {
+    title: "ミニゲーム",
+    description: (durationSeconds: number, milestone: number) =>
+      `制限時間${durationSeconds}秒でターゲットをクリック。1ヒットごとに celebrate("pop", { anchor, scale }) の軽い演出（コンボが続くほど大きくなる）、${milestone}点ごとに celebrate("firework") のボーナス演出、終了時に celebrate("record") で結果を表示する。`,
+    score: "スコア",
+    combo: "コンボ",
+    timeLeft: "残り",
+    seconds: "秒",
+    target: "ターゲット",
+    start: "🎯 スタート",
+    retry: "🔄 もう一度",
+    gameOver: "ゲーム終了！",
+    scoreNote: (score: number) => `スコア ${score}`,
+  },
+  en: {
+    title: "Mini game",
+    description: (durationSeconds: number, milestone: number) =>
+      `Click the targets within ${durationSeconds} seconds. Each hit fires a light celebrate("pop", { anchor, scale }) effect (bigger the longer your combo runs), every ${milestone} points fires a celebrate("firework") bonus, and celebrate("record") shows the result at the end.`,
+    score: "Score",
+    combo: "Combo",
+    timeLeft: "Time left",
+    seconds: "s",
+    target: "Target",
+    start: "🎯 Start",
+    retry: "🔄 Try again",
+    gameOver: "Game over!",
+    scoreNote: (score: number) => `Score ${score}`,
+  },
+};
 
 interface TargetPosition {
   id: number;
@@ -25,6 +57,7 @@ type GameStatus = "idle" | "playing" | "finished";
 /** ヒットで軽い演出、スコア到達で派手な演出が出るミニゲームの実装例。 */
 export function GameExample() {
   const celebrate = useCelebrate();
+  const t = useT(GAME_TEXT);
   const targetRef = useRef<HTMLButtonElement | null>(null);
   const gameAreaRef = useRef<HTMLDivElement | null>(null);
   const timeoutIds = useRef<number[]>([]);
@@ -88,8 +121,8 @@ export function GameExample() {
   useEffect(() => {
     if (status !== "finished") return;
     celebrate("record", {
-      text: "ゲーム終了！",
-      note: `スコア ${score}`,
+      text: t.gameOver,
+      note: t.scoreNote(score),
       with: score >= FIREWORK_MILESTONE ? ["confetti"] : undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -116,16 +149,19 @@ export function GameExample() {
   };
 
   return (
-    <ExamplePageLayout
-      icon="🎯"
-      title="ミニゲーム"
-      description={`制限時間${GAME_DURATION_SECONDS}秒でターゲットをクリック。1ヒットごとに celebrate("pop", { anchor, scale }) の軽い演出（コンボが続くほど大きくなる）、${FIREWORK_MILESTONE}点ごとに celebrate("firework") のボーナス演出、終了時に celebrate("record") で結果を表示する。`}
-    >
+    <ExamplePageLayout icon="🎯" title={t.title} description={t.description(GAME_DURATION_SECONDS, FIREWORK_MILESTONE)}>
       <section className="doc-section">
         <div className="game-stats">
-          <span>スコア: {score}</span>
-          <span>コンボ: {combo}</span>
-          <span>残り: {secondsLeft}秒</span>
+          <span>
+            {t.score}: {score}
+          </span>
+          <span>
+            {t.combo}: {combo}
+          </span>
+          <span>
+            {t.timeLeft}: {secondsLeft}
+            {t.seconds}
+          </span>
         </div>
         <div ref={gameAreaRef} className="game-area">
           {status === "playing" && target && (
@@ -135,13 +171,13 @@ export function GameExample() {
               className="game-target"
               style={{ left: `${target.leftPercent}%`, top: `${target.topPercent}%` }}
               onClick={hitTarget}
-              aria-label="ターゲット"
+              aria-label={t.target}
             />
           )}
           {status !== "playing" && (
             <div className="game-overlay">
               <button className="combo-button" onClick={startGame}>
-                {status === "idle" ? "🎯 スタート" : "🔄 もう一度"}
+                {status === "idle" ? t.start : t.retry}
               </button>
             </div>
           )}

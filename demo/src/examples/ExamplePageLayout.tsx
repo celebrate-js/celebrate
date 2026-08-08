@@ -1,12 +1,18 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useT, LanguageToggle } from "../i18n";
 
 interface ExamplePageLayoutProps {
   icon: string;
   title: string;
-  description: string;
+  description: ReactNode;
   children: ReactNode;
 }
+
+const TEXT = {
+  ja: { backLink: "← 実装例一覧に戻る" },
+  en: { backLink: "← Back to examples" },
+};
 
 /**
  * 実装例ページ共通のヘッダー（一覧へ戻るリンク＋タイトル）。
@@ -15,10 +21,14 @@ interface ExamplePageLayoutProps {
  * リンクがある）。
  */
 export function ExamplePageLayout({ icon, title, description, children }: ExamplePageLayoutProps) {
+  const t = useT(TEXT);
   return (
     <>
+      <div className="lang-toggle-row">
+        <LanguageToggle />
+      </div>
       <p className="example-back-link">
-        <Link to="/examples">← 実装例一覧に戻る</Link>
+        <Link to="/examples">{t.backLink}</Link>
       </p>
       <header className="doc-section">
         <p className="section-title">

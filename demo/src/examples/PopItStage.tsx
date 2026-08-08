@@ -3,6 +3,7 @@ import type { CSSProperties, RefObject } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useCelebrate, ParticleField } from "../../../src/react";
 import { fallMotion, orbitTwinkleMotion, type FallMotionParams, type OrbitTwinkleParams } from "../../../src/index";
+import { useLang, useT } from "../i18n";
 
 // ==== ❄️ 雪：ライブラリのカタログには無い、その場限りの独自の動き。celebrate()は
 // 登録済みの名前だけでなく生のReactNodeも直接発火できる（with と同じ仕組み）。
@@ -116,6 +117,7 @@ export interface PopItTileConfig {
   id: string;
   icon: string;
   label: string;
+  labelEn: string;
   /** グリッド（一覧ページ）でのタイルの背景色。 */
   idleBg: string;
   /** 専用ページ（舞台）の背景（グラデーション）。 */
@@ -124,6 +126,7 @@ export interface PopItTileConfig {
   stageTextColor: string;
   /** 舞台の上の案内文言。 */
   stageHint: string;
+  stageHintEn: string;
   /** 舞台をタップするたびに呼ばれる。タップごとに違う見た目になるよう、色やstyleを
    * 毎回ランダムに選ぶものが多い（「いろんな花火が見れる」という要望に対応）。 */
   fire: (celebrate: ReturnType<typeof useCelebrate>, anchor: RefObject<HTMLElement | null>) => void;
@@ -139,10 +142,12 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     id: "fireworks",
     icon: "🎆",
     label: "花火",
+    labelEn: "Fireworks",
     idleBg: "#ffe4e0",
     stageBg: "radial-gradient(circle at 50% 40%, #2a1f4a 0%, #14142b 100%)",
     stageTextColor: "rgba(255,255,255,0.7)",
     stageHint: "タップで打ち上げ",
+    stageHintEn: "Tap to launch",
     fire: (celebrate, anchor) =>
       celebrate("firework", {
         anchor,
@@ -160,10 +165,12 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     id: "water",
     icon: "💦",
     label: "水面",
+    labelEn: "Water",
     idleBg: "#e0f4ff",
     stageBg: "linear-gradient(180deg, #d6f1ff 0%, #6fc3e8 100%)",
     stageTextColor: "rgba(20,50,70,0.6)",
     stageHint: "タップで波紋",
+    stageHintEn: "Tap for a ripple",
     fire: (celebrate, anchor) =>
       celebrate("ripple", { anchor, color: pickRandom(WATER_COLORS), scale: 1 + Math.random() }),
   },
@@ -171,20 +178,24 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     id: "sakura",
     icon: "🌸",
     label: "桜",
+    labelEn: "Sakura",
     idleBg: "#ffe8f0",
     stageBg: "linear-gradient(180deg, #fff0f5 0%, #ffc2d6 100%)",
     stageTextColor: "rgba(120,40,70,0.55)",
     stageHint: "タップで桜が舞う",
+    stageHintEn: "Tap for cherry blossoms",
     fire: (celebrate, anchor) => celebrate("sakura", { anchor }),
   },
   {
     id: "lightning",
     icon: "⚡️",
     label: "雷",
+    labelEn: "Lightning",
     idleBg: "#fff6d8",
     stageBg: "linear-gradient(180deg, #3a3a55 0%, #14142b 100%)",
     stageTextColor: "rgba(255,255,255,0.7)",
     stageHint: "タップで雷",
+    stageHintEn: "Tap for lightning",
     // lightningは画面全体を貫く演出（isFullScreenContent）なので、タップした位置に関わらず
     // 画面全体に落ちる。anchorを渡しても意味を持たないため渡していない。
     fire: (celebrate) => celebrate("lightning"),
@@ -193,10 +204,12 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     id: "snow",
     icon: "❄️",
     label: "雪",
+    labelEn: "Snow",
     idleBg: "#eef3ff",
     stageBg: "linear-gradient(180deg, #eaf4ff 0%, #a9c9e8 100%)",
     stageTextColor: "rgba(30,50,80,0.55)",
     stageHint: "タップで雪",
+    stageHintEn: "Tap for snow",
     // カタログに無い独自の動き（SnowFall）をReactNodeとしてそのまま発火する例。
     fire: (celebrate, anchor) => celebrate(<SnowFall />, { anchor, durationMs: SNOW_DURATION_MS }),
   },
@@ -204,10 +217,12 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     id: "pop",
     icon: "🥎",
     label: "ポン",
+    labelEn: "Pop",
     idleBg: "#fff0e0",
     stageBg: "linear-gradient(180deg, #fff3e6 0%, #ffcf9e 100%)",
     stageTextColor: "rgba(90,50,10,0.55)",
     stageHint: "ターゲットをタップ",
+    stageHintEn: "Tap the target",
     // このタイルだけ「タップで即発火」ではなく、ミニゲームと同じ
     // 「出てくるターゲットをタップする」形式（BallStage参照）。
     fire: (celebrate, anchor) => celebrate("pop", { anchor, color: pickRandom(POP_COLORS) }),
@@ -216,50 +231,60 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     id: "party",
     icon: "🎉",
     label: "パーティー",
+    labelEn: "Party",
     idleBg: "#f1e8ff",
     stageBg: "linear-gradient(180deg, #f3e8ff 0%, #d9b8ff 100%)",
     stageTextColor: "rgba(60,30,90,0.55)",
     stageHint: "タップで乾杯",
+    stageHintEn: "Tap for a toast",
     fire: (celebrate, anchor) => celebrate("confetti", { anchor }),
   },
   {
     id: "swirl",
     icon: "🌀",
     label: "渦",
+    labelEn: "Swirl",
     idleBg: "#e8fff2",
     stageBg: "linear-gradient(180deg, #e6fff2 0%, #9ef0c4 100%)",
     stageTextColor: "rgba(10,70,45,0.55)",
     stageHint: "タップで渦",
+    stageHintEn: "Tap for a swirl",
     fire: (celebrate, anchor) => celebrate(<Swirl />, { anchor, durationMs: SWIRL_DURATION_MS }),
   },
   {
     id: "sparkle",
     icon: "✨",
     label: "きらめき",
+    labelEn: "Sparkle",
     idleBg: "#fff9d6",
     stageBg: "linear-gradient(180deg, #fffbe0 0%, #ffe066 100%)",
     stageTextColor: "rgba(90,70,10,0.55)",
     stageHint: "タップできらめく",
+    stageHintEn: "Tap to sparkle",
     fire: (celebrate, anchor) => celebrate("sparkle", { anchor, colors: pickRandom(SPARKLE_COLOR_PALETTES) }),
   },
   {
     id: "cracker",
     icon: "🧨",
     label: "クラッカー",
+    labelEn: "Cracker",
     idleBg: "#ffe0ea",
     stageBg: "linear-gradient(180deg, #ffe0ea 0%, #ff8fa3 100%)",
     stageTextColor: "rgba(100,20,40,0.55)",
     stageHint: "タップでクラッカー",
+    stageHintEn: "Tap for a cracker",
     fire: (celebrate, anchor) => celebrate("cracker", { anchor, colors: pickRandom(CRACKER_COLOR_PALETTES) }),
   },
   {
     id: "rain",
     icon: "☔️",
     label: "雨",
+    labelEn: "Rain",
     idleBg: "#e6ecf5",
     stageBg: "linear-gradient(180deg, #7c8ba1 0%, #333d4d 100%)",
     stageTextColor: "rgba(255,255,255,0.7)",
     stageHint: "タップで雨",
+    stageHintEn: "Tap for rain",
     // rainもlightningと同じ画面全体演出（isFullScreenContent）なのでanchorしない。
     fire: (celebrate) => celebrate("rain", { colors: pickRandom(RAIN_COLOR_PALETTES) }),
   },
@@ -267,10 +292,12 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     id: "shatter",
     icon: "💔",
     label: "ひび割れ",
+    labelEn: "Shatter",
     idleBg: "#e8e4f0",
     stageBg: "linear-gradient(180deg, #4a4458 0%, #1c1826 100%)",
     stageTextColor: "rgba(255,255,255,0.7)",
     stageHint: "タップでひび割れ",
+    stageHintEn: "Tap to shatter",
     // shatterも画面全体演出（isFullScreenContent）なのでanchorしない。
     fire: (celebrate) => celebrate("shatter"),
   },
@@ -278,10 +305,12 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     id: "record",
     icon: "🏆",
     label: "自己ベスト",
+    labelEn: "Personal best",
     idleBg: "#fff4d6",
     stageBg: "linear-gradient(180deg, #fff4d6 0%, #ffd76b 100%)",
     stageTextColor: "rgba(100,70,10,0.6)",
     stageHint: "タップで更新",
+    stageHintEn: "Tap for a new record",
     fire: (celebrate, anchor) => {
       const message = pickRandom(RECORD_MESSAGES);
       celebrate("record", { anchor, text: message.text, note: message.note, with: ["confetti"] });
@@ -291,33 +320,50 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     id: "heart",
     icon: "💝",
     label: "ハート",
+    labelEn: "Heart",
     idleBg: "#ffe0ec",
     stageBg: "linear-gradient(180deg, #ffe0ec 0%, #ff9dc0 100%)",
     stageTextColor: "rgba(120,20,60,0.55)",
     stageHint: "タップでハート",
+    stageHintEn: "Tap for hearts",
     fire: (celebrate, anchor) => celebrate("heart", { anchor }),
   },
   {
     id: "float",
     icon: "☁️",
     label: "ふわふわ",
+    labelEn: "Float",
     idleBg: "#eef7ff",
     stageBg: "linear-gradient(180deg, #eef7ff 0%, #cfe6ff 100%)",
     stageTextColor: "rgba(30,60,100,0.5)",
     stageHint: "タップでふわり",
+    stageHintEn: "Tap to drift",
     fire: (celebrate, anchor) => celebrate("float", { anchor }),
   },
 ];
 
+const STAGE_TEXT = {
+  ja: {
+    back: "← ポップイットに戻る",
+    tapCount: "タップ回数",
+    popCount: "ポップ数",
+    combo: "コンボ",
+    target: "ターゲット",
+  },
+  en: { back: "← Back to Pop It", tapCount: "Taps", popCount: "Pops", combo: "Combo", target: "Target" },
+};
+
 function StageHeader({ config, backTo }: { config: PopItTileConfig; backTo: string }) {
+  const { lang } = useLang();
+  const t = useT(STAGE_TEXT);
   return (
     <div className="popit-stage-header">
       <Link to={backTo} className="popit-stage-back">
-        ← ポップイットに戻る
+        {t.back}
       </Link>
       <p className="popit-stage-title">
         <span>{config.icon}</span>
-        <span>{config.label}</span>
+        <span>{lang === "en" ? config.labelEn : config.label}</span>
       </p>
     </div>
   );
@@ -328,8 +374,11 @@ function StageHeader({ config, backTo }: { config: PopItTileConfig; backTo: stri
 // 何度でも見られる、専用ページの実装例。
 function GenericStage({ config, backTo }: { config: PopItTileConfig; backTo: string }) {
   const celebrate = useCelebrate();
+  const { lang } = useLang();
+  const t = useT(STAGE_TEXT);
   const surfaceRef = useRef<HTMLButtonElement | null>(null);
   const [tapCount, setTapCount] = useState(0);
+  const hint = lang === "en" ? config.stageHintEn : config.stageHint;
 
   return (
     <section className="doc-section">
@@ -342,11 +391,13 @@ function GenericStage({ config, backTo }: { config: PopItTileConfig; backTo: str
           config.fire(celebrate, surfaceRef);
           setTapCount((n) => n + 1);
         }}
-        aria-label={config.stageHint}
+        aria-label={hint}
       >
-        {config.stageHint}
+        {hint}
       </button>
-      <p className="section-hint">タップ回数: {tapCount}</p>
+      <p className="section-hint">
+        {t.tapCount}: {tapCount}
+      </p>
     </section>
   );
 }
@@ -368,6 +419,7 @@ function randomBallPosition(id: number): BallTargetPosition {
 
 function BallStage({ config, backTo }: { config: PopItTileConfig; backTo: string }) {
   const celebrate = useCelebrate();
+  const t = useT(STAGE_TEXT);
   const targetRef = useRef<HTMLButtonElement | null>(null);
   const timeoutIds = useRef<number[]>([]);
   const nextTargetId = useRef(0);
@@ -417,8 +469,12 @@ function BallStage({ config, backTo }: { config: PopItTileConfig; backTo: string
     <section className="doc-section">
       <StageHeader config={config} backTo={backTo} />
       <div className="game-stats">
-        <span>ポップ数: {popCount}</span>
-        <span>コンボ: {combo}</span>
+        <span>
+          {t.popCount}: {popCount}
+        </span>
+        <span>
+          {t.combo}: {combo}
+        </span>
       </div>
       <div className="game-area" style={{ background: config.stageBg } as CSSProperties}>
         {target && (
@@ -428,7 +484,7 @@ function BallStage({ config, backTo }: { config: PopItTileConfig; backTo: string
             className="game-target"
             style={{ left: `${target.leftPercent}%`, top: `${target.topPercent}%` }}
             onClick={hitTarget}
-            aria-label="ターゲット"
+            aria-label={t.target}
           />
         )}
       </div>
@@ -439,6 +495,7 @@ function BallStage({ config, backTo }: { config: PopItTileConfig; backTo: string
 /** グリッド（一覧）の見た目。ドキュメント埋め込み版と切り出し単体アプリ版の両方から使う。
  * basePathは各タイルへのリンク先の接頭辞（ドキュメント版は"/examples/popit"、単体アプリ版は""）。 */
 export function PopItGrid({ basePath }: { basePath: string }) {
+  const { lang } = useLang();
   return (
     <div className="popit-grid">
       {POPIT_TILES.map((tile) => (
@@ -449,7 +506,7 @@ export function PopItGrid({ basePath }: { basePath: string }) {
           style={{ background: tile.idleBg } as CSSProperties}
         >
           <span className="popit-tile-icon">{tile.icon}</span>
-          <span className="popit-tile-label">{tile.label}</span>
+          <span className="popit-tile-label">{lang === "en" ? tile.labelEn : tile.label}</span>
         </Link>
       ))}
     </div>
@@ -458,17 +515,24 @@ export function PopItGrid({ basePath }: { basePath: string }) {
 
 /** ポップイットの各タイルの専用ページ。ドキュメント埋め込み版（/examples/popit/:themeId）と
  * 単体アプリ版（/:themeId）の両方から使うため、一覧への戻りリンク先をbackToで受け取る。 */
+const NOT_FOUND_TEXT = {
+  ja: (id: string | undefined) => `「${id}」という舞台は無いみたい。`,
+  en: (id: string | undefined) => `There's no “${id}” stage.`,
+};
+
 export function PopItStage({ backTo = "/examples/popit" }: { backTo?: string }) {
   const { themeId } = useParams<{ themeId: string }>();
   const config = POPIT_TILES.find((tile) => tile.id === themeId);
+  const t = useT(STAGE_TEXT);
+  const notFound = useT(NOT_FOUND_TEXT);
 
   if (!config) {
     return (
       <section className="doc-section">
         <Link to={backTo} className="popit-stage-back">
-          ← ポップイットに戻る
+          {t.back}
         </Link>
-        <p className="section-hint">「{themeId}」という舞台は無いみたい。</p>
+        <p className="section-hint">{notFound(themeId)}</p>
       </section>
     );
   }

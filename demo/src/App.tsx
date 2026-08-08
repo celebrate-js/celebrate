@@ -7,6 +7,7 @@ import { QuizExample } from "./examples/QuizExample";
 import { GameExample } from "./examples/GameExample";
 import { PopIt } from "./examples/PopIt";
 import { PopItStage } from "./examples/PopItStage";
+import { LangProvider, useLang, useT, LanguageToggle } from "./i18n";
 import {
   CelebrateProvider,
   useCelebrate,
@@ -50,102 +51,206 @@ import {
 interface CatalogVariantSpec {
   variant: CelebrateVariant;
   description: string;
+  descriptionEn: string;
   text?: string;
   note?: string;
 }
 
 interface CatalogCategory {
   title: string;
+  titleEn: string;
   description: string;
+  descriptionEn: string;
   variants: readonly CatalogVariantSpec[];
 }
 
 const CATALOG_CATEGORIES: readonly CatalogCategory[] = [
   {
     title: "① 入力フィードバック",
+    titleEn: "① Input feedback",
     description: "ボタン等を押した「軽いタップ確認」に使う。",
+    descriptionEn: "A light tap confirmation for pressing a button.",
     variants: [
-      { variant: "pop", description: "中心から広がって消える、いちばん軽いフィードバック。" },
-      { variant: "ripple", description: "波紋のように広がる。ボタンのタップ確認に。" },
-      { variant: "checkmark", description: "円が描かれてからチェックが描き込まれる。正解・完了の定番表現。" },
+      {
+        variant: "pop",
+        description: "中心から広がって消える、いちばん軽いフィードバック。",
+        descriptionEn: "Expands from the center and fades — the lightest feedback available.",
+      },
+      {
+        variant: "ripple",
+        description: "波紋のように広がる。ボタンのタップ確認に。",
+        descriptionEn: "Spreads out like a ripple. Good for a button tap confirmation.",
+      },
+      {
+        variant: "checkmark",
+        description: "円が描かれてからチェックが描き込まれる。正解・完了の定番表現。",
+        descriptionEn: "A circle draws in, then a checkmark. The classic correct/complete indicator.",
+      },
     ],
   },
   {
     title: "② 達成",
+    titleEn: "② Achievement",
     description: "正解・完了・順位など「できた」を示す。",
+    descriptionEn: "Signals “done” — a correct answer, completion, or a placement.",
     variants: [
-      { variant: "stamp", description: "印影スタンプ。短い文字が押されたように現れて留まる。", text: "正" },
-      { variant: "medal", description: "リボン付きのメダル。stampより「授与された」感が強い。", text: "1" },
-      { variant: "bounce", description: "弾むように現れる短いテキスト。", text: "Nice!" },
+      {
+        variant: "stamp",
+        description: "印影スタンプ。短い文字が押されたように現れて留まる。",
+        descriptionEn: "An ink stamp. A short piece of text lands as if stamped and stays put.",
+        text: "正",
+      },
+      {
+        variant: "medal",
+        description: "リボン付きのメダル。stampより「授与された」感が強い。",
+        descriptionEn: "A ribboned medal — reads more like “awarded” than stamp does.",
+        text: "1",
+      },
+      {
+        variant: "bounce",
+        description: "弾むように現れる短いテキスト。",
+        descriptionEn: "A short piece of text that bounces in.",
+        text: "Nice!",
+      },
     ],
   },
   {
     title: "③ 報酬",
+    titleEn: "③ Reward",
     description: "ご褒美・大当たり。達成よりも一段上の「やった！」感。",
+    descriptionEn: "A bonus, a jackpot — one step up from achievement, a bigger “yes!” moment.",
     variants: [
-      { variant: "confetti", description: "紙吹雪が舞う、定番の祝福演出。" },
-      { variant: "sparkle", description: "きらめきが散る。" },
+      {
+        variant: "confetti",
+        description: "紙吹雪が舞う、定番の祝福演出。",
+        descriptionEn: "Confetti falls — the classic celebration effect.",
+      },
+      { variant: "sparkle", description: "きらめきが散る。", descriptionEn: "Sparkles scatter outward." },
       {
         variant: "record",
         description: "自己ベスト更新を示す全画面バナー。",
+        descriptionEn: "A full-screen banner announcing a new personal best.",
         text: "Congratulations!",
         note: "れんぞく 7問",
       },
-      { variant: "flash", description: "一瞬強く光る。" },
-      { variant: "ring", description: "二重の輪が外へ広がって消える。" },
-      { variant: "firework", description: "複数の破裂点が時間差で咲く花火。" },
+      { variant: "flash", description: "一瞬強く光る。", descriptionEn: "A brief, intense flash." },
+      {
+        variant: "ring",
+        description: "二重の輪が外へ広がって消える。",
+        descriptionEn: "A double ring expands outward and fades.",
+      },
+      {
+        variant: "firework",
+        description: "複数の破裂点が時間差で咲く花火。",
+        descriptionEn: "Fireworks bloom from several points with staggered timing.",
+      },
     ],
   },
   {
     title: "④ リアクション",
+    titleEn: "④ Reaction",
     description: "絵文字で気持ちを表す。",
+    descriptionEn: "Expresses a feeling through emoji.",
     variants: [
-      { variant: "heart", description: "ハートが舞う。" },
-      { variant: "star", description: "星が舞う。" },
-      { variant: "emoji", description: "絵文字が舞う（既定は🎉✨🎊👍）。" },
+      { variant: "heart", description: "ハートが舞う。", descriptionEn: "Hearts float up." },
+      { variant: "star", description: "星が舞う。", descriptionEn: "Stars float up." },
+      {
+        variant: "emoji",
+        description: "絵文字が舞う（既定は🎉✨🎊👍）。",
+        descriptionEn: "Emoji float up (defaults to 🎉✨🎊👍).",
+      },
     ],
   },
   {
     title: "⑤ キャラクター・ナラティブ",
+    titleEn: "⑤ Character / narrative",
     description: "粒や記号ではなく1つの主体が動く。",
+    descriptionEn: "A single actor moves, rather than a swarm of particles or glyphs.",
     variants: [
-      { variant: "cracker", description: "クラッカーが弾けて紙テープが飛ぶ。" },
-      { variant: "float", description: "文字や雲形がふわふわ漂う。" },
+      {
+        variant: "cracker",
+        description: "クラッカーが弾けて紙テープが飛ぶ。",
+        descriptionEn: "A party popper bursts and streamers fly out.",
+      },
+      {
+        variant: "float",
+        description: "文字や雲形がふわふわ漂う。",
+        descriptionEn: "Text or a cloud shape drifts gently.",
+      },
     ],
   },
   {
     title: "⑥ 環境演出",
+    titleEn: "⑥ Environment",
     description: "画面全体への効果。",
+    descriptionEn: "Effects that act on the whole screen.",
     variants: [
-      { variant: "sakura", description: "桜の花びらが舞い落ちる。" },
-      { variant: "shake", description: "画面全体が揺れる。" },
-      { variant: "hitstop", description: "一瞬の間（フレーム停止感）。" },
-      { variant: "vignette", description: "画面端が暗くなる、低体力表現の定番。" },
-      { variant: "rain", description: "紙吹雪が画面全体に降り注ぐ。" },
-      { variant: "lightning", description: "稲妻が画面を上端から下端まで貫く。" },
+      {
+        variant: "sakura",
+        description: "桜の花びらが舞い落ちる。",
+        descriptionEn: "Cherry blossom petals drift down.",
+      },
+      { variant: "shake", description: "画面全体が揺れる。", descriptionEn: "The whole screen shakes." },
+      {
+        variant: "hitstop",
+        description: "一瞬の間（フレーム停止感）。",
+        descriptionEn: "A brief freeze, like a stopped frame.",
+      },
+      {
+        variant: "vignette",
+        description: "画面端が暗くなる、低体力表現の定番。",
+        descriptionEn: "The screen edges darken — the classic low-health look.",
+      },
+      {
+        variant: "rain",
+        description: "紙吹雪が画面全体に降り注ぐ。",
+        descriptionEn: "Confetti rains down across the whole screen.",
+      },
+      {
+        variant: "lightning",
+        description: "稲妻が画面を上端から下端まで貫く。",
+        descriptionEn: "A lightning bolt strikes from the top of the screen to the bottom.",
+      },
     ],
   },
   {
     title: "⑦ 段階エフェクト",
+    titleEn: "⑦ Staged effect",
     description: "複数局面が連続する時間軸型。",
-    variants: [{ variant: "shatter", description: "画面がひび割れて崩れ落ちる。" }],
+    descriptionEn: "Several phases play out in sequence over time.",
+    variants: [
+      {
+        variant: "shatter",
+        description: "画面がひび割れて崩れ落ちる。",
+        descriptionEn: "The screen cracks and crumbles apart.",
+      },
+    ],
   },
   {
     title: "⑧ テキストチャネル",
+    titleEn: "⑧ Text channel",
     description: "浮遊する数値・文字。",
-    variants: [{ variant: "popup", description: "「+1」のような数値・文字が浮かんで消える。", text: "+1" }],
+    descriptionEn: "A floating number or short piece of text.",
+    variants: [
+      {
+        variant: "popup",
+        description: "「+1」のような数値・文字が浮かんで消える。",
+        descriptionEn: "A number or short text like “+1” floats up and fades.",
+        text: "+1",
+      },
+    ],
   },
 ];
 
 // firework専用：カタログカードに種類（fireworkStyle）選択ドロップダウンを出すための一覧。
-const FIREWORK_STYLE_OPTIONS: readonly { value: FireworkStyle; label: string }[] = [
-  { value: "peony", label: "peony（牡丹）" },
-  { value: "willow", label: "willow（柳）" },
-  { value: "ring", label: "ring（輪）" },
-  { value: "kiku", label: "kiku（菊）" },
-  { value: "star", label: "star（型物・星形）" },
-  { value: "senrin", label: "senrin（千輪）" },
-  { value: "hachi", label: "hachi（蜂）" },
+const FIREWORK_STYLE_OPTIONS: readonly { value: FireworkStyle; label: string; labelEn: string }[] = [
+  { value: "peony", label: "peony（牡丹）", labelEn: "peony" },
+  { value: "willow", label: "willow（柳）", labelEn: "willow" },
+  { value: "ring", label: "ring（輪）", labelEn: "ring" },
+  { value: "kiku", label: "kiku（菊）", labelEn: "kiku" },
+  { value: "star", label: "star（型物・星形）", labelEn: "star" },
+  { value: "senrin", label: "senrin（千輪）", labelEn: "senrin" },
+  { value: "hachi", label: "hachi（蜂）", labelEn: "hachi" },
 ];
 const DEFAULT_FIREWORK_STYLE: FireworkStyle = "peony";
 
@@ -158,8 +263,15 @@ function catalogCallSnippet(spec: CatalogVariantSpec, fireworkStyle?: FireworkSt
   return `celebrate("${spec.variant}"${options});`;
 }
 
+const CATALOG_CARD_TEXT = {
+  ja: { soundTitle: "効果音あり", style: "種類", try: "試す" },
+  en: { soundTitle: "Has sound", style: "style", try: "Try it" },
+};
+
 function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
   const celebrate = useCelebrate();
+  const { lang } = useLang();
+  const t = useT(CATALOG_CARD_TEXT);
   const [fireworkStyle, setFireworkStyle] = useState<FireworkStyle>(DEFAULT_FIREWORK_STYLE);
   const isFirework = spec.variant === "firework";
 
@@ -178,19 +290,19 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
       <div className="catalog-card-head">
         <code className="catalog-card-name">{spec.variant}</code>
         {hasSoundForCelebration(spec.variant) && (
-          <span className="catalog-card-sound" title="効果音あり">
+          <span className="catalog-card-sound" title={t.soundTitle}>
             🔈
           </span>
         )}
       </div>
-      <p className="catalog-card-description">{spec.description}</p>
+      <p className="catalog-card-description">{lang === "en" ? spec.descriptionEn : spec.description}</p>
       {isFirework && (
         <label className="catalog-card-style-select">
-          種類
+          {t.style}
           <select value={fireworkStyle} onChange={(e) => setFireworkStyle(e.target.value as FireworkStyle)}>
             {FIREWORK_STYLE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
-                {opt.label}
+                {lang === "en" ? opt.labelEn : opt.label}
               </option>
             ))}
           </select>
@@ -200,27 +312,49 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
         <code>{catalogCallSnippet(spec, isFirework ? fireworkStyle : undefined)}</code>
       </pre>
       <button className="catalog-card-trigger" onClick={fire}>
-        試す
+        {t.try}
       </button>
     </div>
   );
 }
 
+const CATALOG_SECTION_TEXT = {
+  ja: {
+    title: "カタログ（Tier 1）",
+    hint: (
+      <>
+        名前で選ぶだけの、最も簡単な使い方。UXの意味（どの瞬間に使うか）でグルーピングしてある
+        （実装上の構造ではない。理論的根拠は<code>docs/catalog-rationale.md</code>参照）。
+      </>
+    ),
+  },
+  en: {
+    title: "Catalog (Tier 1)",
+    hint: (
+      <>
+        The simplest way to use the library: just pick an effect by name. Grouped by UX meaning (the moment you'd use
+        it), not by implementation. See <code>docs/catalog-rationale.md</code> for the rationale.
+      </>
+    ),
+  },
+};
+
 function CatalogSection() {
+  const { lang } = useLang();
+  const t = useT(CATALOG_SECTION_TEXT);
   return (
     <section id="catalog" className="doc-section">
       <p className="section-title">
         <span>📖</span>
-        <span>カタログ（Tier 1）</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        名前で選ぶだけの、最も簡単な使い方。UXの意味（どの瞬間に使うか）でグルーピングしてある
-        （実装上の構造ではない。理論的根拠は<code>docs/catalog-rationale.md</code>参照）。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       {CATALOG_CATEGORIES.map((category) => (
         <div key={category.title} className="catalog-category">
-          <h3 className="catalog-category-title">{category.title}</h3>
-          <p className="catalog-category-description">{category.description}</p>
+          <h3 className="catalog-category-title">{lang === "en" ? category.titleEn : category.title}</h3>
+          <p className="catalog-category-description">
+            {lang === "en" ? category.descriptionEn : category.description}
+          </p>
           <div className="catalog-grid">
             {category.variants.map((v) => (
               <CatalogCard key={v.variant} spec={v} />
@@ -234,22 +368,46 @@ function CatalogSection() {
 
 // ボーダー系エフェクト（useCelebrateBorder）。celebrate() のオーバーレイと違い、
 // 既存コンポーネント自身の境界線を光らせる／回転させる第3の方式のデモ。
+const BORDER_EFFECT_DEMO_TEXT = {
+  ja: {
+    title: "ボーダーエフェクト（カタログ・Tier 1）",
+    hint: (
+      <>
+        オーバーレイを重ねるのではなく、このカード自身の境界線を光らせる／回転させる、 celebrate()とは別の小さなAPI（
+        <code>useCelebrateBorder()</code>）。 アイコンライブラリのように名前で選ぶだけ（{BORDER_EFFECT_KINDS.length}
+        種類。 中身は後述の「ボーダー」構造テンプレートと同じ2機構）。intensityはglow/conicRing/class
+        3機構すべてに同じduration倍率で効く。
+      </>
+    ),
+    existing: "既存コンポーネント",
+  },
+  en: {
+    title: "Border effects (catalog, Tier 1)",
+    hint: (
+      <>
+        Instead of overlaying something on top, this small API separate from celebrate() (
+        <code>useCelebrateBorder()</code>) makes the card's own border glow or spin. Pick one by name, like an icon
+        library ({BORDER_EFFECT_KINDS.length}
+        kinds — under the hood, the same 2 mechanisms as the “border” structural template below). intensity applies the
+        same duration multiplier across all three mechanisms (glow/conicRing/class).
+      </>
+    ),
+    existing: "Existing component",
+  },
+};
+
 function BorderEffectDemo() {
   const { ref, celebrateBorder } = useCelebrateBorder<HTMLDivElement>();
   const [intensity, setIntensity] = useState(1);
+  const t = useT(BORDER_EFFECT_DEMO_TEXT);
 
   return (
     <section className="doc-section">
       <p className="section-title">
         <span>🖼️</span>
-        <span>ボーダーエフェクト（カタログ・Tier 1）</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        オーバーレイを重ねるのではなく、このカード自身の境界線を光らせる／回転させる、 celebrate()とは別の小さなAPI（
-        <code>useCelebrateBorder()</code>）。 アイコンライブラリのように名前で選ぶだけ（{BORDER_EFFECT_KINDS.length}
-        種類。 中身は後述の「ボーダー」構造テンプレートと同じ2機構）。intensityはglow/conicRing/class
-        3機構すべてに同じduration倍率で効く。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <label className="section-hint" style={{ display: "block", marginBottom: "0.5rem" }}>
         intensity: {intensity.toFixed(2)}
         <input
@@ -262,7 +420,7 @@ function BorderEffectDemo() {
         />
       </label>
       <div ref={ref} className="border-demo-target" style={{ ["--celebrate-border-color" as string]: "#e0904a" }}>
-        既存コンポーネント
+        {t.existing}
       </div>
       <div className="border-demo-buttons">
         {BORDER_EFFECT_KINDS.map((kind) => (
@@ -279,10 +437,32 @@ function BorderEffectDemo() {
 // 一定時間押さないとコンボが途切れる（よくある「連鎖」の作法）。
 const COMBO_RESET_MS = 1200;
 
+const COMBO_DEMO_TEXT = {
+  ja: {
+    title: "Intensity（連続的な強度）",
+    hint: (
+      <>
+        <code>intensity</code>で見た目・音量・振動を連続的に派手にできる。連打するほどintensityを上げる
+        「コンボ」のような使い方の例（{COMBO_RESET_MS}ms押さないとリセット）。
+      </>
+    ),
+  },
+  en: {
+    title: "Intensity (continuous strength)",
+    hint: (
+      <>
+        <code>intensity</code> continuously ramps up the visuals, volume, and haptics. This example raises intensity
+        with each hit, combo-style (resets if you don't hit again within {COMBO_RESET_MS}ms).
+      </>
+    ),
+  },
+};
+
 function ComboDemo() {
   const celebrate = useCelebrate();
   const [combo, setCombo] = useState(0);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t = useT(COMBO_DEMO_TEXT);
 
   const hit = () => {
     setCombo((c) => {
@@ -298,12 +478,9 @@ function ComboDemo() {
     <section className="doc-section">
       <p className="section-title">
         <span>🔥</span>
-        <span>Intensity（連続的な強度）</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        <code>intensity</code>で見た目・音量・振動を連続的に派手にできる。連打するほどintensityを上げる
-        「コンボ」のような使い方の例（{COMBO_RESET_MS}ms押さないとリセット）。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <button className="combo-button" onClick={hit}>
         combo ×{combo}
       </button>
@@ -356,22 +533,44 @@ function SparkleShape({ color, sizeRem }: { color: string; sizeRem: number }) {
 
 // エンジン直利用（Tier 3）：celebrate()もCATALOGも経由しない。ParticleFieldを
 // 直接JSXに置き、motionは自作関数・見た目も自由なReactNode（自作SVG）を渡す。
+const ENGINE_DEMO_TEXT = {
+  ja: {
+    title: "自作の動き（Tier 3・MotionProfile）",
+    hint: (
+      <>
+        celebrate()を経由せず<code>ParticleField</code>を直接置く。<code>motion</code>は<code>MOTION_PROFILES</code>
+        に登録されていない自作関数（渦巻き）でも、型さえ満たせばそのまま渡せる。 見た目（<code>render</code>
+        ）も自由なReactNode。
+      </>
+    ),
+    fire: "Fire spiral",
+  },
+  en: {
+    title: "Custom motion (Tier 3, MotionProfile)",
+    hint: (
+      <>
+        Skip celebrate() and place <code>ParticleField</code> directly. <code>motion</code> can be a custom function (a
+        spiral here) not registered in <code>MOTION_PROFILES</code> — anything that satisfies the type works. The look (
+        <code>render</code>) is any ReactNode you want.
+      </>
+    ),
+    fire: "Fire spiral",
+  },
+};
+
 function EngineDemo() {
   const [fireKey, setFireKey] = useState(0);
+  const t = useT(ENGINE_DEMO_TEXT);
 
   return (
     <section className="doc-section">
       <p className="section-title">
         <span>⚙️</span>
-        <span>自作の動き（Tier 3・MotionProfile）</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        celebrate()を経由せず<code>ParticleField</code>を直接置く。<code>motion</code>は<code>MOTION_PROFILES</code>
-        に登録されていない自作関数（渦巻き）でも、型さえ満たせばそのまま渡せる。 見た目（<code>render</code>
-        ）も自由なReactNode。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <button className="combo-button" onClick={() => setFireKey((k) => k + 1)}>
-        spiral 発火
+        {t.fire}
       </button>
       <div
         style={{
@@ -405,7 +604,10 @@ function EngineDemo() {
 
 // celebrate()の第一引数・withはvariant名（文字列）だけでなく、生のReactNodeも
 // 受け取れる。呼び出し側が自作した任意のコンポーネントをそのまま重ねられることの実演。
+const CUSTOM_BADGE_TEXT = { ja: "🛠️ 自作コンポーネント", en: "🛠️ Custom component" };
+
 function CustomBadge() {
+  const label = useT(CUSTOM_BADGE_TEXT);
   return (
     <span
       style={{
@@ -422,30 +624,51 @@ function CustomBadge() {
         boxShadow: "0 8px 20px -6px rgba(0, 0, 0, 0.35)",
       }}
     >
-      🛠️ 自作コンポーネント
+      {label}
     </span>
   );
 }
 
+const REACT_NODE_DEMO_TEXT = {
+  ja: {
+    title: "ReactNodeをそのまま渡す",
+    hint: (
+      <>
+        celebrate()の第一引数・<code>with</code>はvariant名だけでなく、生のReactNodeも受け取れる。
+        カタログに登録されていない自作コンポーネントをそのまま重ねられる。
+      </>
+    ),
+    stampText: "合格",
+  },
+  en: {
+    title: "Pass a raw ReactNode",
+    hint: (
+      <>
+        celebrate()'s first argument and <code>with</code> accept a raw ReactNode, not just a variant name — you can
+        overlay any custom component that isn't in the catalog.
+      </>
+    ),
+    stampText: "Pass",
+  },
+};
+
 function ReactNodeDemo() {
   const celebrate = useCelebrate();
+  const t = useT(REACT_NODE_DEMO_TEXT);
   return (
     <section className="doc-section">
       <p className="section-title">
         <span>🧩</span>
-        <span>ReactNodeをそのまま渡す</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        celebrate()の第一引数・<code>with</code>はvariant名だけでなく、生のReactNodeも受け取れる。
-        カタログに登録されていない自作コンポーネントをそのまま重ねられる。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <button className="combo-button" onClick={() => celebrate(<CustomBadge />)}>
         celebrate(&lt;CustomBadge /&gt;)
       </button>
       <button
         className="combo-button"
         style={{ marginLeft: "0.6rem" }}
-        onClick={() => celebrate("stamp", { text: "合格", with: [<CustomBadge key="badge" />] })}
+        onClick={() => celebrate("stamp", { text: t.stampText, with: [<CustomBadge key="badge" />] })}
       >
         stamp + with:[&lt;CustomBadge /&gt;]
       </button>
@@ -455,9 +678,15 @@ function ReactNodeDemo() {
 
 // container を指定すると、画面全体（viewport）ではなくその要素の内側だけに
 // フルスクリーン系variant（rain等）を閉じ込められる。「このカードの中だけ雨を降らせる」の実演。
+const SCOPED_TRIGGER_TEXT = {
+  ja: { rain: "この枠内だけrain", shake: "画面全体shake（Tier3直接）" },
+  en: { rain: "rain, scoped to this box", shake: "whole-screen shake (Tier 3 direct)" },
+};
+
 function ScopedTrigger() {
   const celebrate = useCelebrate();
   const trigger = useContainerModifier();
+  const t = useT(SCOPED_TRIGGER_TEXT);
   return (
     <div
       style={{
@@ -470,32 +699,52 @@ function ScopedTrigger() {
       }}
     >
       <button className="combo-button" onClick={() => celebrate("rain")}>
-        この枠内だけrain
+        {t.rain}
       </button>
       <button
         className="combo-button"
         onClick={() => trigger({ className: "celebrate-shake-active", durationMs: 400 })}
       >
-        画面全体shake（Tier3直接）
+        {t.shake}
       </button>
     </div>
   );
 }
 
-function ScopedDemo() {
-  const boxRef = useRef<HTMLDivElement>(null);
-  return (
-    <section className="doc-section">
-      <p className="section-title">
-        <span>🪟</span>
-        <span>ローカルスコープ（container）</span>
-      </p>
-      <p className="section-hint">
+const SCOPED_DEMO_TEXT = {
+  ja: {
+    title: "ローカルスコープ（container）",
+    hint: (
+      <>
         <code>{"<CelebrateProvider container={ref}>"}</code>
         にすると、rain/lightning/shatterのような全画面variantを画面全体ではなくこの枠の中だけに閉じ込められる。
         右のボタンは比較用（shake/hitstopは<code>useContainerModifier()</code>
         を直接使うTier3の例で、常に画面全体が対象）。
+      </>
+    ),
+  },
+  en: {
+    title: "Local scope (container)",
+    hint: (
+      <>
+        <code>{"<CelebrateProvider container={ref}>"}</code> confines full-screen variants like rain/lightning/shatter
+        to this box instead of the whole viewport. The right-hand button is for comparison (shake/hitstop, a Tier 3
+        example using <code>useContainerModifier()</code> directly, always target the whole screen).
+      </>
+    ),
+  },
+};
+
+function ScopedDemo() {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const t = useT(SCOPED_DEMO_TEXT);
+  return (
+    <section className="doc-section">
+      <p className="section-title">
+        <span>🪟</span>
+        <span>{t.title}</span>
       </p>
+      <p className="section-hint">{t.hint}</p>
       <div
         ref={boxRef}
         style={{
@@ -521,7 +770,46 @@ function ScopedDemo() {
 // 存在しない組み合わせ（例：グローで4層・時間差広め）もその場で作れる。
 const RADIAL_SHAPES: readonly RadialBurstShape[] = ["fill", "outline", "glow"];
 
+const FIRE_BUTTON_TEXT = {
+  ja: "🚀 発火（celebrate()を経由しない）",
+  en: "🚀 Fire (bypassing celebrate())",
+};
+
+const RADIAL_BURST_BUILDER_TEXT = {
+  ja: {
+    title: "構造テンプレート：RadialBurst",
+    hint: (
+      <>
+        variantのカタログ（名前）を経由せず、構造テンプレートに生のパラメータを渡して組み立てる。 pop / ripple / ring /
+        flash は全部これのプリセット違いでしかない＝カタログにない組み合わせもここで自由に作れる。
+      </>
+    ),
+    scaleToLabel: "scaleTo（layer 0基準）",
+    sizeLabel: "size（rem・layer 0基準）",
+    layersLabel: "layers",
+    layerDelayLabel: "layer間のdelayMs",
+    origin: "origin（原点移動・スポットライトの掃引）",
+  },
+  en: {
+    title: "Structural template: RadialBurst",
+    hint: (
+      <>
+        Skips the variant catalog (names) and assembles a burst by passing raw parameters to the structural template.
+        pop / ripple / ring / flash are all just presets of this — combinations not in the catalog can be built here
+        freely.
+      </>
+    ),
+    scaleToLabel: "scaleTo (layer 0)",
+    sizeLabel: "size in rem (layer 0)",
+    layersLabel: "layers",
+    layerDelayLabel: "delayMs between layers",
+    origin: "origin (moving center, a spotlight sweep)",
+  },
+};
+
 function RadialBurstBuilder() {
+  const t = useT(RADIAL_BURST_BUILDER_TEXT);
+  const fireText = useT(FIRE_BUTTON_TEXT);
   const [shape, setShape] = useState<RadialBurstShape>("outline");
   const [scaleFrom, setScaleFrom] = useState(0.3);
   const [scaleTo, setScaleTo] = useState(2.4);
@@ -565,12 +853,9 @@ function RadialBurstBuilder() {
     <section className="doc-section">
       <p className="section-title">
         <span>🧱</span>
-        <span>構造テンプレート：RadialBurst</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        variantのカタログ（名前）を経由せず、構造テンプレートに生のパラメータを渡して組み立てる。 pop / ripple / ring /
-        flash は全部これのプリセット違いでしかない＝カタログにない組み合わせもここで自由に作れる。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <div className="playground-grid">
         <div className="playground-controls">
           <label>
@@ -595,7 +880,7 @@ function RadialBurstBuilder() {
             />
           </label>
           <label>
-            scaleTo（layer 0基準）: {scaleTo.toFixed(2)}
+            {t.scaleToLabel}: {scaleTo.toFixed(2)}
             <input
               type="range"
               min="0.5"
@@ -606,7 +891,7 @@ function RadialBurstBuilder() {
             />
           </label>
           <label>
-            size（rem・layer 0基準）: {size.toFixed(2)}
+            {t.sizeLabel}: {size.toFixed(2)}
             <input
               type="range"
               min="0.5"
@@ -628,7 +913,7 @@ function RadialBurstBuilder() {
             />
           </label>
           <label>
-            layers: {layerCount}
+            {t.layersLabel}: {layerCount}
             <input
               type="range"
               min="1"
@@ -639,7 +924,7 @@ function RadialBurstBuilder() {
             />
           </label>
           <label>
-            layer間のdelayMs: {layerDelayMs}
+            {t.layerDelayLabel}: {layerDelayMs}
             <input
               type="range"
               min="0"
@@ -655,7 +940,7 @@ function RadialBurstBuilder() {
           </label>
           <label className="playground-checkbox">
             <input type="checkbox" checked={spotlight} onChange={(e) => setSpotlight(e.target.checked)} />
-            origin（原点移動・スポットライトの掃引）
+            {t.origin}
           </label>
         </div>
         <div className="playground-code">
@@ -665,7 +950,7 @@ function RadialBurstBuilder() {
         </div>
       </div>
       <button className="combo-button" onClick={() => setFireKey((k) => k + 1)}>
-        🚀 発火（celebrate()を経由しない）
+        {fireText}
       </button>
       <div
         style={{
@@ -703,7 +988,59 @@ function DiamondShape({ color }: { color: string }) {
   );
 }
 
+const PARTICLE_FALL_BUILDER_TEXT = {
+  ja: {
+    title: "構造テンプレート：ParticleField（降ってくる系）",
+    hint: (
+      <>
+        rain（雨）もsakura（桜吹雪）も実体は同じ<code>ParticleField</code>に<code>fallMotion</code>という
+        動き関数とパラメータを渡しているだけ。<code>render</code>は文字列専用ではなく
+        <strong>任意のReactNode</strong>（画像・SVG・自作コンポーネントも可）を受け取れる
+        ――ここでは文字と自作SVG図形（粒ごとにパレットから色を変える）を切り替えて実演する。
+      </>
+    ),
+    count: "個数",
+    fallSpeed: "fallSpeed（rem/秒）",
+    swayAmplitude: "swayAmplitude（横揺れ幅）",
+    swayFrequency: "swayFrequency（横揺れの速さ）",
+    spreadX: "spreadX（横方向の広がり）",
+    natural: "自然にバラける（乱数で物理演算っぽく散らす）",
+    renderKind: "見た目（render）",
+    glyphOption: "文字（絵文字）",
+    shapeOption: "SVG図形（自作コンポーネント・多色）",
+    glyphLabel: "絵柄",
+    glyphPlaceholder: "❄️ 🍂 🌸 など",
+    shapeHint: (n: number) => `色は固定1色ではなく、パレット（${n}色）から粒ごとに順番に割り当てる。`,
+  },
+  en: {
+    title: "Structural template: ParticleField (falling effects)",
+    hint: (
+      <>
+        rain and sakura are both really the same <code>ParticleField</code> given a <code>fallMotion</code> motion
+        function and parameters. <code>render</code> isn't limited to strings — it accepts{" "}
+        <strong>any ReactNode</strong> (an image, SVG, or custom component). Here you can switch between text and a
+        custom SVG shape (colored per-particle from a palette).
+      </>
+    ),
+    count: "count",
+    fallSpeed: "fallSpeed (rem/sec)",
+    swayAmplitude: "swayAmplitude (sway width)",
+    swayFrequency: "swayFrequency (sway speed)",
+    spreadX: "spreadX (horizontal spread)",
+    natural: "natural scatter (randomize like real physics)",
+    renderKind: "look (render)",
+    glyphOption: "text (emoji)",
+    shapeOption: "SVG shape (custom component, multi-color)",
+    glyphLabel: "glyph",
+    glyphPlaceholder: "e.g. ❄️ 🍂 🌸",
+    shapeHint: (n: number) =>
+      `Instead of one fixed color, each particle is assigned in turn from a ${n}-color palette.`,
+  },
+};
+
 function ParticleFallBuilder() {
+  const t = useT(PARTICLE_FALL_BUILDER_TEXT);
+  const fireText = useT(FIRE_BUTTON_TEXT);
   const [count, setCount] = useState(24);
   const [fallSpeed, setFallSpeed] = useState(8);
   const [swayAmplitude, setSwayAmplitude] = useState(1.5);
@@ -807,18 +1144,13 @@ function ParticleFallBuilder() {
     <section className="doc-section">
       <p className="section-title">
         <span>❄️</span>
-        <span>構造テンプレート：ParticleField（降ってくる系）</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        rain（雨）もsakura（桜吹雪）も実体は同じ<code>ParticleField</code>に<code>fallMotion</code>という
-        動き関数とパラメータを渡しているだけ。<code>render</code>は文字列専用ではなく
-        <strong>任意のReactNode</strong>（画像・SVG・自作コンポーネントも可）を受け取れる
-        ――ここでは文字と自作SVG図形（粒ごとにパレットから色を変える）を切り替えて実演する。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <div className="playground-grid">
         <div className="playground-controls">
           <label>
-            個数: {count}
+            {t.count}: {count}
             <input
               type="range"
               min="4"
@@ -829,7 +1161,7 @@ function ParticleFallBuilder() {
             />
           </label>
           <label>
-            fallSpeed（rem/秒）: {fallSpeed}
+            {t.fallSpeed}: {fallSpeed}
             <input
               type="range"
               min="1"
@@ -840,7 +1172,7 @@ function ParticleFallBuilder() {
             />
           </label>
           <label>
-            swayAmplitude（横揺れ幅）: {swayAmplitude.toFixed(1)}
+            {t.swayAmplitude}: {swayAmplitude.toFixed(1)}
             <input
               type="range"
               min="0"
@@ -851,7 +1183,7 @@ function ParticleFallBuilder() {
             />
           </label>
           <label>
-            swayFrequency（横揺れの速さ）: {swayFrequency.toFixed(1)}
+            {t.swayFrequency}: {swayFrequency.toFixed(1)}
             <input
               type="range"
               min="0.5"
@@ -873,7 +1205,7 @@ function ParticleFallBuilder() {
             />
           </label>
           <label>
-            spreadX（横方向の広がり）: {spreadX}
+            {t.spreadX}: {spreadX}
             <input
               type="range"
               min="2"
@@ -885,23 +1217,28 @@ function ParticleFallBuilder() {
           </label>
           <label className="playground-checkbox">
             <input type="checkbox" checked={natural} onChange={(e) => setNatural(e.target.checked)} />
-            自然にバラける（乱数で物理演算っぽく散らす）
+            {t.natural}
           </label>
           <label>
-            見た目（render）
+            {t.renderKind}
             <select value={renderKind} onChange={(e) => setRenderKind(e.target.value as FallRenderKind)}>
-              <option value="glyph">文字（絵文字）</option>
-              <option value="shape">SVG図形（自作コンポーネント・多色）</option>
+              <option value="glyph">{t.glyphOption}</option>
+              <option value="shape">{t.shapeOption}</option>
             </select>
           </label>
           {renderKind === "glyph" ? (
             <label>
-              絵柄
-              <input type="text" value={glyph} onChange={(e) => setGlyph(e.target.value)} placeholder="❄️ 🍂 🌸 など" />
+              {t.glyphLabel}
+              <input
+                type="text"
+                value={glyph}
+                onChange={(e) => setGlyph(e.target.value)}
+                placeholder={t.glyphPlaceholder}
+              />
             </label>
           ) : (
             <p className="section-hint" style={{ margin: 0 }}>
-              色は固定1色ではなく、パレット（{SHAPE_PALETTE.length}色）から粒ごとに順番に割り当てる。
+              {t.shapeHint(SHAPE_PALETTE.length)}
             </p>
           )}
         </div>
@@ -912,7 +1249,7 @@ function ParticleFallBuilder() {
         </div>
       </div>
       <button className="combo-button" onClick={() => setFireKey((k) => k + 1)}>
-        🚀 発火（celebrate()を経由しない）
+        {fireText}
       </button>
       <div
         style={{
@@ -939,8 +1276,61 @@ function ParticleFallBuilder() {
 // glow系のパラメータ違い、spin/rainbowはconicRing系のパラメータ違いでしかないことの実演。
 type GlowFamily = "pulse" | "flicker" | "fire" | "ice" | "electric";
 
+const BORDER_MECHANISM_BUILDER_TEXT = {
+  ja: {
+    title: "構造テンプレート：ボーダー（glow/conicRing）",
+    hint: (
+      <>
+        glow/neon/fire/ice/electricは全部box-shadowパルス/フリッカー（<code>glow</code>機構）のパラメータ違い、
+        spin/rainbowは全部conic-gradientリング（<code>conicRing</code>機構）のパラメータ違いでしかない。
+        名前を選ぶのではなく、機構と生のパラメータ（色・stops・mode）を直接指定する。
+      </>
+    ),
+    mechanism: "機構",
+    mechanismGlow: "glow（box-shadowパルス/フリッカー）",
+    mechanismConicRing: "conicRing（グラデーションリング）",
+    family: "系統",
+    familyPulse: "pulse（glow相当・単発）",
+    familyFlicker: "flicker（neon相当・明滅）",
+    familyFire: "fire相当（2色ゆらめき）",
+    familyIce: "ice相当（2色シマー）",
+    familyElectric: "electric相当（離散ジッター）",
+    stops: "stops（conic-gradientの色並び）",
+    modeSweep: "sweep（spin相当・回り続ける）",
+    modeFlash: "flash（rainbow相当・一度だけ）",
+    existing: "既存コンポーネント",
+    fire: "🚀 発火",
+  },
+  en: {
+    title: "Structural template: border (glow/conicRing)",
+    hint: (
+      <>
+        glow/neon/fire/ice/electric are all just parameter variants of a box-shadow pulse/flicker (the
+        <code>glow</code> mechanism); spin/rainbow are all just parameter variants of a conic-gradient ring (the
+        <code>conicRing</code> mechanism). Instead of picking a name, specify the mechanism and raw parameters (color /
+        stops / mode) directly.
+      </>
+    ),
+    mechanism: "mechanism",
+    mechanismGlow: "glow (box-shadow pulse/flicker)",
+    mechanismConicRing: "conicRing (gradient ring)",
+    family: "family",
+    familyPulse: "pulse (glow equivalent, single shot)",
+    familyFlicker: "flicker (neon equivalent, blinking)",
+    familyFire: "fire equivalent (2-color flicker)",
+    familyIce: "ice equivalent (2-color shimmer)",
+    familyElectric: "electric equivalent (discrete jitter)",
+    stops: "stops (conic-gradient color stops)",
+    modeSweep: "sweep (spin equivalent, keeps spinning)",
+    modeFlash: "flash (rainbow equivalent, plays once)",
+    existing: "Existing component",
+    fire: "🚀 Fire",
+  },
+};
+
 function BorderMechanismBuilder() {
   const { ref, celebrateBorder } = useCelebrateBorder<HTMLDivElement>();
+  const t = useT(BORDER_MECHANISM_BUILDER_TEXT);
   const [mechanism, setMechanism] = useState<"glow" | "conicRing">("glow");
   const [glowFamily, setGlowFamily] = useState<GlowFamily>("flicker");
   const [color1, setColor1] = useState("#ff8a3d");
@@ -993,32 +1383,28 @@ function BorderMechanismBuilder() {
     <section className="doc-section">
       <p className="section-title">
         <span>🖼️</span>
-        <span>構造テンプレート：ボーダー（glow/conicRing）</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        glow/neon/fire/ice/electricは全部box-shadowパルス/フリッカー（<code>glow</code>機構）のパラメータ違い、
-        spin/rainbowは全部conic-gradientリング（<code>conicRing</code>機構）のパラメータ違いでしかない。
-        名前を選ぶのではなく、機構と生のパラメータ（色・stops・mode）を直接指定する。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <div className="playground-grid">
         <div className="playground-controls">
           <label>
-            機構
+            {t.mechanism}
             <select value={mechanism} onChange={(e) => setMechanism(e.target.value as "glow" | "conicRing")}>
-              <option value="glow">glow（box-shadowパルス/フリッカー）</option>
-              <option value="conicRing">conicRing（グラデーションリング）</option>
+              <option value="glow">{t.mechanismGlow}</option>
+              <option value="conicRing">{t.mechanismConicRing}</option>
             </select>
           </label>
           {mechanism === "glow" ? (
             <>
               <label>
-                系統
+                {t.family}
                 <select value={glowFamily} onChange={(e) => setGlowFamily(e.target.value as GlowFamily)}>
-                  <option value="pulse">pulse（glow相当・単発）</option>
-                  <option value="flicker">flicker（neon相当・明滅）</option>
-                  <option value="fire">fire相当（2色ゆらめき）</option>
-                  <option value="ice">ice相当（2色シマー）</option>
-                  <option value="electric">electric相当（離散ジッター）</option>
+                  <option value="pulse">{t.familyPulse}</option>
+                  <option value="flicker">{t.familyFlicker}</option>
+                  <option value="fire">{t.familyFire}</option>
+                  <option value="ice">{t.familyIce}</option>
+                  <option value="electric">{t.familyElectric}</option>
                 </select>
               </label>
               <label>
@@ -1035,14 +1421,14 @@ function BorderMechanismBuilder() {
           ) : (
             <>
               <label>
-                stops（conic-gradientの色並び）
+                {t.stops}
                 <input type="text" value={stopsText} onChange={(e) => setStopsText(e.target.value)} />
               </label>
               <label>
                 mode
                 <select value={mode} onChange={(e) => setMode(e.target.value as "sweep" | "flash")}>
-                  <option value="sweep">sweep（spin相当・回り続ける）</option>
-                  <option value="flash">flash（rainbow相当・一度だけ）</option>
+                  <option value="sweep">{t.modeSweep}</option>
+                  <option value="flash">{t.modeFlash}</option>
                 </select>
               </label>
             </>
@@ -1059,10 +1445,10 @@ function BorderMechanismBuilder() {
         className="border-demo-target"
         style={{ marginTop: "1rem", ["--celebrate-border-color" as string]: color1 }}
       >
-        既存コンポーネント
+        {t.existing}
       </div>
       <button className="combo-button" onClick={fire}>
-        🚀 発火
+        {t.fire}
       </button>
     </section>
   );
@@ -1082,7 +1468,36 @@ const GIFT_CONTENT_STYLE: CSSProperties = {
   background: "#fff7e6",
 };
 
+const CLIP_REVEAL_DEMO_TEXT = {
+  ja: {
+    title: "構造テンプレート：ClipReveal（軸I=マスク・リビール）",
+    hint: (
+      <>
+        RadialBurst（scale+opacity）/ParticleField（粒）/StrokePath（線）とは別の軸： 覆いを<code>clip-path</code>
+        で動かして中身を出し入れする（緞帳ワイプ）。
+        <code>direction="cover"</code>は同じ経路の逆再生（覆いが閉じる）。
+      </>
+    ),
+    reveal: "reveal（覆いが晴れる）",
+    cover: "cover（覆いが閉じる）",
+  },
+  en: {
+    title: "Structural template: ClipReveal (axis I = mask/reveal)",
+    hint: (
+      <>
+        A different axis from RadialBurst (scale+opacity) / ParticleField (particles) / StrokePath (lines): moves a
+        cover with <code>clip-path</code> to reveal or hide content (a curtain wipe). <code>direction="cover"</code>{" "}
+        plays the same path in reverse (the cover closes).
+      </>
+    ),
+    reveal: "reveal (cover clears)",
+    cover: "cover (cover closes)",
+  },
+};
+
 function ClipRevealDemo() {
+  const t = useT(CLIP_REVEAL_DEMO_TEXT);
+  const fireText = useT(FIRE_BUTTON_TEXT);
   const [edge, setEdge] = useState<ClipRevealEdge>("left");
   const [direction, setDirection] = useState<"reveal" | "cover">("reveal");
   const [color, setColor] = useState("#2b2b2b");
@@ -1110,13 +1525,9 @@ function ClipRevealDemo() {
     <section className="doc-section">
       <p className="section-title">
         <span>🎬</span>
-        <span>構造テンプレート：ClipReveal（軸I=マスク・リビール）</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        RadialBurst（scale+opacity）/ParticleField（粒）/StrokePath（線）とは別の軸： 覆いを<code>clip-path</code>
-        で動かして中身を出し入れする（緞帳ワイプ）。
-        <code>direction="cover"</code>は同じ経路の逆再生（覆いが閉じる）。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <div className="playground-grid">
         <div className="playground-controls">
           <label>
@@ -1132,8 +1543,8 @@ function ClipRevealDemo() {
           <label>
             direction
             <select value={direction} onChange={(e) => setDirection(e.target.value as "reveal" | "cover")}>
-              <option value="reveal">reveal（覆いが晴れる）</option>
-              <option value="cover">cover（覆いが閉じる）</option>
+              <option value="reveal">{t.reveal}</option>
+              <option value="cover">{t.cover}</option>
             </select>
           </label>
           <label>
@@ -1154,7 +1565,7 @@ function ClipRevealDemo() {
           setFired(true);
         }}
       >
-        🚀 発火（celebrate()を経由しない）
+        {fireText}
       </button>
       <div
         style={{
@@ -1191,9 +1602,39 @@ function ClipRevealDemo() {
 // 構造テンプレートのデモ・その5：Sequence（合成層。軸F=staged-sequence）。
 // with（parallel相当・同時に重ねる）とは別軸：「前段が終わってから次段が始まる」かつ
 // 「前段の実行結果（着地座標）を次段のパラメータとして受け取れる」ことの実演。
+const SEQUENCE_DEMO_TEXT = {
+  ja: {
+    title: "合成層：Sequence",
+    hint: (
+      <>
+        <code>with</code>（parallel相当・同時に重ねる）とは別軸：前段が終わってから次段が始まり、
+        前段の実行結果（ここでは「落下地点のx座標」）を次段の<code>render</code>へ渡せる。 各ステップの
+        <code>onEnter</code>で効果音・振動をステップ単位に鳴らせる（ここではログ表示で代用）。
+      </>
+    ),
+    step1: "1段目：落下中（onEnter）",
+    step2: (x: number | undefined) => `2段目：着地（前段の結果 landedAtRem=${x} を受け取った）`,
+  },
+  en: {
+    title: "Composite layer: Sequence",
+    hint: (
+      <>
+        A different axis from <code>with</code> (parallel — layered at the same time): the next step only starts after
+        the previous one ends, and the previous step's result (here, the x landing coordinate) can be passed into the
+        next step's <code>render</code>. Each step's <code>onEnter</code> can play a sound/haptic per step (shown here
+        as a log line instead).
+      </>
+    ),
+    step1: "Step 1: falling (onEnter)",
+    step2: (x: number | undefined) => `Step 2: landed (received previous result landedAtRem=${x})`,
+  },
+};
+
 function SequenceDemo() {
   const [fireKey, setFireKey] = useState(0);
   const [log, setLog] = useState<string[]>([]);
+  const t = useT(SEQUENCE_DEMO_TEXT);
+  const fireText = useT(FIRE_BUTTON_TEXT);
 
   const fire = () => {
     setLog([]);
@@ -1204,15 +1645,11 @@ function SequenceDemo() {
     <section className="doc-section">
       <p className="section-title">
         <span>🎞️</span>
-        <span>合成層：Sequence</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        <code>with</code>（parallel相当・同時に重ねる）とは別軸：前段が終わってから次段が始まり、
-        前段の実行結果（ここでは「落下地点のx座標」）を次段の<code>render</code>へ渡せる。 各ステップの
-        <code>onEnter</code>で効果音・振動をステップ単位に鳴らせる（ここではログ表示で代用）。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <button className="combo-button" onClick={fire}>
-        🚀 発火（celebrate()を経由しない）
+        {fireText}
       </button>
       <div
         style={{
@@ -1232,15 +1669,11 @@ function SequenceDemo() {
               render: () => <span>🪙</span>,
               durationMs: 500,
               computeResult: () => ({ landedAtRem: 2.4 }),
-              onEnter: () => setLog((prev) => [...prev, "1段目：落下中（onEnter）"]),
+              onEnter: () => setLog((prev) => [...prev, t.step1]),
             },
             {
               render: (result) => <span>💥 x={result?.landedAtRem}rem</span>,
-              onEnter: (result) =>
-                setLog((prev) => [
-                  ...prev,
-                  `2段目：着地（前段の結果 landedAtRem=${result?.landedAtRem} を受け取った）`,
-                ]),
+              onEnter: (result) => setLog((prev) => [...prev, t.step2(result?.landedAtRem)]),
             },
           ]}
         />
@@ -1297,8 +1730,44 @@ const STAMP_SHAPES: readonly CelebrateStampShape[] = ["rounded", "circle", "squa
 // Playgroundの1つの色スウォッチをどちらに流し込むかを、選んだvariantで出し分ける。
 const PALETTE_VARIANTS = new Set<CelebrateVariant>(["confetti", "sparkle", "cracker", "rain", "firework"]);
 
+const PLAYGROUND_TEXT = {
+  ja: {
+    title: "The playground（options全体を試す・Tier 1）",
+    hint: (
+      <>
+        上のカタログが1 variant＝1個のシンプルな呼び出しだったのに対し、こちらは
+        <code>with</code>/<code>intensity</code>/<code>text</code>等の<code>CelebrateVariantOptions</code>を
+        自由に組み合わせて試せる。構造テンプレート（下記）は名前を経由せず生のパラメータを直接いじる、さらに下の層。
+      </>
+    ),
+    withLegend: "with（重ねるvariant）",
+    sizeRemCheckbox: "sizeRem を指定する（絶対サイズ）",
+    rotateDegCheckbox: "rotateDeg を指定する（傾き）",
+    shapeDefault: "（既定：rounded）",
+    textPlaceholder: "例：合格",
+    notePlaceholder: "例：れんぞく 7問",
+  },
+  en: {
+    title: "The playground (try all options, Tier 1)",
+    hint: (
+      <>
+        Where the catalog above is one variant = one simple call, here you can freely combine
+        <code>CelebrateVariantOptions</code> like <code>with</code>/<code>intensity</code>/<code>text</code>. The
+        structural templates below go a layer deeper still, skipping names to work with raw parameters directly.
+      </>
+    ),
+    withLegend: "with (variants layered on top)",
+    sizeRemCheckbox: "specify sizeRem (absolute size)",
+    rotateDegCheckbox: "specify rotateDeg (tilt)",
+    shapeDefault: "(default: rounded)",
+    textPlaceholder: "e.g. Pass",
+    notePlaceholder: "e.g. 7 in a row",
+  },
+};
+
 function Playground() {
   const celebrate = useCelebrate();
+  const t = useT(PLAYGROUND_TEXT);
   const [variant, setVariant] = useState<CelebrateVariant>("confetti");
   const [withList, setWithList] = useState<CelebrateVariant[]>([]);
   const [intensity, setIntensity] = useState(1);
@@ -1359,13 +1828,9 @@ function Playground() {
     <section className="doc-section">
       <p className="section-title">
         <span>🛝</span>
-        <span>The playground（options全体を試す・Tier 1）</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        上のカタログが1 variant＝1個のシンプルな呼び出しだったのに対し、こちらは
-        <code>with</code>/<code>intensity</code>/<code>text</code>等の<code>CelebrateVariantOptions</code>を
-        自由に組み合わせて試せる。構造テンプレート（下記）は名前を経由せず生のパラメータを直接いじる、さらに下の層。
-      </p>
+      <p className="section-hint">{t.hint}</p>
       <div className="playground-grid">
         <div className="playground-controls">
           <label>
@@ -1379,7 +1844,7 @@ function Playground() {
             </select>
           </label>
           <fieldset>
-            <legend>with（重ねるvariant）</legend>
+            <legend>{t.withLegend}</legend>
             <div className="playground-with-list">
               {ALL_VARIANTS.filter((v) => v !== variant).map((v) => (
                 <label key={v} className="playground-checkbox">
@@ -1408,7 +1873,7 @@ function Playground() {
                   checked={sizeRem !== null}
                   onChange={(e) => setSizeRem(e.target.checked ? 5 : null)}
                 />
-                sizeRem を指定する（絶対サイズ）
+                {t.sizeRemCheckbox}
               </label>
               {sizeRem !== null && (
                 <label>
@@ -1433,7 +1898,7 @@ function Playground() {
                   checked={rotateDeg !== null}
                   onChange={(e) => setRotateDeg(e.target.checked ? -6 : null)}
                 />
-                rotateDeg を指定する（傾き）
+                {t.rotateDegCheckbox}
               </label>
               {rotateDeg !== null && (
                 <label>
@@ -1457,7 +1922,7 @@ function Playground() {
                 value={shape ?? ""}
                 onChange={(e) => setShape(e.target.value === "" ? null : (e.target.value as CelebrateStampShape))}
               >
-                <option value="">（既定：rounded）</option>
+                <option value="">{t.shapeDefault}</option>
                 {STAMP_SHAPES.map((s) => (
                   <option key={s} value={s}>
                     {s}
@@ -1469,7 +1934,12 @@ function Playground() {
           {supportsText && (
             <label>
               text
-              <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="例：合格" />
+              <input
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder={t.textPlaceholder}
+              />
             </label>
           )}
           {supportsNote && (
@@ -1479,7 +1949,7 @@ function Playground() {
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="例：れんぞく 7問"
+                placeholder={t.notePlaceholder}
               />
             </label>
           )}
@@ -1501,20 +1971,35 @@ function Playground() {
   );
 }
 
-const FEATURES = [
-  "variantを名前で選ぶだけ（アイコンライブラリと同じ感覚）",
-  "with で任意のvariantを重ねられる（合成が汎用）",
-  "intensity で見た目・音量・振動が連続的に派手になる",
-  "sound / haptic をそれぞれ個別にon/offできる",
-  "ボーダーエフェクト（既存コンポーネントの境界線を装飾）が10種類",
-  "画面全体エフェクト（rain/lightning/shatter/vignette）にも対応",
-  "seed で再現可能なパーティクル生成（テスト・デモ向け）",
-  "Tailwind等のビルドパイプライン不要（プレーンCSSのみ）",
-  "reduced-motion（アクセシビリティ設定）に全variantが対応",
-  "拡張可能な物理エンジンの核（motionProfile / ParticleField）をTier 3として同梱",
-];
+const FEATURES_TEXT = {
+  ja: [
+    "variantを名前で選ぶだけ（アイコンライブラリと同じ感覚）",
+    "with で任意のvariantを重ねられる（合成が汎用）",
+    "intensity で見た目・音量・振動が連続的に派手になる",
+    "sound / haptic をそれぞれ個別にon/offできる",
+    "ボーダーエフェクト（既存コンポーネントの境界線を装飾）が10種類",
+    "画面全体エフェクト（rain/lightning/shatter/vignette）にも対応",
+    "seed で再現可能なパーティクル生成（テスト・デモ向け）",
+    "Tailwind等のビルドパイプライン不要（プレーンCSSのみ）",
+    "reduced-motion（アクセシビリティ設定）に全variantが対応",
+    "拡張可能な物理エンジンの核（motionProfile / ParticleField）をTier 3として同梱",
+  ],
+  en: [
+    "Pick a variant by name (like using an icon library)",
+    "with layers any number of variants together (composition is generic)",
+    "intensity continuously ramps up visuals, volume, and haptics",
+    "sound / haptic can each be toggled independently",
+    "10 border effects (decorate an existing component's border)",
+    "Full-screen effects too (rain/lightning/shatter/vignette)",
+    "seed gives reproducible particle generation (for tests and demos)",
+    "No build pipeline needed (Tailwind etc.) — plain CSS only",
+    "Every variant respects reduced-motion (accessibility setting)",
+    "An extensible physics engine core (motionProfile / ParticleField) ships as Tier 3",
+  ],
+};
 
 function Features() {
+  const items = useT(FEATURES_TEXT);
   return (
     <section className="doc-section">
       <p className="section-title">
@@ -1522,7 +2007,7 @@ function Features() {
         <span>Features</span>
       </p>
       <ul className="features-list">
-        {FEATURES.map((f) => (
+        {items.map((f) => (
           <li key={f}>{f}</li>
         ))}
       </ul>
@@ -1530,13 +2015,25 @@ function Features() {
   );
 }
 
+const DOCS_HEADER_TEXT = {
+  ja: {
+    tagline:
+      "React向けの祝福・反応エフェクトライブラリ。名前で選ぶだけのカタログから、生のパラメータを直接いじる構造テンプレートまで、3段階の自由度で使える。",
+    examplesLink: "🎮 実装例を見る（花火大会・クイズ・ミニゲーム）→",
+  },
+  en: {
+    tagline:
+      "A celebration/reaction effects library for React. Use it at 3 levels of freedom: a catalog you pick by name, or structural templates you drive with raw parameters directly.",
+    examplesLink: "🎮 See the examples (fireworks, quiz, mini game) →",
+  },
+};
+
 function DocsHeader() {
+  const t = useT(DOCS_HEADER_TEXT);
   return (
     <header className="docs-header">
       <h1 className="docs-title">@celebrate-js/celebrate</h1>
-      <p className="docs-tagline">
-        React向けの祝福・反応エフェクトライブラリ。名前で選ぶだけのカタログから、生のパラメータを直接いじる構造テンプレートまで、3段階の自由度で使える。
-      </p>
+      <p className="docs-tagline">{t.tagline}</p>
       <div className="docs-badges">
         <span className="docs-badge">
           <span>npm</span>
@@ -1552,13 +2049,14 @@ function DocsHeader() {
         </span>
       </div>
       <p className="docs-examples-link">
-        <Link to="/examples">🎮 実装例を見る（花火大会・クイズ・ミニゲーム）→</Link>
+        <Link to="/examples">{t.examplesLink}</Link>
       </p>
     </header>
   );
 }
 
-const QUICKSTART_CODE = `import { CelebrateProvider, useCelebrate } from "@celebrate-js/celebrate/react";
+const QUICKSTART_CODE_TEXT = {
+  ja: `import { CelebrateProvider, useCelebrate } from "@celebrate-js/celebrate/react";
 
 function App() {
   return (
@@ -1571,25 +2069,62 @@ function App() {
 function AnswerButton() {
   const celebrate = useCelebrate();
   return <button onClick={() => celebrate("confetti")}>正解</button>;
-}`;
+}`,
+  en: `import { CelebrateProvider, useCelebrate } from "@celebrate-js/celebrate/react";
 
-function Quickstart() {
+function App() {
   return (
-    <section className="doc-section">
-      <p className="section-title">
-        <span>🚀</span>
-        <span>Quickstart</span>
-      </p>
-      <p className="section-hint">
+    <CelebrateProvider>
+      <AnswerButton />
+    </CelebrateProvider>
+  );
+}
+
+function AnswerButton() {
+  const celebrate = useCelebrate();
+  return <button onClick={() => celebrate("confetti")}>Correct!</button>;
+}`,
+};
+
+const QUICKSTART_TEXT = {
+  ja: {
+    hint: (
+      <>
         <code>npm install @celebrate-js/celebrate</code>。あとは
         <code>{"<CelebrateProvider>"}</code>で包んで<code>useCelebrate()</code>を呼ぶだけ。
         3段階（Tier）の自由度がある：①名前で選ぶカタログ（下記）、②複数局面を順番に切り替える合成層 （<code>with</code>/
         <code>Sequence</code>）、③構造テンプレートに生のパラメータを渡すTier 3。 詳細は
         <a href="#catalog">上のカタログ</a>と<a href="#api-reference">下のAPIリファレンス</a>参照（リポジトリの
         <code>docs/</code>にも同内容のmarkdown版がある）。
+      </>
+    ),
+  },
+  en: {
+    hint: (
+      <>
+        <code>npm install @celebrate-js/celebrate</code>. Then just wrap your app in{" "}
+        <code>{"<CelebrateProvider>"}</code> and call <code>useCelebrate()</code>. There are 3 tiers of freedom: ① the
+        catalog you pick by name (below), ② a composite layer that steps through phases in order (<code>with</code>/
+        <code>Sequence</code>), ③ Tier 3, passing raw parameters to structural templates directly. See{" "}
+        <a href="#catalog">the catalog above</a> and <a href="#api-reference">the API reference below</a> for details
+        (the repo's <code>docs/</code> also has the same content in markdown).
+      </>
+    ),
+  },
+};
+
+function Quickstart() {
+  const t = useT(QUICKSTART_TEXT);
+  const code = useT(QUICKSTART_CODE_TEXT);
+  return (
+    <section className="doc-section">
+      <p className="section-title">
+        <span>🚀</span>
+        <span>Quickstart</span>
       </p>
+      <p className="section-hint">{t.hint}</p>
       <pre className="playground-code">
-        <code>{QUICKSTART_CODE}</code>
+        <code>{code}</code>
       </pre>
     </section>
   );
@@ -1617,15 +2152,21 @@ interface ApiRow {
   desc: string;
 }
 
+const API_TABLE_TEXT = {
+  ja: { defaultValue: "既定値", description: "説明" },
+  en: { defaultValue: "default", description: "description" },
+};
+
 function ApiTable({ rows }: { rows: readonly ApiRow[] }) {
+  const t = useT(API_TABLE_TEXT);
   return (
     <table className="api-table">
       <thead>
         <tr>
           <th>prop</th>
           <th>type</th>
-          <th>既定値</th>
-          <th>説明</th>
+          <th>{t.defaultValue}</th>
+          <th>{t.description}</th>
         </tr>
       </thead>
       <tbody>
@@ -1941,15 +2482,21 @@ const BORDER_KIND_ROWS: readonly BorderKindRow[] = [
   { kind: "shine", mechanism: "class", durationMs: 700, desc: "斜めの光沢が一度だけ横切る。" },
 ];
 
+const BORDER_KIND_TABLE_TEXT = {
+  ja: { mechanism: "機構", duration: "既定duration", description: "説明" },
+  en: { mechanism: "mechanism", duration: "default duration", description: "description" },
+};
+
 function BorderKindTable() {
+  const t = useT(BORDER_KIND_TABLE_TEXT);
   return (
     <table className="api-table">
       <thead>
         <tr>
           <th>kind</th>
-          <th>機構</th>
-          <th>既定duration</th>
-          <th>説明</th>
+          <th>{t.mechanism}</th>
+          <th>{t.duration}</th>
+          <th>{t.description}</th>
         </tr>
       </thead>
       <tbody>
@@ -1985,11 +2532,12 @@ const REWARD_TIER_PROPS: readonly ApiRow[] = [
 // CATALOG_CATEGORIES（カタログセクションと共通のデータ）とdurationForCelebration()/
 // hasSoundForCelebration()/hasHapticForCelebration()（recipes.tsxの実データ）から
 // 実行時に組み立てる。
-const VARIANT_TO_CATEGORY = new Map<CelebrateVariant, string>(
-  CATALOG_CATEGORIES.flatMap((category) => category.variants.map((v) => [v.variant, category.title] as const))
+const VARIANT_TO_CATEGORY = new Map<CelebrateVariant, CatalogCategory>(
+  CATALOG_CATEGORIES.flatMap((category) => category.variants.map((v) => [v.variant, category] as const))
 );
 
 function VariantTable() {
+  const { lang } = useLang();
   return (
     <table className="api-table">
       <thead>
@@ -2002,44 +2550,102 @@ function VariantTable() {
         </tr>
       </thead>
       <tbody>
-        {CELEBRATE_VARIANT_NAMES.map((variant) => (
-          <tr key={variant}>
-            <td>
-              <code>{variant}</code>
-            </td>
-            <td>{VARIANT_TO_CATEGORY.get(variant) ?? "-"}</td>
-            <td>{durationForCelebration(variant)}ms</td>
-            <td>{hasSoundForCelebration(variant) ? "🔈" : "-"}</td>
-            <td>{hasHapticForCelebration(variant) ? "📳" : "-"}</td>
-          </tr>
-        ))}
+        {CELEBRATE_VARIANT_NAMES.map((variant) => {
+          const category = VARIANT_TO_CATEGORY.get(variant);
+          return (
+            <tr key={variant}>
+              <td>
+                <code>{variant}</code>
+              </td>
+              <td>{category ? (lang === "en" ? category.titleEn : category.title) : "-"}</td>
+              <td>{durationForCelebration(variant)}ms</td>
+              <td>{hasSoundForCelebration(variant) ? "🔈" : "-"}</td>
+              <td>{hasHapticForCelebration(variant) ? "📳" : "-"}</td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
 }
 
+const API_REFERENCE_SECTION_TEXT = {
+  ja: {
+    title: "API リファレンス",
+    hint: (
+      <>
+        各propsの型・既定値・説明の一覧（<code>docs/api-reference.md</code>
+        と同内容）。使い方の説明・コード例はこのページの上のセクション、または
+        <code>docs/guide.md</code>参照。
+      </>
+    ),
+    variantListTitle: "CelebrateVariant 一覧",
+    variantListNote: (n: number) => (
+      <>登録済みの{n}variant。durationMs/sound/hapticは実装から実行時に取得した値（ハードコードではない）。</>
+    ),
+    celebrateOptionsNote: <>celebrate(content, options)の第二引数。</>,
+    radialBurstNote: "RadialBurst自体のprops（layers/children/theme/classNameに加えて）：",
+    strokeLineNote: <>pointsとdはどちらか一方を指定する（直線区間のみならpoints、円弧など曲線を含むならd）。</>,
+    clipRevealNote: <>覆いをclip-pathで動かして中身を出し入れするプリミティブ（軸I=clip-reveal）。</>,
+    sequenceStepLabel: <code>SequenceStep&lt;TResult&gt;</code>,
+    enterSettleNote: (
+      <>「入って、そのまま残る」構造テンプレート（stamp/medal/recordが共有）。EnterSettleOptionsは全て省略可。</>
+    ),
+    returnValue: "戻り値：",
+    celebrateBorderOptionsLabel: <code>CelebrateBorderOptions</code>,
+    borderKindsNote: (
+      <>
+        <code>BORDER_EFFECT_KINDS</code>（10種）は実質2機構＋単純なCSSクラス3種に集約されている：
+      </>
+    ),
+  },
+  en: {
+    title: "API reference",
+    hint: (
+      <>
+        A list of each prop's type, default, and description (same content as <code>docs/api-reference.md</code>). For
+        usage explanations and code examples, see the sections above on this page, or <code>docs/guide.md</code>. Prop
+        descriptions in this section are Japanese-only for now.
+      </>
+    ),
+    variantListTitle: "CelebrateVariant list",
+    variantListNote: (n: number) => (
+      <>{n} registered variants. durationMs/sound/haptic are read from the implementation at runtime, not hardcoded.</>
+    ),
+    celebrateOptionsNote: <>The second argument of celebrate(content, options).</>,
+    radialBurstNote: "RadialBurst's own props (in addition to layers/children/theme/className):",
+    strokeLineNote: (
+      <>Specify either points or d (points for straight-only segments, d if curves like arcs are involved).</>
+    ),
+    clipRevealNote: <>A primitive that moves a cover with clip-path to reveal/hide content (axis I = clip-reveal).</>,
+    sequenceStepLabel: <code>SequenceStep&lt;TResult&gt;</code>,
+    enterSettleNote: (
+      <>
+        The “enters, then stays” structural template (shared by stamp/medal/record). All EnterSettleOptions are
+        optional.
+      </>
+    ),
+    returnValue: "Return value:",
+    celebrateBorderOptionsLabel: <code>CelebrateBorderOptions</code>,
+    borderKindsNote: (
+      <>
+        <code>BORDER_EFFECT_KINDS</code> (10 kinds) really reduces to 2 mechanisms plus 3 simple CSS classes:
+      </>
+    ),
+  },
+};
+
 function ApiReferenceSection() {
+  const t = useT(API_REFERENCE_SECTION_TEXT);
   return (
     <section id="api-reference" className="doc-section">
       <p className="section-title">
         <span>📚</span>
-        <span>API リファレンス</span>
+        <span>{t.title}</span>
       </p>
-      <p className="section-hint">
-        各propsの型・既定値・説明の一覧（<code>docs/api-reference.md</code>
-        と同内容）。使い方の説明・コード例はこのページの上のセクション、または
-        <code>docs/guide.md</code>参照。
-      </p>
+      <p className="section-hint">{t.hint}</p>
 
-      <ApiSubsection
-        title="CelebrateVariant 一覧"
-        note={
-          <>
-            登録済みの{CELEBRATE_VARIANT_NAMES.length}
-            variant。durationMs/sound/hapticは実装から実行時に取得した値（ハードコードではない）。
-          </>
-        }
-      >
+      <ApiSubsection title={t.variantListTitle} note={t.variantListNote(CELEBRATE_VARIANT_NAMES.length)}>
         <VariantTable />
       </ApiSubsection>
 
@@ -2047,14 +2653,14 @@ function ApiReferenceSection() {
         <ApiTable rows={CELEBRATE_PROVIDER_PROPS} />
       </ApiSubsection>
 
-      <ApiSubsection title="CelebrateOptions" note={<>celebrate(content, options)の第二引数。</>}>
+      <ApiSubsection title="CelebrateOptions" note={t.celebrateOptionsNote}>
         <ApiTable rows={CELEBRATE_OPTIONS} />
       </ApiSubsection>
 
       <ApiSubsection title="RadialBurstLayer / RadialBurst">
         <ApiTable rows={RADIAL_BURST_LAYER_PROPS} />
         <p className="section-hint" style={{ marginTop: "0.75rem" }}>
-          RadialBurst自体のprops（layers/children/theme/classNameに加えて）：
+          {t.radialBurstNote}
         </p>
         <ApiTable rows={RADIAL_BURST_PROPS} />
       </ApiSubsection>
@@ -2063,46 +2669,35 @@ function ApiReferenceSection() {
         <ApiTable rows={PARTICLE_SPEC_PROPS} />
       </ApiSubsection>
 
-      <ApiSubsection
-        title="StrokeLine"
-        note={<>pointsとdはどちらか一方を指定する（直線区間のみならpoints、円弧など曲線を含むならd）。</>}
-      >
+      <ApiSubsection title="StrokeLine" note={t.strokeLineNote}>
         <ApiTable rows={STROKE_LINE_PROPS} />
       </ApiSubsection>
 
-      <ApiSubsection
-        title="ClipReveal"
-        note={<>覆いをclip-pathで動かして中身を出し入れするプリミティブ（軸I=clip-reveal）。</>}
-      >
+      <ApiSubsection title="ClipReveal" note={t.clipRevealNote}>
         <ApiTable rows={CLIP_REVEAL_PROPS} />
       </ApiSubsection>
 
       <ApiSubsection title="Sequence / SequenceStep<TResult>">
         <ApiTable rows={SEQUENCE_PROPS} />
         <p className="section-hint" style={{ marginTop: "0.75rem" }}>
-          <code>SequenceStep&lt;TResult&gt;</code>：
+          {t.sequenceStepLabel}：
         </p>
         <ApiTable rows={SEQUENCE_STEP_PROPS} />
       </ApiSubsection>
 
-      <ApiSubsection
-        title="enterSettleStyle(options)"
-        note={
-          <>「入って、そのまま残る」構造テンプレート（stamp/medal/recordが共有）。EnterSettleOptionsは全て省略可。</>
-        }
-      >
+      <ApiSubsection title="enterSettleStyle(options)" note={t.enterSettleNote}>
         <ApiTable rows={ENTER_SETTLE_OPTIONS} />
       </ApiSubsection>
 
       <ApiSubsection title="useCelebrateBorder()">
-        <p className="section-hint">戻り値：</p>
+        <p className="section-hint">{t.returnValue}</p>
         <ApiTable rows={USE_CELEBRATE_BORDER_RETURN} />
         <p className="section-hint" style={{ marginTop: "0.75rem" }}>
-          <code>CelebrateBorderOptions</code>：
+          {t.celebrateBorderOptionsLabel}：
         </p>
         <ApiTable rows={CELEBRATE_BORDER_OPTIONS} />
         <p className="section-hint" style={{ marginTop: "0.75rem" }}>
-          <code>BORDER_EFFECT_KINDS</code>（10種）は実質2機構＋単純なCSSクラス3種に集約されている：
+          {t.borderKindsNote}
         </p>
         <BorderKindTable />
       </ApiSubsection>
@@ -2118,10 +2713,32 @@ function ApiReferenceSection() {
   );
 }
 
+const DOCS_PAGE_TEXT = {
+  ja: {
+    tier2Title: "合成層（Tier 2）",
+    tier2Description: "複数局面を順番に切り替える。前段の実行結果を次段のパラメータとして渡せる。",
+    tier3Title: "構造テンプレート（Tier 3）",
+    tier3Description:
+      "variant名のカタログを経由せず、構造テンプレートに生のパラメータを直接渡す。カタログの各variantは全部これのプリセット違いでしかない。",
+  },
+  en: {
+    tier2Title: "Composite layer (Tier 2)",
+    tier2Description:
+      "Steps through multiple phases in order. The previous step's result can feed the next step's parameters.",
+    tier3Title: "Structural templates (Tier 3)",
+    tier3Description:
+      "Skips the variant-name catalog and passes raw parameters to structural templates directly. Every catalog variant is really just a preset of this.",
+  },
+};
+
 /** ドキュメントページ本体（旧App）。ルーティングはApp.tsx側で行う。 */
 export function DocsPage() {
+  const t = useT(DOCS_PAGE_TEXT);
   return (
     <>
+      <div className="lang-toggle-row">
+        <LanguageToggle />
+      </div>
       <DocsHeader />
       <Quickstart />
       <Features />
@@ -2129,17 +2746,9 @@ export function DocsPage() {
       <BorderEffectDemo />
       <Playground />
       <ComboDemo />
-      <SectionDivider
-        icon="🧬"
-        title="合成層（Tier 2）"
-        description="複数局面を順番に切り替える。前段の実行結果を次段のパラメータとして渡せる。"
-      />
+      <SectionDivider icon="🧬" title={t.tier2Title} description={t.tier2Description} />
       <SequenceDemo />
-      <SectionDivider
-        icon="🧱"
-        title="構造テンプレート（Tier 3）"
-        description="variant名のカタログを経由せず、構造テンプレートに生のパラメータを直接渡す。カタログの各variantは全部これのプリセット違いでしかない。"
-      />
+      <SectionDivider icon="🧱" title={t.tier3Title} description={t.tier3Description} />
       <RadialBurstBuilder />
       <ParticleFallBuilder />
       <ClipRevealDemo />
@@ -2154,20 +2763,23 @@ export function DocsPage() {
 
 // CelebrateProviderはルート1箇所（ここ）だけに置く。各ページはその内側の
 // ルートで切り替わるだけなので、ページ遷移をまたいでもProviderは再マウントされない。
+// LangProviderも同様にルート1箇所（ここ）だけに置き、ページ遷移をまたいで言語選択を保持する。
 export function App() {
   return (
     <BrowserRouter>
-      <CelebrateProvider>
-        <Routes>
-          <Route path="/" element={<DocsPage />} />
-          <Route path="/examples" element={<ExamplesIndex />} />
-          <Route path="/examples/fireworks" element={<FireworksShowcase />} />
-          <Route path="/examples/quiz" element={<QuizExample />} />
-          <Route path="/examples/game" element={<GameExample />} />
-          <Route path="/examples/popit" element={<PopIt />} />
-          <Route path="/examples/popit/:themeId" element={<PopItStage />} />
-        </Routes>
-      </CelebrateProvider>
+      <LangProvider>
+        <CelebrateProvider>
+          <Routes>
+            <Route path="/" element={<DocsPage />} />
+            <Route path="/examples" element={<ExamplesIndex />} />
+            <Route path="/examples/fireworks" element={<FireworksShowcase />} />
+            <Route path="/examples/quiz" element={<QuizExample />} />
+            <Route path="/examples/game" element={<GameExample />} />
+            <Route path="/examples/popit" element={<PopIt />} />
+            <Route path="/examples/popit/:themeId" element={<PopItStage />} />
+          </Routes>
+        </CelebrateProvider>
+      </LangProvider>
     </BrowserRouter>
   );
 }
