@@ -26,6 +26,7 @@ import { SHATTER_DURATION_MS } from "./shatter";
 // 違いは "どの座標に置くか" だけなので、内部では中心座標1つに正規化して扱う。
 //
 // 同時に何件でも重ねて出せる（配列で保持し、それぞれが自分の duration で個別に片付く）。
+// ただしshatterだけは画面全体を撮影して元画面を隠す排他的な演出なので、一度に一件に限る。
 // ポップイットのように多数のボタンを連打・同時押しする使い方を想定しており、
 // 「後発が先発を打ち切る」動きは意図しないタイミングで前の演出が消えて見える原因になる
 // ため採用しない。
@@ -58,6 +59,7 @@ export function CelebrateProvider({ children, theme, container }: CelebrateProvi
   const [portalTarget, setPortalTarget] = useState<Element | null>(null);
   const nextId = useRef(0);
   const timers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
+  const activeShatterId = useRef<number | null>(null);
   // <html>への class 付け外し自体は containerModifier.ts（shake/hitstop/vignetteと
   // useContainerModifier()フックが共有する ref カウント実装）に任せてあるので、
   // ここでは「アンマウント時に解除関数を呼ぶ」ためだけに保持する。
@@ -71,6 +73,7 @@ export function CelebrateProvider({ children, theme, container }: CelebrateProvi
     return () => {
       for (const timer of timerMap.values()) clearTimeout(timer);
       timerMap.clear();
+      activeShatterId.current = null;
       for (const release of releasers) release();
       releasers.clear();
     };
@@ -86,6 +89,10 @@ export function CelebrateProvider({ children, theme, container }: CelebrateProvi
 
   const celebrate = useCallback<CelebrateFn>(
     (content: CelebrateVariant | ReactNode, options: CelebrateOptions = {}) => {
+      // shatterは「画面を一枚の撮影画像にして崩す」演出であり、複数枚を重ねる意味がない。
+      // 呼び出し元のイベントが重複しても、撮影中・再生中は先に始まった一件だけを残す。
+      if (content === "shatter" && activeShatterId.current !== null) return;
+
       const { anchor, ...variantOptions } = options;
       // 基準要素の位置は発火した瞬間に測る（演出は1秒で消えるため追従は不要）。
       // container が指定されている場合、overlay-root は viewport ではなく container 基準の
@@ -99,6 +106,7 @@ export function CelebrateProvider({ children, theme, container }: CelebrateProvi
           }
         : null;
       const id = nextId.current++;
+      if (content === "shatter") activeShatterId.current = id;
       // shatterは画面の撮影を完了してから破片を動かす。撮影中に通常の自動片付けが走らないよう、
       // 文字列として直接発火した場合も最低保持時間を保証する。
       const durationMs =
@@ -118,6 +126,7 @@ export function CelebrateProvider({ children, theme, container }: CelebrateProvi
       const timer = setTimeout(() => {
         setActiveList((prev) => prev.filter((item) => item.id !== id));
         timers.current.delete(id);
+        if (activeShatterId.current === id) activeShatterId.current = null;
         for (const release of releases) containerModifierReleasers.current.delete(release);
       }, durationMs);
       timers.current.set(id, timer);
