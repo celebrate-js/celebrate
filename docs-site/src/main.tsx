@@ -1,9 +1,10 @@
 import { marked } from "marked";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { createRoot } from "react-dom/client";
 import {
   CelebrateProvider,
   hasSoundForCelebration,
+  isFullScreenContent,
   useCelebrate,
   type CelebrateVariant,
   type CelebrateVariantOptions,
@@ -302,11 +303,16 @@ const catalogCategories: readonly CatalogCategory[] = [
 ];
 
 const fireworkStyles: readonly FireworkStyle[] = ["peony", "willow", "ring", "kiku", "star", "senrin", "hachi"];
+const SHATTER_CATALOG_LOCK_MS = 3_500;
 
 function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
   const celebrate = useCelebrate();
   const [fireworkStyle, setFireworkStyle] = useState<FireworkStyle>("peony");
+  const [isShatterPlaying, setIsShatterPlaying] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const shatterLockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirework = spec.variant === "firework";
+  const isFullScreen = isFullScreenContent(spec.variant);
   const options: CelebrateVariantOptions = { text: spec.text, note: spec.note };
   if (isFirework) options.fireworkStyle = fireworkStyle;
   const code = `celebrate("${spec.variant}"${
@@ -320,6 +326,30 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
           .join(", ")} }`
       : ""
   });`;
+
+  useEffect(
+    () => () => {
+      if (shatterLockTimer.current) clearTimeout(shatterLockTimer.current);
+    },
+    []
+  );
+
+  function fire() {
+    if (spec.variant === "shatter") {
+      if (shatterLockTimer.current) return;
+      setIsShatterPlaying(true);
+      shatterLockTimer.current = setTimeout(() => {
+        shatterLockTimer.current = null;
+        setIsShatterPlaying(false);
+      }, SHATTER_CATALOG_LOCK_MS);
+    }
+
+    if (isFullScreen) {
+      celebrate(spec.variant, options);
+    } else {
+      celebrate(spec.variant, { ...options, anchor: buttonRef });
+    }
+  }
 
   return (
     <article className="catalog-card">
@@ -343,8 +373,8 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
       <pre>
         <code>{code}</code>
       </pre>
-      <button type="button" onClick={() => celebrate(spec.variant, options)}>
-        試す
+      <button ref={buttonRef} type="button" disabled={isShatterPlaying} onClick={fire}>
+        {isShatterPlaying ? "再生中…" : "試す"}
       </button>
     </article>
   );
