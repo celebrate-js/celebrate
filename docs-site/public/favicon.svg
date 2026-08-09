@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Celebrate.js</title>
+  <rect width="64" height="64" rx="17" fill="#f04757" />
+  <path d="M32 10.5 36.5 27.5 53.5 32l-17 4.5L32 53.5l-4.5-17L10.5 32l17-4.5L32 10.5Z" fill="#fffaf6" />
+  <circle cx="48.5" cy="15.5" r="3.5" fill="#ffcf69" />
+  <circle cx="16" cy="47.5" r="3" fill="#ffcf69" />
+</svg>
