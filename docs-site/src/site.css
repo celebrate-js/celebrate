@@ -426,9 +426,10 @@ main {
   padding: 3px 5px;
 }
 .catalog-card pre {
-  background: var(--code-surface);
+  background: #f0ece3;
+  border: 1px solid var(--line);
   border-radius: 7px;
-  color: #e2dfff;
+  color: var(--ink);
   font-size: 0.71rem;
   line-height: 1.45;
   margin: 0 0 12px;
