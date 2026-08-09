@@ -35,6 +35,9 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "npm"
           cache-dependency-path: demo/package-lock.json
+      # demo/は../../srcを直接型検査する。React等をsrcから解決できるよう、
+      # demo側だけでなくルートの依存も入れる。
+      - run: npm ci
       - working-directory: demo
         run: npm ci
       - working-directory: demo
