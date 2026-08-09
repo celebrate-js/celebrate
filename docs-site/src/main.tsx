@@ -184,6 +184,7 @@ function Home() {
         <span>npm</span>
         <code>npm install @celebrate-js/celebrate</code>
       </div>
+      <p className="runtime-note">React 18.3 / 19対応。開発・ビルドにはNode.js 20.19以降が必要です。</p>
 
       <a className="catalog-launch" href="#catalog">
         <span>
