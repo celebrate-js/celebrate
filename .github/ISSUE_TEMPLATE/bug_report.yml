@@ -1,0 +1,30 @@
+name: Bug report
+description: 再現可能な不具合を報告する
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        再現手順と利用中のバージョンを記載してください。認証情報や個人情報は書かないでください。
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "@celebrate-js/celebrate@0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: 最小の再現コード、手順、期待した動作と実際の動作を記載してください。
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "React 19, Vite 6, Chrome 132"
+    validations:
+      required: true

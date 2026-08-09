@@ -1,0 +1,19 @@
+name: Feature request
+description: 新しいエフェクトやAPIの提案
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: 解決したい利用場面を記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or behavior
+      description: 期待するAPIや動作を、可能なら短いコード例とともに記載してください。
+    validations:
+      required: true
