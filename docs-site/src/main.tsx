@@ -120,7 +120,7 @@ function DocsApp() {
         <nav aria-label="外部リンク">
           <a href="#catalog">カタログを試す</a>
           <a href="https://www.npmjs.com/package/@celebrate-js/celebrate">npm</a>
-          <a href="https://github.com/sato0825/celebrate-js">GitHub</a>
+          <a href="https://github.com/celebrate-js/celebrate">GitHub</a>
         </nav>
       </header>
 
@@ -160,7 +160,7 @@ function DocsApp() {
 
       <footer>
         <span>MIT License</span>
-        <a href="https://github.com/sato0825/celebrate-js/issues">Issue を開く</a>
+        <a href="https://github.com/celebrate-js/celebrate/issues">Issue を開く</a>
       </footer>
     </div>
   );
