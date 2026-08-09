@@ -8,7 +8,7 @@ import eslintConfigPrettier from "eslint-config-prettier";
 // src/ = ライブラリ本体（ブラウザ向け）、demo/ = ドキュメント兼サンプルサイト（別tsconfig）。
 // dist/はビルド成果物なので対象外（.gitignore同様、lintも通す意味がない）。
 export default tseslint.config(
-  { ignores: ["dist/**", "node_modules/**", "demo/dist/**"] },
+  { ignores: ["dist/**", "node_modules/**", "demo/dist/**", "docs-site/dist/**"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
