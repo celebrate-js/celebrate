@@ -4,7 +4,7 @@
 
 React向けの「決まった瞬間」の演出ライブラリ。印影スタンプ・紙吹雪・花火・稲光・ボーダーの発光など、UI操作への視覚的フィードバックをまとめて提供します。
 
-> このリポジトリはパッケージ本体（`src/`）と、開発時に手元で動作確認するためのローカルサンドボックス（`demo/`）で構成されています。`demo/`はnpm公開物には含まれません（`package.json`の`files`参照）。公開ドキュメントサイトと試せるカタログは[celebrate-js-docs.pages.dev](https://celebrate-js-docs.pages.dev)で公開しています。
+> このリポジトリはパッケージ本体（`src/`）と、開発時に手元で動作確認するためのローカルサンドボックス（`demo/`）で構成されています。`demo/`はnpm公開物には含まれません（`package.json`の`files`参照）。公開ドキュメントサイトと試せるカタログは[celebrate-js.mikoto-gateway.com](https://celebrate-js.mikoto-gateway.com)で公開しています。
 
 ## 動作要件
 
@@ -44,7 +44,7 @@ function SubmitButton() {
 
 ## ドキュメント
 
-- [公開ドキュメント・試せるカタログ](https://celebrate-js-docs.pages.dev) — ガイド、APIリファレンス、25種類のエフェクトをブラウザで試せます
+- [公開ドキュメント・試せるカタログ](https://celebrate-js.mikoto-gateway.com) — ガイド、APIリファレンス、25種類のエフェクトをブラウザで試せます
 - [ガイド](docs/guide.md) — 3層の設計思想・カタログ・各コンポーネントの使い方
 - [API リファレンス](docs/api-reference.md) — props・optionsの型と既定値の一覧
 - [カタログ妥当性根拠](docs/catalog-rationale.md) — 25 variantがなぜ入っているかの理論的根拠・出典
