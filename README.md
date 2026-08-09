@@ -2,6 +2,8 @@
 
 A React library for “moment” effects — stamp seals, confetti, fireworks, lightning, glowing borders, and more. Add clear visual feedback to UI interactions out of the box.
 
+Japanese documentation is available in [README-JP.md](README-JP.md).
+
 > This repository contains the package itself (`src/`) and a local sandbox (`demo/`) for development checks. The `demo/` directory is not included in the published npm package (see `files` in `package.json`). The public documentation site and interactive catalog are available at [celebrate-js-docs.pages.dev](https://celebrate-js-docs.pages.dev).
 
 ## Requirements
