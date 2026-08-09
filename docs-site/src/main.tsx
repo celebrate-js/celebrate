@@ -307,7 +307,7 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
   const celebrate = useCelebrate();
   const [fireworkStyle, setFireworkStyle] = useState<FireworkStyle>("peony");
   const [isShatterPlaying, setIsShatterPlaying] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const effectAnchorRef = useRef<HTMLSpanElement | null>(null);
   const shatterLockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirework = spec.variant === "firework";
   const isFullScreen = isFullScreenContent(spec.variant);
@@ -345,7 +345,7 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
     if (isFullScreen) {
       celebrate(spec.variant, options);
     } else {
-      celebrate(spec.variant, { ...options, anchor: buttonRef });
+      celebrate(spec.variant, { ...options, anchor: effectAnchorRef });
     }
   }
 
@@ -371,9 +371,12 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
       <pre>
         <code>{code}</code>
       </pre>
-      <button ref={buttonRef} type="button" disabled={isShatterPlaying} onClick={fire}>
-        {isShatterPlaying ? "再生中…" : "試す"}
-      </button>
+      <div className="catalog-card-action">
+        <span ref={effectAnchorRef} aria-hidden="true" className="catalog-card-effect-anchor" />
+        <button type="button" disabled={isShatterPlaying} onClick={fire}>
+          {isShatterPlaying ? "再生中…" : "試す"}
+        </button>
+      </div>
     </article>
   );
 }

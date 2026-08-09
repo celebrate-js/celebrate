@@ -281,7 +281,7 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
   const t = useT(CATALOG_CARD_TEXT);
   const [fireworkStyle, setFireworkStyle] = useState<FireworkStyle>(DEFAULT_FIREWORK_STYLE);
   const [isShatterPlaying, setIsShatterPlaying] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const effectAnchorRef = useRef<HTMLSpanElement | null>(null);
   const shatterLockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirework = spec.variant === "firework";
   const isFullScreen = isFullScreenContent(spec.variant);
@@ -310,12 +310,12 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
       }, SHATTER_CATALOG_LOCK_MS);
     }
 
-    // カード単位の演出は、押した場所のすぐ近くに出す。従来のviewport中央では、
+    // カード単位の演出は、ボタンを隠さないようその少し上に出す。従来のviewport中央では、
     // 下段カードのcracker/floatを押したときに「出ていない」ように見えやすかった。
     if (isFullScreen) {
       celebrate(spec.variant, options);
     } else {
-      celebrate(spec.variant, { ...options, anchor: buttonRef });
+      celebrate(spec.variant, { ...options, anchor: effectAnchorRef });
     }
   };
 
@@ -345,9 +345,12 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
       <pre className="catalog-card-code">
         <code>{catalogCallSnippet(spec, isFirework ? fireworkStyle : undefined)}</code>
       </pre>
-      <button ref={buttonRef} className="catalog-card-trigger" disabled={isShatterPlaying} onClick={fire}>
-        {isShatterPlaying ? "再生中…" : t.try}
-      </button>
+      <div className="catalog-card-action">
+        <span ref={effectAnchorRef} aria-hidden="true" className="catalog-card-effect-anchor" />
+        <button className="catalog-card-trigger" disabled={isShatterPlaying} onClick={fire}>
+          {isShatterPlaying ? "再生中…" : t.try}
+        </button>
+      </div>
     </div>
   );
 }

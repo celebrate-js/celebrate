@@ -440,7 +440,6 @@ main {
   word-break: break-word;
 }
 .catalog-card button {
-  align-self: flex-start;
   background: var(--surface);
   border: 1px solid var(--accent);
   border-radius: 7px;
@@ -449,6 +448,18 @@ main {
   font-size: 0.82rem;
   font-weight: 750;
   padding: 7px 15px;
+}
+.catalog-card-action {
+  align-self: flex-start;
+  position: relative;
+}
+.catalog-card-effect-anchor {
+  bottom: 5rem;
+  height: 1px;
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  width: 1px;
 }
 .catalog-card button:hover {
   background: var(--accent);
