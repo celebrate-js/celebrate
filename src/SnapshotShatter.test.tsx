@@ -71,7 +71,7 @@ beforeEach(() => {
   document.body.appendChild(source);
   context = createContext();
   originalGetContext = HTMLCanvasElement.prototype.getContext;
-  HTMLCanvasElement.prototype.getContext = () => context;
+  HTMLCanvasElement.prototype.getContext = (() => context) as unknown as typeof HTMLCanvasElement.prototype.getContext;
   originalRaf = window.requestAnimationFrame;
   originalCaf = window.cancelAnimationFrame;
   originalMatchMedia = window.matchMedia;
