@@ -43,6 +43,7 @@ function SubmitButton() {
 - [API リファレンス](docs/api-reference.md) — props・optionsの型と既定値の一覧
 - [カタログ妥当性根拠](docs/catalog-rationale.md) — 25 variantがなぜ入っているかの理論的根拠・出典
 - [エフェクト構造の分解](docs/effect-structure-taxonomy.md) — 実装の構造的な分類・設計メモ
+- [デモ素材の由来](docs/asset-provenance.md) — アザラシ画像の公開・再配布に関する確認
 
 ## 開発
 
