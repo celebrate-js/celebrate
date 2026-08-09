@@ -1,7 +1,6 @@
 {
   "name": "@celebrate-js/celebrate",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "React向けの「決まった瞬間」の演出ライブラリ（印影スタンプ・紙吹雪・花火・ボーダーエフェクトなど）。",
   "license": "MIT",

@@ -849,6 +849,56 @@ a {
   cursor: pointer;
 }
 
+.popit-stage-surface--ice-floe {
+  overflow: hidden;
+}
+
+.popit-ice-floe-hint {
+  position: relative;
+  z-index: 2;
+}
+
+.popit-ice-floe-motion-origin {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+}
+
+/* 流氷のTier 3例。ParticleFieldがtransformを毎フレーム更新し、ここは見た目だけを持つ。 */
+.popit-seal-drift {
+  pointer-events: none;
+  z-index: 1;
+}
+
+.popit-seal-on-floe {
+  position: relative;
+  display: block;
+  filter: drop-shadow(0 0.22rem 0.22rem rgba(13, 65, 88, 0.26));
+}
+
+.popit-seal-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.popit-seal-floe {
+  position: absolute;
+  z-index: 0;
+  right: -5%;
+  bottom: 3%;
+  width: 110%;
+  height: 29%;
+  border-radius: 48% 52% 42% 58%;
+  background: linear-gradient(165deg, #fff 0%, #d9f5ff 48%, #a5dce9 100%);
+  box-shadow: inset 0 -0.08rem 0 rgba(64, 148, 178, 0.32);
+  transform: rotate(-4deg);
+}
+
 /* タップ位置で発火するタイル用の、見えない基準点（celebrate()のanchor先）。
    ボタンのクリック座標に毎回動かしてから発火するので、常に指の下で演出が起きる。 */
 .popit-stage-click-anchor {
@@ -856,4 +906,34 @@ a {
   width: 0;
   height: 0;
   pointer-events: none;
+}
+
+/* Tier 3の「動き×見た目」例。アザラシ画像を同じまま、異なるMotionProfileへ渡す。 */
+.seal-freedom-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.8rem;
+}
+
+.seal-freedom-cell {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid #cce8ef;
+  border-radius: 0.8rem;
+  background: linear-gradient(180deg, #f4fdff 0%, #e2f6fa 100%);
+}
+
+.seal-freedom-cell-title {
+  margin: 0 0 0.55rem;
+  color: #285c70;
+  font-weight: 800;
+}
+
+.seal-freedom-stage {
+  position: relative;
+  height: 9rem;
+  margin-top: 0.7rem;
+  overflow: hidden;
+  border-radius: 0.6rem;
+  background: linear-gradient(180deg, #ddf6ff 0%, #c5edf7 45%, #70bfd8 46%, #439ab9 100%);
 }

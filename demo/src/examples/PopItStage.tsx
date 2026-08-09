@@ -2,8 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, RefObject } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useCelebrate, ParticleField } from "../../../src/react";
-import { fallMotion, orbitTwinkleMotion, type FallMotionParams, type OrbitTwinkleParams } from "../../../src/index";
+import {
+  fallMotion,
+  orbitTwinkleMotion,
+  type FallMotionParams,
+  type MotionProfile,
+  type OrbitTwinkleParams,
+} from "../../../src/index";
 import { useLang, useT } from "../i18n";
+import sealFrontUrl from "../assets/seal-front-flippers.png";
+import sealBackUrl from "../assets/seal-lying-back.png";
+import sealSleepingUrl from "../assets/seal-sleeping-curled.png";
 
 // ==== ❄️ 雪：ライブラリのカタログには無い、その場限りの独自の動き。celebrate()は
 // 登録済みの名前だけでなく生のReactNodeも直接発火できる（with と同じ仕組み）。
@@ -89,6 +98,47 @@ function Swirl() {
   return <ParticleField particles={particles} />;
 }
 
+// ==== 🦭 流氷：Tier 3の「見た目」と「動き」を組み合わせる例。
+// 同じ自作アザラシ画像を、流氷の中で左から右へまっすぐ横切らせる。カタログへvariantを
+// 増やさず、ポップイット固有の演出としてParticleFieldに直接渡す。
+const SEAL_DRIFT_DURATION_MS = 3400;
+const SEAL_IMAGE_URLS = [sealFrontUrl, sealBackUrl, sealSleepingUrl] as const;
+
+interface SealDriftParams {
+  lane: number;
+  durationSeconds: number;
+}
+
+const sealDriftMotion: MotionProfile<SealDriftParams> = (t, p) => {
+  const progress = Math.min(1, t / p.durationSeconds);
+  const eased = progress * progress * (3 - 2 * progress);
+  return { x: -18 + 36 * eased, y: p.lane * 2.5, scale: 0.9, opacity: 1 - progress * 0.08, rotate: 0 };
+};
+
+function SealOnFloe({ src, sizeRem }: { src: string; sizeRem: number }) {
+  return (
+    <span className="popit-seal-on-floe" style={{ width: `${sizeRem}rem` }}>
+      <img className="popit-seal-image" src={src} alt="" draggable={false} />
+      <span className="popit-seal-floe" />
+    </span>
+  );
+}
+
+function SealDrift() {
+  const particles = useMemo(() => {
+    const durationSeconds = SEAL_DRIFT_DURATION_MS / 1000;
+    return Array.from({ length: 3 }, (_, i) => ({
+      motion: sealDriftMotion,
+      params: { lane: i - 1, durationSeconds },
+      durationSeconds,
+      delaySeconds: i * 0.32,
+      render: <SealOnFloe src={SEAL_IMAGE_URLS[i]} sizeRem={2.7 + i * 0.18} />,
+    }));
+  }, []);
+
+  return <ParticleField particles={particles} className="popit-seal-drift" />;
+}
+
 const FIREWORK_STAGE_STYLES = ["peony", "willow", "kiku", "star", "senrin", "hachi"] as const;
 const WATER_COLORS = ["#1f7fb8", "#3aa0d1", "#0c5f8f", "#5cc4e8"];
 const POP_COLORS = ["#ff9d4d", "#ffb347", "#ff7a5c", "#ffcc70"];
@@ -134,7 +184,7 @@ export interface PopItTileConfig {
   anchorAtClick?: boolean;
   /** 舞台をタップするたびに呼ばれる。タップごとに違う見た目になるよう、色やstyleを
    * 毎回ランダムに選ぶものが多い（「いろんな花火が見れる」という要望に対応）。 */
-  fire: (celebrate: ReturnType<typeof useCelebrate>, anchor: RefObject<HTMLElement | null>) => void;
+  fire?: (celebrate: ReturnType<typeof useCelebrate>, anchor: RefObject<HTMLElement | null>) => void;
 }
 
 function pickRandom<T>(items: readonly T[]): T {
@@ -220,6 +270,17 @@ export const POPIT_TILES: readonly PopItTileConfig[] = [
     anchorAtClick: true,
     // カタログに無い独自の動き（SnowFall）をReactNodeとしてそのまま発火する例。
     fire: (celebrate, anchor) => celebrate(<SnowFall />, { anchor, durationMs: SNOW_DURATION_MS }),
+  },
+  {
+    id: "ice-floe",
+    icon: "🧊",
+    label: "流氷",
+    labelEn: "Ice floe",
+    idleBg: "#e3f8ff",
+    stageBg: "linear-gradient(180deg, #dff7ff 0%, #b9e8f3 43%, #62b8d2 44%, #2689b2 100%)",
+    stageTextColor: "rgba(19,75,96,0.7)",
+    stageHint: "流氷をタップするとアザラシが流れてくる",
+    stageHintEn: "Tap the ice floe to let seals drift by",
   },
   {
     id: "pop",
@@ -410,9 +471,9 @@ function GenericStage({ config, backTo }: { config: PopItTileConfig; backTo: str
             const stageRect = surfaceRef.current.getBoundingClientRect();
             clickAnchorRef.current.style.left = `${e.clientX - stageRect.left}px`;
             clickAnchorRef.current.style.top = `${e.clientY - stageRect.top}px`;
-            config.fire(celebrate, clickAnchorRef);
+            config.fire?.(celebrate, clickAnchorRef);
           } else {
-            config.fire(celebrate, surfaceRef);
+            config.fire?.(celebrate, surfaceRef);
           }
           setTapCount((n) => n + 1);
         }}
@@ -420,6 +481,60 @@ function GenericStage({ config, backTo }: { config: PopItTileConfig; backTo: str
       >
         {hint}
         {config.anchorAtClick && <span ref={clickAnchorRef} className="popit-stage-click-anchor" />}
+      </button>
+      <p className="section-hint">
+        {t.tapCount}: {tapCount}
+      </p>
+    </section>
+  );
+}
+
+// 🧊 流氷だけはParticleFieldをCelebrateProviderの外側レイヤーではなく、舞台そのものに
+// 直接置く。これにより「画面外から来る」のではなく、角丸の流氷の中だけを横切る動きになる。
+function IceFloeStage({ config, backTo }: { config: PopItTileConfig; backTo: string }) {
+  const { lang } = useLang();
+  const t = useT(STAGE_TEXT);
+  const [tapCount, setTapCount] = useState(0);
+  const [driftKeys, setDriftKeys] = useState<number[]>([]);
+  const nextDriftKey = useRef(0);
+  const timeoutIds = useRef<number[]>([]);
+  const hint = lang === "en" ? config.stageHintEn : config.stageHint;
+
+  useEffect(
+    () => () => {
+      timeoutIds.current.forEach((id) => window.clearTimeout(id));
+    },
+    []
+  );
+
+  const startDrift = () => {
+    const key = nextDriftKey.current++;
+    setDriftKeys((keys) => [...keys, key]);
+    const timeoutId = window.setTimeout(() => {
+      setDriftKeys((keys) => keys.filter((activeKey) => activeKey !== key));
+      timeoutIds.current = timeoutIds.current.filter((activeId) => activeId !== timeoutId);
+    }, SEAL_DRIFT_DURATION_MS);
+    timeoutIds.current.push(timeoutId);
+  };
+
+  return (
+    <section className="doc-section">
+      <StageHeader config={config} backTo={backTo} />
+      <button
+        className="popit-stage-surface popit-stage-surface--ice-floe"
+        style={{ background: config.stageBg, color: config.stageTextColor } as CSSProperties}
+        onClick={() => {
+          setTapCount((count) => count + 1);
+          startDrift();
+        }}
+        aria-label={hint}
+      >
+        <span className="popit-ice-floe-hint">{hint}</span>
+        {driftKeys.map((key) => (
+          <span key={key} className="popit-ice-floe-motion-origin">
+            <SealDrift />
+          </span>
+        ))}
       </button>
       <p className="section-hint">
         {t.tapCount}: {tapCount}
@@ -564,6 +679,8 @@ export function PopItStage({ backTo }: { backTo: string }) {
 
   return config.id === "pop" ? (
     <BallStage config={config} backTo={backTo} />
+  ) : config.id === "ice-floe" ? (
+    <IceFloeStage config={config} backTo={backTo} />
   ) : (
     <GenericStage config={config} backTo={backTo} />
   );

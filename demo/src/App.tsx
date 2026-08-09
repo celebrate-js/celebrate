@@ -28,6 +28,7 @@ import {
   DEFAULT_CELEBRATE_THEME,
   BORDER_EFFECT_KINDS,
   fallMotion,
+  orbitTwinkleMotion,
   glowPreset,
   neonPreset,
   firePreset,
@@ -40,6 +41,9 @@ import {
   type RadialLayer,
   type FireworkStyle,
 } from "../../src/index";
+import sealFrontUrl from "./assets/seal-front-flippers.png";
+import sealBackUrl from "./assets/seal-lying-back.png";
+import sealSleepingUrl from "./assets/seal-sleeping-curled.png";
 
 // カタログ（Tier1・25 variant）を公式ドキュメントとして提示するセクション。
 // recipes.tsxの8カテゴリ（UXの意味でグルーピングした並び順）をそのまま踏襲し、
@@ -595,6 +599,182 @@ function EngineDemo() {
             render: <SparkleShape color={SPIRAL_PALETTE[i % SPIRAL_PALETTE.length]!} sizeRem={0.7 + (i % 3) * 0.25} />,
           }))}
         />
+      </div>
+    </section>
+  );
+}
+
+// ==== 自由な組み合わせの実演：Tier 3は「動き（motion）」と「見た目（render）」が
+// 完全に独立している。動きはfallMotion/orbitTwinkleMotionのような既存プリセットでも
+// 自作関数でもよく、見た目はSVG/文字だけでなく好きな画像（自作イラスト）も渡せる。
+// ここでは同じ3枚のアザラシ画像を、性質の異なる3つの動きに使い回して、
+// 「動き」と「見た目」を自由に掛け合わせられることを見せる。
+function SealImage({ src, sizeRem, rotateDeg = 0 }: { src: string; sizeRem: number; rotateDeg?: number }) {
+  return (
+    <img
+      src={src}
+      alt=""
+      draggable={false}
+      style={{
+        width: `${sizeRem}rem`,
+        height: "auto",
+        display: "block",
+        transform: `rotate(${rotateDeg}deg)`,
+        filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.25))",
+      }}
+    />
+  );
+}
+
+interface SealBurstParams {
+  angleRad: number;
+  speed: number;
+  durationSeconds: number;
+}
+
+// カタログのfirework等が使うballisticMotionと同じ発想（角度・速度から位置を積分する）だが、
+// ここではライブラリ内部を経由せず、この場で1から書いた自作MotionProfile。
+// 「動き」は組み込み関数を呼ぶ必要すら無く、型さえ満たせば何でも良いことの実演。
+const sealBurstMotion: MotionProfile<SealBurstParams> = (t, p) => {
+  const progress = Math.min(1, t / p.durationSeconds);
+  return {
+    x: Math.cos(p.angleRad) * p.speed * progress,
+    y: Math.sin(p.angleRad) * p.speed * progress - 1.5 * progress * progress,
+    scale: 1 - progress * 0.25,
+    opacity: 1 - progress * 0.9,
+    rotate: (p.angleRad * 180) / Math.PI + progress * 40,
+  };
+};
+
+const SEAL_FREEDOM_TEXT = {
+  ja: {
+    title: "自由な組み合わせ：動き×見た目",
+    hint: (
+      <>
+        Tier 3では「動き（motion）」と「見た目（render）」が独立している。動きは<code>fallMotion</code>/
+        <code>orbitTwinkleMotion</code>のような既存プリセットでも自作関数でもよく、見た目はSVGや文字だけでなく
+        好きな画像（自作イラスト）も渡せる。同じ3枚のアザラシ画像を、性質の異なる3つの動きに使い回してみる。
+      </>
+    ),
+    fallTitle: "降ってくる（fallMotion）",
+    fallFire: "🦭 降らせる",
+    burstTitle: "打ち上がる（自作motion）",
+    burstFire: "🦭 打ち上げる",
+    orbitTitle: "漂う（orbitTwinkleMotion）",
+    orbitFire: "🦭 漂わせる",
+  },
+  en: {
+    title: "Free combinations: motion × look",
+    hint: (
+      <>
+        In Tier 3, “motion” and “look” (render) are independent. Motion can be an existing preset like{" "}
+        <code>fallMotion</code>/<code>orbitTwinkleMotion</code> or a function you write yourself, and the look isn't
+        limited to SVG or text — any image (your own illustration) works too. Here the same 3 seal images get reused
+        across 3 motions with very different personalities.
+      </>
+    ),
+    fallTitle: "Falling (fallMotion)",
+    fallFire: "🦭 Let it snow",
+    burstTitle: "Launching (custom motion)",
+    burstFire: "🦭 Launch",
+    orbitTitle: "Drifting (orbitTwinkleMotion)",
+    orbitFire: "🦭 Set adrift",
+  },
+};
+
+function SealFreedomDemo() {
+  const t = useT(SEAL_FREEDOM_TEXT);
+  const [fallKey, setFallKey] = useState(0);
+  const [burstKey, setBurstKey] = useState(0);
+  const [orbitKey, setOrbitKey] = useState(0);
+
+  const SEAL_FALL_COUNT = 10;
+  const SEAL_BURST_COUNT = 14;
+  const SEAL_ORBIT_COUNT = 8;
+
+  return (
+    <section id="seal-freedom" className="doc-section">
+      <p className="section-title">
+        <span>🦭</span>
+        <span>{t.title}</span>
+      </p>
+      <p className="section-hint">{t.hint}</p>
+
+      <div className="seal-freedom-grid">
+        <div className="seal-freedom-cell">
+          <p className="seal-freedom-cell-title">{t.fallTitle}</p>
+          <button className="combo-button" onClick={() => setFallKey((k) => k + 1)}>
+            {t.fallFire}
+          </button>
+          <div className="seal-freedom-stage">
+            <ParticleField
+              key={fallKey}
+              particles={Array.from({ length: SEAL_FALL_COUNT }, (_, i) => {
+                const durationSeconds = 2.6 + (i % 3) * 0.3;
+                return {
+                  motion: fallMotion,
+                  params: {
+                    fallSpeed: 3.5 + (i % 4) * 0.6,
+                    startX: (i / (SEAL_FALL_COUNT - 1) - 0.5) * 14,
+                    swayAmplitude: 0.8 + (i % 3) * 0.4,
+                    swayFrequency: 0.8 + (i % 2) * 0.3,
+                    durationSeconds,
+                  },
+                  durationSeconds,
+                  delaySeconds: (i / SEAL_FALL_COUNT) * 0.6,
+                  render: <SealImage src={sealSleepingUrl} sizeRem={2.4} />,
+                };
+              })}
+            />
+          </div>
+        </div>
+
+        <div className="seal-freedom-cell">
+          <p className="seal-freedom-cell-title">{t.burstTitle}</p>
+          <button className="combo-button" onClick={() => setBurstKey((k) => k + 1)}>
+            {t.burstFire}
+          </button>
+          <div className="seal-freedom-stage">
+            <ParticleField
+              key={burstKey}
+              particles={Array.from({ length: SEAL_BURST_COUNT }, (_, i) => {
+                const angleRad = (Math.PI * 2 * i) / SEAL_BURST_COUNT;
+                const durationSeconds = 1.1;
+                return {
+                  motion: sealBurstMotion,
+                  params: { angleRad, speed: 5 + (i % 3) * 0.8, durationSeconds },
+                  durationSeconds,
+                  delaySeconds: 0,
+                  render: <SealImage src={sealFrontUrl} sizeRem={2.1} />,
+                };
+              })}
+            />
+          </div>
+        </div>
+
+        <div className="seal-freedom-cell">
+          <p className="seal-freedom-cell-title">{t.orbitTitle}</p>
+          <button className="combo-button" onClick={() => setOrbitKey((k) => k + 1)}>
+            {t.orbitFire}
+          </button>
+          <div className="seal-freedom-stage">
+            <ParticleField
+              key={orbitKey}
+              particles={Array.from({ length: SEAL_ORBIT_COUNT }, (_, i) => ({
+                motion: orbitTwinkleMotion,
+                params: {
+                  radius: 1.6 + (i % 3) * 0.6,
+                  angularSpeed: 2.2 + (i % 3) * 0.4,
+                  startAngleRad: (Math.PI * 2 * i) / SEAL_ORBIT_COUNT,
+                  twinkleFrequency: 1.5 + (i % 2) * 0.5,
+                },
+                durationSeconds: 3.5,
+                delaySeconds: 0,
+                render: <SealImage src={sealBackUrl} sizeRem={1.9} />,
+              }))}
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -2796,6 +2976,7 @@ export function DocsPage() {
       <SectionDivider icon="🧱" title={t.tier3Title} description={t.tier3Description} />
       <RadialBurstBuilder />
       <ParticleFallBuilder />
+      <SealFreedomDemo />
       <ClipRevealDemo />
       <BorderMechanismBuilder />
       <EngineDemo />
