@@ -9,8 +9,8 @@ export default defineConfig({
       // demo/index.html（ドキュメント本体）とdemo/popit.html（ポップイットを切り出した
       // 単体アプリ）の2エントリをビルド対象にする（複数HTMLエントリの構成）。
       input: {
-        main: resolve(__dirname, "index.html"),
-        popit: resolve(__dirname, "popit.html"),
+        main: resolve(import.meta.dirname, "index.html"),
+        popit: resolve(import.meta.dirname, "popit.html"),
       },
     },
   },

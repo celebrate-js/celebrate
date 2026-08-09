@@ -40,7 +40,9 @@ describe("ClipReveal", () => {
     // celebrate-clip-reveal（clip-pathが当たる方）の中には無い。
     const contentIndex = html.indexOf("celebrate-clip-reveal-content");
     const curtainIndex = html.indexOf('"celebrate-clip-reveal celebrate-clip-reveal--left"');
-    const imgIndex = html.indexOf("result.png");
+    // React 19 は画像の preload を先頭に出力することがあるため、
+    // content 要素の中にある画像を起点付きで探す。
+    const imgIndex = html.indexOf("result.png", contentIndex);
     expect(contentIndex).toBeGreaterThan(-1);
     expect(curtainIndex).toBeGreaterThan(-1);
     // childrenを包む要素の方が先（DOM順で先＝下に描画される）、カーテンは後（上に重なる）。

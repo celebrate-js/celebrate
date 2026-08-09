@@ -20,6 +20,14 @@ export default tseslint.config(
     plugins: { "react-hooks": reactHooks },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // React Compilerは導入していない。ParticleField等はrAFでDOMを直接更新する設計のため、
+      // Compiler前提の純粋性・ref・immutability規則を有効にすると既存の正当な実装まで
+      // エラーになる。rules-of-hooks / exhaustive-depsを含む従来のHooks規則は維持する。
+      "react-hooks/purity": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/preserve-manual-memoization": "off",
+      "react-hooks/refs": "off",
+      "react-hooks/immutability": "off",
       // ライブラリ全体でReact.FC等を使わず素直な関数宣言のコンポーネントで統一しているため、
       // 未使用変数はTypeScript側（noUnusedLocals/noUnusedParameters）で既に検知している。
       // ESLint側は「_」始まりの意図的な未使用引数だけ緩める。

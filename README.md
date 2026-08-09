@@ -8,6 +8,11 @@ A React library for “moment” effects — stamp seals, confetti, fireworks, l
 
 > This repository contains the package itself (`src/`) and a local sandbox (`demo/`) for development checks. The `demo/` directory is not included in the published npm package (see `files` in `package.json`). The public documentation site and interactive catalog are available at [celebrate-js-docs.pages.dev](https://celebrate-js-docs.pages.dev).
 
+## Requirements
+
+- React 18.3 or React 19
+- Node.js 20.19 or later for local development, builds, and tests
+
 ## Install
 
 ```bash
@@ -71,6 +76,11 @@ npm --prefix demo run dev
 React向けの「決まった瞬間」の演出ライブラリ。印影スタンプ・紙吹雪・花火・稲光・ボーダーの発光など、UI操作への視覚的フィードバックをまとめて提供します。
 
 > このリポジトリはパッケージ本体（`src/`）と、開発時に手元で動作確認するためのローカルサンドボックス（`demo/`）で構成されています。`demo/`はnpm公開物には含まれません（`package.json`の`files`参照）。公開ドキュメントサイトと試せるカタログは[celebrate-js-docs.pages.dev](https://celebrate-js-docs.pages.dev)で公開しています。
+
+## 動作要件
+
+- React 18.3 または React 19
+- ローカル開発・ビルド・テストにはNode.js 20.19以降
 
 ## インストール
 

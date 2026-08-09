@@ -184,6 +184,11 @@ main {
   overflow-x: auto;
   white-space: nowrap;
 }
+.runtime-note {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 10px 0 0;
+}
 .catalog-launch {
   align-items: center;
   border: 1px solid var(--accent-weak);
