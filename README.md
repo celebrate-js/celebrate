@@ -4,7 +4,7 @@ A React library for “moment” effects — stamp seals, confetti, fireworks, l
 
 Japanese documentation is available in [README-JP.md](README-JP.md).
 
-> This repository contains the package itself (`src/`) and a local sandbox (`demo/`) for development checks. The `demo/` directory is not included in the published npm package (see `files` in `package.json`). The public documentation site and interactive catalog are available at [celebrate-js-docs.pages.dev](https://celebrate-js-docs.pages.dev).
+> This repository contains the package itself (`src/`) and a local sandbox (`demo/`) for development checks. The `demo/` directory is not included in the published npm package (see `files` in `package.json`). The public documentation site and interactive catalog are available at [celebrate-js.mikoto-gateway.com](https://celebrate-js.mikoto-gateway.com).
 
 ## Requirements
 
@@ -44,7 +44,7 @@ function SubmitButton() {
 
 ## Documentation
 
-- [Online documentation and interactive catalog](https://celebrate-js-docs.pages.dev) — guides, API reference, and all 25 effects to try in the browser
+- [Online documentation and interactive catalog](https://celebrate-js.mikoto-gateway.com) — guides, API reference, and all 25 effects to try in the browser
 - [Guide](docs/guide.md) — the 3-tier design philosophy, catalog, and component usage
 - [API reference](docs/api-reference.md) — prop/option types and defaults
 - [Catalog rationale](docs/catalog-rationale.md) — why the catalog contains 25 variants, with theory and sources
