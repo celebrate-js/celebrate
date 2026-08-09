@@ -313,13 +313,14 @@ a {
 .catalog-card-code {
   margin: 0;
   border-radius: 0.5rem;
-  background: #1e1e2e;
+  border: 1px solid #e6e1d8;
+  background: #f0ece3;
   padding: 0.5rem 0.65rem;
   overflow-x: auto;
 }
 
 .catalog-card-code code {
-  color: #e2dfff;
+  color: #2b2622;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.75rem;
   white-space: pre-wrap;
