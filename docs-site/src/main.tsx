@@ -23,6 +23,7 @@ import guide from "../../docs/guide.md?raw";
 
 type DocumentId = "guide" | "api-reference" | "catalog-rationale" | "effect-structure-taxonomy" | "asset-provenance";
 type PageId = DocumentId | "catalog";
+type Language = "en" | "ja";
 
 type DocumentPage = {
   id: DocumentId;
@@ -31,7 +32,7 @@ type DocumentPage = {
   source: string;
 };
 
-const documents: readonly DocumentPage[] = [
+const japaneseDocuments: readonly DocumentPage[] = [
   {
     id: "guide",
     label: "ガイド",
@@ -64,12 +65,163 @@ const documents: readonly DocumentPage[] = [
   },
 ];
 
-const documentById = new Map(documents.map((document) => [document.id, document]));
+const englishDocuments: readonly DocumentPage[] = [
+  {
+    id: "guide",
+    label: "Guide",
+    summary: "Installation, the three-tier design, and the main React APIs.",
+    source: `# Guide
+
+## Requirements
+
+- React 18.3 or React 19
+- Node.js 20.19 or newer for local development, builds, and tests
+
+## Quick start
+
+\`\`\`tsx
+import { CelebrateProvider, useCelebrate } from "@celebrate-js/celebrate/react";
+
+function App() {
+  return <CelebrateProvider><SubmitButton /></CelebrateProvider>;
+}
+
+function SubmitButton() {
+  const celebrate = useCelebrate();
+  return <button onClick={() => celebrate("confetti")}>Submit</button>;
+}
+\`\`\`
+
+## Three tiers
+
+| Tier | Use it for | Example |
+| --- | --- | --- |
+| **Tier 1: catalog** | A named, ready-made effect | \`celebrate("confetti")\` |
+| **Tier 2: composition** | Layering names and custom React nodes | \`celebrate("stamp", { with: ["confetti"] })\` |
+| **Tier 3: primitives** | Building a new effect from raw parameters | \`<RadialBurst><RadialBurstLayer ... /></RadialBurst>\` |
+
+Named effects such as \`stamp\`, \`pop\`, \`ripple\`, \`ring\`, and \`flash\` are presets. When the catalog does not express the visual you need, move to the Tier 3 primitives rather than inventing another name.
+
+## Provider and trigger
+
+Mount \`<CelebrateProvider>\` once at the app root. \`useCelebrate()\` returns \`celebrate(content, options)\`, which must be called from a React component.
+
+\`\`\`tsx
+const celebrate = useCelebrate();
+celebrate("stamp", { text: "PASS" });
+celebrate("confetti", { anchor: buttonRef });
+celebrate(<MyBadge />);
+celebrate("stamp", { with: ["confetti", <MyBadge />] });
+\`\`\`
+
+Use \`anchor\` for a local effect at an element. Omit it for the viewport center. See the [API reference](./api-reference.md) for every option.
+
+## Tier 3 primitives
+
+- \`RadialBurst\`: expanding layers; used by \`pop\`, \`ripple\`, \`ring\`, and \`flash\`.
+- \`ParticleField\`: arbitrary particles, render nodes, and motion profiles; used by confetti, sparkle, rain, sakura, and cracker.
+- \`StrokePath\`: drawn paths such as lightning.
+- \`SnapshotShatter\`: breaks a canvas or image snapshot into triangles.
+- \`useCelebrateBorder()\`: decorates an existing element's border.
+
+The Japanese guide contains the complete original design notes and examples.`,
+  },
+  {
+    id: "api-reference",
+    label: "API reference",
+    summary: "Provider, trigger options, composition, and Tier 3 primitive types.",
+    source: `# API reference
+
+## \`CelebrateProvider\`
+
+| Prop | Type | Purpose |
+| --- | --- | --- |
+| \`theme\` | \`CelebrateTheme\` | The default visual theme; individual calls can override it. |
+| \`container\` | \`RefObject<HTMLElement \\| null>\` | Scopes overlays such as rain and lightning to an element. Use \`position: relative\` on that element. \`shatter\` always captures the viewport. |
+
+## \`celebrate(content, options)\`
+
+| Option | Purpose |
+| --- | --- |
+| \`anchor\` | The center point for a local effect; omit for the viewport center. |
+| \`text\`, \`note\` | Copy for stamp, record, bounce, medal, and popup. |
+| \`with\` | A named effect, React node, or list to render in parallel. |
+| \`theme\`, \`colors\`, \`color\` | Per-call visual overrides. |
+| \`intensity\` | A continuous scale for supported visual, audio, and haptic output. |
+| \`sizeRem\`, \`rotateDeg\`, \`shape\` | Size and stamp-specific presentation controls. |
+| \`sound\`, \`haptic\` | Enable or disable feedback independently. |
+| \`seed\` | Reproducible particle generation for tests and demos. |
+
+When the first argument is a literal variant name, TypeScript narrows the available options to the options that affect that variant.
+
+## Components and hooks
+
+- \`<Celebrate variant={...} />\` renders declaratively in place.
+- \`<RadialBurst>\` and \`<RadialBurstLayer>\` build expanding layers.
+- \`<ParticleField>\` receives particle specs with a motion profile, duration, delay, and React render node.
+- \`<StrokePath>\` draws SVG lines and paths.
+- \`<SnapshotShatter>\` shatters a canvas or image snapshot.
+- \`<Sequence>\` plays typed stages in order and can pass results forward.
+- \`useCelebrateBorder()\` and \`useContainerModifier()\` affect an existing element or the document container.
+
+For the full field-by-field Japanese tables, switch to 日本語.`,
+  },
+  {
+    id: "catalog-rationale",
+    label: "Catalog rationale",
+    summary: "Why the catalog has named effects and how the groups map to UX moments.",
+    source: `# Catalog rationale
+
+The 25 named Tier 1 effects are grouped by **UX meaning**, not by implementation. For example, \`pop\`, \`ripple\`, \`ring\`, and \`flash\` share the same radial structure but communicate different moments: a light acknowledgement, a tap ripple, an expanding ring, or a stronger reward.
+
+The groups cover input feedback, achievement, reward, reaction, character or narrative, environmental effects, staged effects, and text channels. A name belongs in the catalog only when it is a useful word for a product moment; a new visual that needs raw parameters belongs in Tier 3 instead.
+
+The Japanese source includes the research notes and the detailed mapping from categories to motion and gamification references.`,
+  },
+  {
+    id: "effect-structure-taxonomy",
+    label: "Effect structure taxonomy",
+    summary: "A design map for rendering scope, emission, motion, time, composition, and masking.",
+    source: `# Effect structure taxonomy
+
+This design note separates an effect into independent axes:
+
+1. **Rendering scope** — local element, container, or viewport.
+2. **Emission shape** — point, line, area, or an existing surface.
+3. **Element count** — one actor or a field of particles.
+4. **Per-element motion** — radial, ballistic, falling, static, orbiting, or custom.
+5. **Painting** — CSS, SVG, Canvas, DOM, image, or a custom React node.
+6. **Time** — a single transition, a staged sequence, or a persistent state.
+7. **Composition** — parallel layers, ordered stages, and independent effects.
+8. **Computation** — CSS, Web Animations, requestAnimationFrame, or a physics calculation.
+9. **Mask/reveal** — transforming or removing an existing visible surface.
+
+The public primitives follow this map: \`ParticleField\` owns field motion, \`RadialBurst\` owns expanding layers, \`StrokePath\` owns drawn paths, \`Sequence\` owns ordered phases, and \`SnapshotShatter\` owns captured-pixel breakup.
+
+The Japanese document retains the full design audit, examples, and proposed future work.`,
+  },
+  {
+    id: "asset-provenance",
+    label: "Asset provenance",
+    summary: "Ownership and redistribution status for images used in the demos.",
+    source: `# Asset provenance
+
+The seal images used in the demo were generated for this project at the creator's direction. They are project assets, not third-party stock material. The project keeps the original Japanese asset record as the detailed provenance note.`,
+  },
+];
+
+const documentIds = new Set<DocumentId>([
+  "guide",
+  "api-reference",
+  "catalog-rationale",
+  "effect-structure-taxonomy",
+  "asset-provenance",
+]);
 
 function currentPageId(): PageId | undefined {
   const id = window.location.hash.slice(1).split("#")[0];
   if (id === "catalog") return id;
-  return documentById.has(id as DocumentId) ? (id as DocumentId) : undefined;
+  return documentIds.has(id as DocumentId) ? (id as DocumentId) : undefined;
 }
 
 function documentHref(id: DocumentId): string {
@@ -78,7 +230,19 @@ function documentHref(id: DocumentId): string {
 
 function DocsApp() {
   const [pageId, setPageId] = useState<PageId | undefined>(currentPageId);
+  const [language, setLanguage] = useState<Language>("en");
+  const documents = language === "en" ? englishDocuments : japaneseDocuments;
+  const documentById = useMemo(() => new Map(documents.map((document) => [document.id, document])), [documents]);
   const activeDocument = pageId && pageId !== "catalog" ? documentById.get(pageId) : undefined;
+  const copy =
+    language === "en"
+      ? {
+          catalog: "Try the catalog",
+          documentation: "DOCUMENTATION",
+          footer: "Open an issue",
+          home: "Celebrate.js Docs",
+        }
+      : { catalog: "カタログを試す", documentation: "ドキュメント", footer: "Issue を開く", home: "Celebrate.js Docs" };
 
   useEffect(() => {
     const updatePage = () => setPageId(currentPageId());
@@ -87,13 +251,14 @@ function DocsApp() {
   }, []);
 
   useEffect(() => {
+    document.documentElement.lang = language;
     document.title = activeDocument
       ? `${activeDocument.label} | Celebrate.js Docs`
       : pageId === "catalog"
         ? "Catalog | Celebrate.js Docs"
         : "Celebrate.js Docs";
     window.scrollTo({ top: 0, behavior: "instant" });
-  }, [activeDocument, pageId]);
+  }, [activeDocument, language, pageId]);
 
   function handleArticleClick(event: MouseEvent<HTMLElement>) {
     const link = (event.target as HTMLElement).closest<HTMLAnchorElement>("a");
@@ -113,23 +278,39 @@ function DocsApp() {
   return (
     <div className="site-shell">
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="Celebrate.js Docs ホーム">
+        <a className="brand" href="#top" aria-label={copy.home}>
           <span>Celebrate.js</span>
           <small>Docs</small>
         </a>
         <nav aria-label="外部リンク">
-          <a href="#catalog">カタログを試す</a>
+          <a href="#catalog">{copy.catalog}</a>
           <a href="https://www.npmjs.com/package/@celebrate-js/celebrate">npm</a>
           <a href="https://github.com/celebrate-js/celebrate">GitHub</a>
+          <span className="language-toggle" aria-label="Documentation language">
+            <button
+              type="button"
+              className={language === "en" ? "is-active" : undefined}
+              onClick={() => setLanguage("en")}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              className={language === "ja" ? "is-active" : undefined}
+              onClick={() => setLanguage("ja")}
+            >
+              日本語
+            </button>
+          </span>
         </nav>
       </header>
 
       <div className="site-layout">
-        <aside className="sidebar" aria-label="ドキュメント">
-          <p className="sidebar-label">DOCUMENTATION</p>
+        <aside className="sidebar" aria-label={copy.documentation}>
+          <p className="sidebar-label">{copy.documentation}</p>
           <nav>
             <a className={pageId === "catalog" ? "is-active" : undefined} href="#catalog">
-              カタログを試す
+              {copy.catalog}
             </a>
             {documents.map((document) => (
               <a
@@ -145,7 +326,7 @@ function DocsApp() {
 
         <main id="top">
           {pageId === "catalog" ? (
-            <CatalogPage />
+            <CatalogPage language={language} />
           ) : activeDocument && renderedDocument ? (
             <article
               className="document"
@@ -153,42 +334,58 @@ function DocsApp() {
               dangerouslySetInnerHTML={{ __html: renderedDocument }}
             />
           ) : (
-            <Home />
+            <Home language={language} documents={documents} />
           )}
         </main>
       </div>
 
       <footer>
         <span>MIT License</span>
-        <a href="https://github.com/celebrate-js/celebrate/issues">Issue を開く</a>
+        <a href="https://github.com/celebrate-js/celebrate/issues">{copy.footer}</a>
       </footer>
     </div>
   );
 }
 
-function Home() {
+function Home({ language, documents }: { language: Language; documents: readonly DocumentPage[] }) {
+  const isEnglish = language === "en";
   return (
     <div className="home">
       <p className="eyebrow">REACT CELEBRATION EFFECTS</p>
       <h1>
-        決まった瞬間に、
+        {isEnglish ? "Make every moment" : "決まった瞬間に、"}
         <br />
-        演出を。
+        {isEnglish ? "feel complete." : "演出を。"}
       </h1>
       <p className="lead">
-        <code>@celebrate-js/celebrate</code>{" "}
-        は、印影スタンプ、紙吹雪、花火、稲光などの視覚的フィードバックをReactアプリへ加えるライブラリです。
+        {isEnglish ? (
+          <>
+            <code>@celebrate-js/celebrate</code> adds visual feedback to React apps: ink stamps, confetti, fireworks,
+            lightning, and more.
+          </>
+        ) : (
+          <>
+            <code>@celebrate-js/celebrate</code>{" "}
+            は、印影スタンプ、紙吹雪、花火、稲光などの視覚的フィードバックをReactアプリへ加えるライブラリです。
+          </>
+        )}
       </p>
       <div className="install-block">
         <span>npm</span>
         <code>npm install @celebrate-js/celebrate</code>
       </div>
-      <p className="runtime-note">React 18.3 / 19対応。開発・ビルドにはNode.js 20.19以降が必要です。</p>
+      <p className="runtime-note">
+        {isEnglish
+          ? "React 18.3 / 19. Node.js 20.19 or newer for development and builds."
+          : "React 18.3 / 19対応。開発・ビルドにはNode.js 20.19以降が必要です。"}
+      </p>
 
       <a className="catalog-launch" href="#catalog">
         <span>
-          <strong>試せるカタログ</strong>
-          <small>25種類のエフェクトを、その場で発火できます。</small>
+          <strong>{isEnglish ? "Interactive catalog" : "試せるカタログ"}</strong>
+          <small>
+            {isEnglish ? "Try all 25 effects directly in the browser." : "25種類のエフェクトを、その場で発火できます。"}
+          </small>
         </span>
         <span aria-hidden="true">→</span>
       </a>
@@ -196,7 +393,7 @@ function Home() {
       <section aria-labelledby="start-heading">
         <div className="section-heading">
           <p className="eyebrow">START HERE</p>
-          <h2 id="start-heading">リファレンス</h2>
+          <h2 id="start-heading">{isEnglish ? "Reference" : "リファレンス"}</h2>
         </div>
         <div className="document-grid">
           {documents.map((document) => (
@@ -302,10 +499,52 @@ const catalogCategories: readonly CatalogCategory[] = [
   },
 ];
 
+const englishCatalogCategories: Record<string, { title: string; description: string }> = {
+  "① 入力フィードバック": { title: "① Input feedback", description: "A light confirmation for pressing a control." },
+  "② 達成": { title: "② Achievement", description: "Signals a correct answer, completion, or placement." },
+  "③ 報酬": { title: "③ Reward", description: "A bigger moment: a bonus, a jackpot, or a win." },
+  "④ リアクション": { title: "④ Reaction", description: "Express a feeling through emoji." },
+  "⑤ キャラクター・ナラティブ": {
+    title: "⑤ Character / narrative",
+    description: "One actor moves rather than a field of particles.",
+  },
+  "⑥ 環境演出": { title: "⑥ Environment", description: "Effects that act across the whole screen." },
+  "⑦ 段階エフェクト": { title: "⑦ Staged effect", description: "Several phases play out over time." },
+  "⑧ テキストチャネル": { title: "⑧ Text channel", description: "A floating number or short piece of text." },
+};
+
+const englishCatalogVariants: Record<CelebrateVariant, string> = {
+  pop: "Expands from the center and fades — the lightest feedback.",
+  ripple: "Spreads out like a ripple for a tap confirmation.",
+  checkmark: "A circle draws in, then a checkmark.",
+  stamp: "A short piece of text lands like an ink stamp.",
+  medal: "A ribboned medal that feels awarded.",
+  bounce: "A short text label that bounces in.",
+  confetti: "Classic falling confetti.",
+  sparkle: "Sparkles scatter outward.",
+  record: "A full-screen banner for a new personal best.",
+  flash: "A brief, intense flash.",
+  ring: "A double ring expands and fades.",
+  firework: "Fireworks bloom from several staggered points.",
+  heart: "Hearts float up.",
+  star: "Stars float up.",
+  emoji: "Emoji float up (🎉✨🎊👍 by default).",
+  cracker: "A party popper bursts with streamers.",
+  float: "Text or a cloud shape drifts gently.",
+  sakura: "Cherry blossom petals drift down.",
+  shake: "The whole screen shakes.",
+  hitstop: "A brief freeze, like a stopped frame.",
+  vignette: "Screen edges darken for a low-health look.",
+  rain: "Confetti rains down across the screen.",
+  lightning: "A bolt strikes from top to bottom.",
+  shatter: "Captures the screen and breaks those exact pixels into shards.",
+  popup: "Text such as “+1” floats up and fades.",
+};
+
 const fireworkStyles: readonly FireworkStyle[] = ["peony", "willow", "ring", "kiku", "star", "senrin", "hachi"];
 const SHATTER_CATALOG_LOCK_MS = 3_500;
 
-function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
+function CatalogCard({ spec, language }: { spec: CatalogVariantSpec; language: Language }) {
   const celebrate = useCelebrate();
   const [fireworkStyle, setFireworkStyle] = useState<FireworkStyle>("peony");
   const [isShatterPlaying, setIsShatterPlaying] = useState(false);
@@ -355,12 +594,14 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
     <article className="catalog-card">
       <div className="catalog-card-head">
         <code>{spec.variant}</code>
-        {hasSoundForCelebration(spec.variant) && <span title="効果音あり">🔈</span>}
+        {hasSoundForCelebration(spec.variant) && (
+          <span title={language === "en" ? "Sound included" : "効果音あり"}>🔈</span>
+        )}
       </div>
-      <p>{spec.description}</p>
+      <p>{language === "en" ? englishCatalogVariants[spec.variant] : spec.description}</p>
       {isFirework && (
         <label>
-          種類
+          {language === "en" ? "Style" : "種類"}
           <select value={fireworkStyle} onChange={(event) => setFireworkStyle(event.target.value as FireworkStyle)}>
             {fireworkStyles.map((style) => (
               <option key={style} value={style}>
@@ -376,7 +617,7 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
       <div className="catalog-card-action">
         <span ref={effectAnchorRef} aria-hidden="true" className="catalog-card-effect-anchor" />
         <button type="button" disabled={isShatterPlaying} onClick={fire}>
-          {isShatterPlaying ? "再生中…" : "試す"}
+          {isShatterPlaying ? (language === "en" ? "Playing…" : "再生中…") : language === "en" ? "Try it" : "試す"}
         </button>
       </div>
     </article>
@@ -418,8 +659,9 @@ function catalogPlaygroundOptionsSnippet(
   return lines.length > 0 ? `, {\n${lines.join("\n")}\n}` : "";
 }
 
-function CatalogPlayground() {
+function CatalogPlayground({ language }: { language: Language }) {
   const celebrate = useCelebrate();
+  const isEnglish = language === "en";
   const [variant, setVariant] = useState<CelebrateVariant>("confetti");
   const [withList, setWithList] = useState<CelebrateVariant[]>([]);
   const [intensity, setIntensity] = useState(1);
@@ -484,8 +726,12 @@ function CatalogPlayground() {
     <section className="catalog-playground" aria-labelledby="catalog-playground-title">
       <div>
         <p className="eyebrow">CUSTOM PLAYGROUND</p>
-        <h2 id="catalog-playground-title">カスタムして試す</h2>
-        <p>名前だけのカードではなく、optionsを変えながら実際の呼び出しと見た目を確認できます。</p>
+        <h2 id="catalog-playground-title">{isEnglish ? "Customize and try it" : "カスタムして試す"}</h2>
+        <p>
+          {isEnglish
+            ? "Change options, preview the call, and trigger the real effect without leaving the catalog."
+            : "名前だけのカードではなく、optionsを変えながら実際の呼び出しと見た目を確認できます。"}
+        </p>
       </div>
       <div className="catalog-playground-grid">
         <div className="catalog-playground-controls">
@@ -507,7 +753,7 @@ function CatalogPlayground() {
             </select>
           </label>
           <fieldset>
-            <legend>with（重ねる演出）</legend>
+            <legend>{isEnglish ? "with (layered effects)" : "with（重ねる演出）"}</legend>
             <div className="catalog-playground-with-list">
               {CATALOG_PLAYGROUND_VARIANTS.filter((item) => item !== variant).map((item) => (
                 <label key={item}>
@@ -530,7 +776,7 @@ function CatalogPlayground() {
           </label>
           {supportsSize && (
             <label>
-              sizeRem: {sizeRem?.toFixed(1) ?? "既定"}
+              sizeRem: {sizeRem?.toFixed(1) ?? (isEnglish ? "default" : "既定")}
               <input
                 type="range"
                 min="0.5"
@@ -563,7 +809,7 @@ function CatalogPlayground() {
                   setShape(event.target.value === "" ? null : (event.target.value as CelebrateStampShape))
                 }
               >
-                <option value="">既定（rounded）</option>
+                <option value="">{isEnglish ? "default (rounded)" : "既定（rounded）"}</option>
                 {CATALOG_PLAYGROUND_STAMP_SHAPES.map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -578,7 +824,7 @@ function CatalogPlayground() {
               <input
                 type="text"
                 value={text}
-                placeholder="例：合格"
+                placeholder={isEnglish ? "e.g. PASS" : "例：合格"}
                 onChange={(event) => setText(event.target.value)}
               />
             </label>
@@ -589,7 +835,7 @@ function CatalogPlayground() {
               <input
                 type="text"
                 value={note}
-                placeholder="例：れんぞく 7問"
+                placeholder={isEnglish ? "e.g. 7 in a row" : "例：れんぞく 7問"}
                 onChange={(event) => setNote(event.target.value)}
               />
             </label>
@@ -606,29 +852,32 @@ function CatalogPlayground() {
       <div className="catalog-playground-action">
         <span ref={effectAnchorRef} aria-hidden="true" className="catalog-card-effect-anchor" />
         <button type="button" onClick={fire}>
-          カスタム設定で発火
+          {isEnglish ? "Trigger custom effect" : "カスタム設定で発火"}
         </button>
       </div>
     </section>
   );
 }
 
-function CatalogPage() {
+function CatalogPage({ language }: { language: Language }) {
+  const isEnglish = language === "en";
   return (
     <section className="catalog-page">
       <p className="eyebrow">INTERACTIVE CATALOG · TIER 1</p>
-      <h1>試せるカタログ</h1>
+      <h1>{isEnglish ? "Interactive catalog" : "試せるカタログ"}</h1>
       <p className="catalog-lead">
-        カードの「試す」を押すと、その場でエフェクトが発火します。画面全体を使う演出も含みます。
+        {isEnglish
+          ? "Press Try on any card to trigger its effect. The catalog includes full-screen effects as well."
+          : "カードの「試す」を押すと、その場でエフェクトが発火します。画面全体を使う演出も含みます。"}
       </p>
-      <CatalogPlayground />
+      <CatalogPlayground language={language} />
       {catalogCategories.map((category) => (
         <section className="catalog-category" key={category.title}>
-          <h2>{category.title}</h2>
-          <p>{category.description}</p>
+          <h2>{isEnglish ? englishCatalogCategories[category.title]!.title : category.title}</h2>
+          <p>{isEnglish ? englishCatalogCategories[category.title]!.description : category.description}</p>
           <div className="catalog-grid">
             {category.variants.map((spec) => (
-              <CatalogCard key={spec.variant} spec={spec} />
+              <CatalogCard key={spec.variant} spec={spec} language={language} />
             ))}
           </div>
         </section>
