@@ -451,6 +451,12 @@ main {
   background: #e33b4b;
   color: #fff;
 }
+.catalog-card button:disabled {
+  background: #f2eeeb;
+  border-color: #d6ceca;
+  color: #968d88;
+  cursor: wait;
+}
 
 footer {
   align-items: center;

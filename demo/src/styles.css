@@ -362,6 +362,13 @@ a {
   color: #fff;
 }
 
+.catalog-card-trigger:disabled {
+  background: #f2eeeb;
+  border-color: #d6ceca;
+  color: #968d88;
+  cursor: wait;
+}
+
 /* ==== プレイグラウンド（react-toastify の "The playground" に相当） ==== */
 
 .playground-grid {

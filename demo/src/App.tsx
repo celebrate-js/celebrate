@@ -18,6 +18,7 @@ import {
   hasSoundForCelebration,
   hasHapticForCelebration,
   durationForCelebration,
+  isFullScreenContent,
   CELEBRATE_VARIANT_NAMES,
   type CelebrateVariant,
   type CelebrateVariantOptions,
@@ -255,6 +256,10 @@ const FIREWORK_STYLE_OPTIONS: readonly { value: FireworkStyle; label: string; la
   { value: "hachi", label: "hachi（蜂）", labelEn: "hachi" },
 ];
 const DEFAULT_FIREWORK_STYLE: FireworkStyle = "peony";
+// html2canvasによる撮影と破片アニメーションが完了するまでの間、同じ全画面shatterを
+// 積み重ねない。通常のカード演出は連打しても共存できるが、画面スナップショットだけは
+// 2枚重ねると「二重に割れた」ように見えるため、カタログでは単発再生にする。
+const SHATTER_CATALOG_LOCK_MS = 3_500;
 
 function catalogCallSnippet(spec: CatalogVariantSpec, fireworkStyle?: FireworkStyle): string {
   const optionLines: string[] = [];
@@ -275,7 +280,18 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
   const { lang } = useLang();
   const t = useT(CATALOG_CARD_TEXT);
   const [fireworkStyle, setFireworkStyle] = useState<FireworkStyle>(DEFAULT_FIREWORK_STYLE);
+  const [isShatterPlaying, setIsShatterPlaying] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const shatterLockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirework = spec.variant === "firework";
+  const isFullScreen = isFullScreenContent(spec.variant);
+
+  useEffect(
+    () => () => {
+      if (shatterLockTimer.current) clearTimeout(shatterLockTimer.current);
+    },
+    []
+  );
 
   const fire = () => {
     // spec.variantは（一覧から来る）変数なのでリテラルでの絞り込みができず、celebrate()の
@@ -284,7 +300,23 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
     // optionを混在させた時にexcess propertyでコンパイルエラーになるため）。
     const options: CelebrateVariantOptions = { text: spec.text, note: spec.note };
     if (isFirework) options.fireworkStyle = fireworkStyle;
-    celebrate(spec.variant, options);
+
+    if (spec.variant === "shatter") {
+      if (shatterLockTimer.current) return;
+      setIsShatterPlaying(true);
+      shatterLockTimer.current = setTimeout(() => {
+        shatterLockTimer.current = null;
+        setIsShatterPlaying(false);
+      }, SHATTER_CATALOG_LOCK_MS);
+    }
+
+    // カード単位の演出は、押した場所のすぐ近くに出す。従来のviewport中央では、
+    // 下段カードのcracker/floatを押したときに「出ていない」ように見えやすかった。
+    if (isFullScreen) {
+      celebrate(spec.variant, options);
+    } else {
+      celebrate(spec.variant, { ...options, anchor: buttonRef });
+    }
   };
 
   return (
@@ -313,8 +345,8 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
       <pre className="catalog-card-code">
         <code>{catalogCallSnippet(spec, isFirework ? fireworkStyle : undefined)}</code>
       </pre>
-      <button className="catalog-card-trigger" onClick={fire}>
-        {t.try}
+      <button ref={buttonRef} className="catalog-card-trigger" disabled={isShatterPlaying} onClick={fire}>
+        {isShatterPlaying ? "再生中…" : t.try}
       </button>
     </div>
   );
