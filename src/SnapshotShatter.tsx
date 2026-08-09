@@ -123,11 +123,30 @@ export function SnapshotShatter({
 }: SnapshotShatterProps) {
   const [capture, setCapture] = useState<CapturedSnapshot | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // React Strict Mode は開発時にlayout effectを再実行する。撮影準備を二度走らせると、
+  // 同じスナップショットからCanvasとrAFの系統が二重に生まれ、「一回のshatterが二回割れる」
+  // 見た目になるため、同じ入力の初期化は一度だけにする。
+  const initializedCapture = useRef<{
+    source: SnapshotShatterSource;
+    seed: number | undefined;
+    columns: number | undefined;
+    rows: number | undefined;
+  } | null>(null);
 
   useLayoutEffect(() => {
     const source = sourceRef.current;
     if (!source) return;
     if (source instanceof HTMLImageElement && (!source.complete || source.naturalWidth === 0)) return;
+
+    const previous = initializedCapture.current;
+    if (
+      previous?.source === source &&
+      previous.seed === seed &&
+      previous.columns === columns &&
+      previous.rows === rows
+    ) {
+      return;
+    }
 
     const rect = source.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
@@ -140,6 +159,7 @@ export function SnapshotShatter({
     bitmapContext.drawImage(source, 0, 0, bitmap.width, bitmap.height);
     bitmapContext.scale(pixelRatio, pixelRatio);
 
+    initializedCapture.current = { source, seed, columns, rows };
     setCapture({
       bitmap,
       scene: createSnapshotShatterScene(

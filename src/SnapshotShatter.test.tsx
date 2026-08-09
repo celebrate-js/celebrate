@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act } from "react";
+import { act, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SnapshotShatter } from "./SnapshotShatter";
@@ -117,6 +117,19 @@ describe("SnapshotShatter", () => {
     expect(context.clip).toHaveBeenCalled();
     expect(onComplete).toHaveBeenCalledTimes(1);
     expect(source.style.visibility).toBe("");
+  });
+
+  it("Strict Modeでも同じ撮影準備を二重に実行しない", () => {
+    act(() => {
+      root.render(
+        <StrictMode>
+          <SnapshotShatter sourceRef={{ current: source }} seed={1} durationMs={100} />
+        </StrictMode>
+      );
+    });
+
+    // source→bitmapへの一回のコピー。Strict Modeのlayout effect再実行で二枚作らない。
+    expect(context.drawImage).toHaveBeenCalledTimes(1);
   });
 
   it("reduced motionでは元画像を移動せずにフェードする", () => {
