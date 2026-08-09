@@ -112,9 +112,6 @@ function DocsApp() {
     <div className="site-shell">
       <header className="site-header">
         <a className="brand" href="#top" aria-label="Celebrate.js Docs ホーム">
-          <span className="brand-mark" aria-hidden="true">
-            ✦
-          </span>
           <span>Celebrate.js</span>
           <small>Docs</small>
         </a>

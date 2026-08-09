@@ -60,10 +60,6 @@ code {
   gap: 8px;
   text-decoration: none;
 }
-.brand-mark {
-  color: var(--accent);
-  font-size: 1.25rem;
-}
 .brand small {
   color: var(--muted);
   font-size: 0.74rem;
