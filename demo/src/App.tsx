@@ -223,8 +223,8 @@ const CATALOG_CATEGORIES: readonly CatalogCategory[] = [
     variants: [
       {
         variant: "shatter",
-        description: "画面がひび割れて崩れ落ちる。",
-        descriptionEn: "The screen cracks and crumbles apart.",
+        description: "画面全体を撮影し、その画素を本当に破片として崩す。",
+        descriptionEn: "Captures the whole screen, then breaks those exact pixels into shards.",
       },
     ],
   },
@@ -895,8 +895,8 @@ const SCOPED_DEMO_TEXT = {
     hint: (
       <>
         <code>{"<CelebrateProvider container={ref}>"}</code>
-        にすると、rain/lightning/shatterのような全画面variantを画面全体ではなくこの枠の中だけに閉じ込められる。
-        右のボタンは比較用（shake/hitstopは<code>useContainerModifier()</code>
+        にすると、rain/lightningのような全画面variantを画面全体ではなくこの枠の中だけに閉じ込められる。
+        shatterは常に画面全体を撮影して割る。 右のボタンは比較用（shake/hitstopは<code>useContainerModifier()</code>
         を直接使うTier3の例で、常に画面全体が対象）。
       </>
     ),
@@ -905,9 +905,10 @@ const SCOPED_DEMO_TEXT = {
     title: "Local scope (container)",
     hint: (
       <>
-        <code>{"<CelebrateProvider container={ref}>"}</code> confines full-screen variants like rain/lightning/shatter
-        to this box instead of the whole viewport. The right-hand button is for comparison (shake/hitstop, a Tier 3
-        example using <code>useContainerModifier()</code> directly, always target the whole screen).
+        <code>{"<CelebrateProvider container={ref}>"}</code> confines full-screen variants like rain/lightning to this
+        box instead of the whole viewport. Shatter always captures and breaks the entire viewport. The right-hand button
+        is for comparison (shake/hitstop, a Tier 3 example using <code>useContainerModifier()</code> directly, always
+        target the whole screen).
       </>
     ),
   },
@@ -2385,7 +2386,7 @@ const CELEBRATE_PROVIDER_PROPS: readonly ApiRow[] = [
   {
     name: "container",
     type: "RefObject<HTMLElement | null>",
-    desc: "指定すると、rain/lightning/shatterのような画面全体エフェクトをviewport全体ではなくこの要素の内側に閉じ込める（position: relativeをこの要素に設定しておくこと）。省略時はdocument.body。",
+    desc: "指定すると、rain/lightningのような画面全体エフェクトをviewport全体ではなくこの要素の内側に閉じ込める（position: relativeをこの要素に設定しておくこと）。省略時はdocument.body。shatterは常にviewport全体を撮影する。",
   },
 ];
 

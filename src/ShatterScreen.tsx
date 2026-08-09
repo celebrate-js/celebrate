@@ -1,56 +1,89 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
+import html2canvas from "html2canvas";
 import { clsx } from "./clsx";
-import { createSeededShatterRandom, createShatterScene, type ShatterScene } from "./shatter";
-import { StrokePath } from "./StrokePath";
+import { SnapshotShatter } from "./SnapshotShatter";
 
 export interface ShatterScreenProps {
   className?: string;
-  /** 再現可能なテスト・デモ用。 */
+  /** 再現可能な破片メッシュを使うテスト・デモ用。 */
   seed?: number;
 }
 
 /**
- * 画面ひび割れ崩壊（⑤段階エフェクト）。①ヒビが入る→②広がる→③バキバキ（シェイク）→
- * ④破片が崩れ落ちる、の4局面を1回の発火にまとめてある。`rain` / `lightning` と同じく
- * 実体を持つ全画面コンテンツなので、CelebrateProvider が変換されていない入れ物へ
- * そのまま描画する（isFullScreenContent("shatter") が true）。
+ * 現在のviewportを一度だけCanvasへ撮影し、撮影した画素を画面全体で割る。
+ * 画面の内容を直接崩すため、ひびの上に抽象的な板を重ねるだけの演出にはしない。
  */
 export function ShatterScreen({ className, seed }: ShatterScreenProps) {
-  const [scene] = useState<ShatterScene>(() =>
-    createShatterScene(seed === undefined ? Math.random : createSeededShatterRandom(seed))
-  );
+  const sourceRef = useRef<HTMLCanvasElement | null>(null);
+  const [captured, setCaptured] = useState(false);
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const captureViewport = async () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const image = await html2canvas(document.body, {
+        backgroundColor: null,
+        logging: false,
+        useCORS: true,
+        x: window.scrollX,
+        y: window.scrollY,
+        width,
+        height,
+        windowWidth: document.documentElement.clientWidth,
+        windowHeight: document.documentElement.clientHeight,
+      });
+      if (cancelled || !sourceRef.current) return;
+
+      const source = sourceRef.current;
+      source.width = image.width;
+      source.height = image.height;
+      const context = source.getContext("2d");
+      if (!context) return;
+      context.drawImage(image, 0, 0);
+      setCompleted(false);
+      setCaptured(true);
+    };
+
+    void captureViewport();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!captured || completed) return;
+    // SnapshotShatterのCanvasはCelebrateProviderのportal（body直下）に残し、アプリ本体だけを
+    // 一時的に隠す。これをしないと、動いた破片の下から元のDOMが見えて「割れていない」ように見える。
+    const roots = [...document.body.children].filter(
+      (element) => !element.classList.contains("celebrate-overlay-root")
+    ) as HTMLElement[];
+    const previousVisibilities = roots.map((element) => element.style.visibility);
+    roots.forEach((element) => {
+      element.style.visibility = "hidden";
+    });
+    return () => {
+      roots.forEach((element, index) => {
+        element.style.visibility = previousVisibilities[index]!;
+      });
+    };
+  }, [captured, completed]);
 
   return (
     <span aria-hidden="true" data-shatter-screen="" className={clsx("celebrate-shatter", className)}>
-      <span className="celebrate-shatter-shake-layer">
-        <StrokePath
-          lines={scene.cracks.map((crack) => ({
-            points: crack.points,
-            strokeWidth: 0.5,
-            dashLength: 160,
-            color: "rgba(255, 255, 255, 0.92)",
-            glow: "soft",
-            durationMs: 280,
-            delayMs: parseFloat(crack.delay) * 1000,
-          }))}
+      <canvas ref={sourceRef} className="celebrate-shatter-snapshot-source" />
+      {captured && (
+        <SnapshotShatter
+          sourceRef={sourceRef}
+          seed={seed}
+          columns={8}
+          rows={6}
+          durationMs={2200}
+          onComplete={() => setCompleted(true)}
         />
-        {scene.shards.map((shard) => (
-          <span
-            key={shard.id}
-            data-shatter-shard=""
-            className="celebrate-shatter-shard"
-            style={
-              {
-                clipPath: shard.clipPath,
-                "--celebrate-shatter-fall-x": shard.fallX,
-                "--celebrate-shatter-fall-y": shard.fallY,
-                "--celebrate-shatter-rotate": shard.rotate,
-                animationDelay: shard.delay,
-              } as CSSProperties
-            }
-          />
-        ))}
-      </span>
+      )}
     </span>
   );
 }

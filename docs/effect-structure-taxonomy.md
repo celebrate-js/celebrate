@@ -156,7 +156,7 @@ parallel(leaf1, leaf2, ...)   // 同時実行。各leafが独立した視覚/音
   DOM要素の`style.transform`/`style.opacity`に直接書き込む（Reactの再レンダーを経由しないため
   粒子数が増えても軽い）。`render`は軸Eの`custom-component`拡張そのもの。
 - **`StrokePath.tsx`**：経路を`stroke-dasharray`/`dashoffset`で描き下ろす構造テンプレート
-  （軸D=`stroke-reveal`）。`lightning`の稲光・`shatter`のヒビ・`checkmark`は実装としては
+  （軸D=`stroke-reveal`）。`lightning`の稲光・`checkmark`は実装としては
   これのパラメータ違い（`lines: StrokeLine[]`に太さ・色・duration・グロー強度を渡すだけ。
   `points`＝直線の折れ線、`d`＝円弧などの曲線）。
 - **`ClipReveal.tsx`**：覆いを`clip-path`で動かして中身を出し入れする構造テンプレート
@@ -172,7 +172,7 @@ parallel(leaf1, leaf2, ...)   // 同時実行。各leafが独立した視覚/音
 - **`useContainerModifier()`**：`<html>`への一時的なclass付け外し（軸A=`container-modifier`）を
   celebrate()を経由せず直接使うためのフック。内部実装（`containerModifier.ts`のref カウント）は
   `shake`/`hitstop`/`vignette`とTier3利用の両方で共有している。
-- **`CelebrateProvider`の`container`prop**：rain/lightning/shatterのような画面全体エフェクトが
+- **`CelebrateProvider`の`container`prop**：rain/lightningのような画面全体エフェクトが
   常に`document.body`（viewport全体）に固定されていた問題を解消。`container`を渡すと、
   そのローカル要素の内側だけにスコープできる。
 - **`enterSettle.ts`**：「入って、そのまま残る」構造テンプレート（軸F=`enter-and-persist`）。
@@ -187,7 +187,7 @@ confetti/sparkle/cracker/rain/firework/sakuraなど既存の粒子系variantは
 `ParticleField`/`motionProfile`エンジンに統合済み（実装は見た目の忠実な再現より
 構造の共通化を優先したため、cracker等は元のCSSキーフレーム版と厳密には一致しない）。
 checkmarkは`StrokePath`（軸D=`stroke-reveal`）に統合済み（円弧・チェックとも
-`stroke-dasharray`/`dashoffset`という同じ仕組みで、lightning・shatterのヒビと実体は同じだった）。
+`stroke-dasharray`/`dashoffset`という同じ仕組みで、lightningの稲光と同じ描画機構）。
 
 ## ボーダーエフェクトの重複（列挙）
 
@@ -254,23 +254,22 @@ GSAPのtimelineと同じ層構造）。
 
 ## 既存variantの軸マッピング（検証・抜粋）
 
-| variant            | A                     | B                        | C              | D                       | E/I              | F                 |
-| ------------------ | --------------------- | ------------------------ | -------------- | ----------------------- | ---------------- | ----------------- |
-| pop                | self-rendered-overlay | point                    | single         | static-scale            | fill             | one-shot-fade     |
-| ripple             | self-rendered-overlay | point                    | multi-layer(3) | static-scale            | outline          | one-shot-fade     |
-| confetti           | self-rendered-overlay | point                    | particle-field | radial-velocity         | fill             | one-shot-fade     |
-| cracker            | self-rendered-overlay | cone                     | particle-field | ballistic               | fill(streamer)   | one-shot-fade     |
-| sakura             | self-rendered-overlay | point                    | particle-field | drift-sway              | fill(petal)      | one-shot-fade     |
-| rain               | self-rendered-overlay | line-edge（画面幅）      | particle-field | fall-only               | fill             | one-shot-fade     |
-| lightning          | self-rendered-overlay | point→path（画面サイズ） | single         | stroke-reveal           | icon-svg-shape   | one-shot-fade     |
-| shatter(crack)     | self-rendered-overlay | point（画面サイズ）      | single         | stroke-reveal           | icon-svg-shape   | staged-sequence   |
-| shatter(shard)     | self-rendered-overlay | area-scatter             | multi-layer(9) | ballistic               | fill             | staged-sequence   |
-| checkmark          | self-rendered-overlay | point                    | multi-layer(2) | stroke-reveal           | icon-svg-shape   | enter-and-persist |
-| stamp/medal/record | self-rendered-overlay | point                    | single         | static-scale            | fill+glyph       | enter-and-persist |
-| hitstop            | self-rendered-overlay | area-scatter（画面全体） | single         | static-scale(scale固定) | fill             | one-shot-fade     |
-| vignette           | self-rendered-overlay | area-scatter（画面全体） | single         | static-scale(inset反転) | glow-gradient    | one-shot-fade     |
-| border: spin/ants  | external-decorate     | ring                     | single         | stroke-reveal相当       | decorative-frame | bounded-repeat可  |
-| shake              | container-modifier    | —                        | —              | —                       | —                | one-shot          |
+| variant            | A                     | B                        | C                 | D                       | E/I              | F                 |
+| ------------------ | --------------------- | ------------------------ | ----------------- | ----------------------- | ---------------- | ----------------- |
+| pop                | self-rendered-overlay | point                    | single            | static-scale            | fill             | one-shot-fade     |
+| ripple             | self-rendered-overlay | point                    | multi-layer(3)    | static-scale            | outline          | one-shot-fade     |
+| confetti           | self-rendered-overlay | point                    | particle-field    | radial-velocity         | fill             | one-shot-fade     |
+| cracker            | self-rendered-overlay | cone                     | particle-field    | ballistic               | fill(streamer)   | one-shot-fade     |
+| sakura             | self-rendered-overlay | point                    | particle-field    | drift-sway              | fill(petal)      | one-shot-fade     |
+| rain               | self-rendered-overlay | line-edge（画面幅）      | particle-field    | fall-only               | fill             | one-shot-fade     |
+| lightning          | self-rendered-overlay | point→path（画面サイズ） | single            | stroke-reveal           | icon-svg-shape   | one-shot-fade     |
+| shatter            | self-rendered-overlay | viewport                 | snapshot-mesh(96) | gravity + rotation      | captured-pixels  | staged-sequence   |
+| checkmark          | self-rendered-overlay | point                    | multi-layer(2)    | stroke-reveal           | icon-svg-shape   | enter-and-persist |
+| stamp/medal/record | self-rendered-overlay | point                    | single            | static-scale            | fill+glyph       | enter-and-persist |
+| hitstop            | self-rendered-overlay | area-scatter（画面全体） | single            | static-scale(scale固定) | fill             | one-shot-fade     |
+| vignette           | self-rendered-overlay | area-scatter（画面全体） | single            | static-scale(inset反転) | glow-gradient    | one-shot-fade     |
+| border: spin/ants  | external-decorate     | ring                     | single            | stroke-reveal相当       | decorative-frame | bounded-repeat可  |
+| shake              | container-modifier    | —                        | —                 | —                       | —                | one-shot          |
 
 ## 新規提案の軸マッピング
 
@@ -300,9 +299,8 @@ GSAPのtimelineと同じ層構造）。
 3. ~~マスク・リビール（軸I）の最初の実装：`clip-reveal`を1つ（緞帳ワイプ等）試作する~~
    **実装済み**：`ClipReveal.tsx`。edge（left/right/top/bottom/center）×direction（in/out）を
    1つのCSS keyframeの順再生・逆再生（`animation-direction: reverse`）だけで表現し、
-   keyframeを倍にしない設計にした。shatterの破片（画面サイズのclip-pathマスク要素）は
-   構造的にはこの軸に属するが、`ParticleField`の小粒モデルと違い今回の移行対象ではない
-   （将来的な移行の受け皿として実装した）。
+   keyframeを倍にしない設計にした。shatterはClipRevealではなく、画面のスナップショットを
+   Canvasの三角形メッシュとして描画する。
 4. ~~`RadialBurst`を軸B「原点移動」に対応させる（スポットライト用）~~ **実装済み**：
    `RadialBurst`の`origin: RadialOriginKeyframe[]`（`{offset, xRem, yRem}`の配列）。
    経由点は実行時に決まる任意個なのでCSS keyframesでは表現できず、`borderGlow.ts`と同じ理由で
@@ -338,5 +336,5 @@ GSAPのtimelineと同じ層構造）。
 - ~~ドキュメント（README駆動）を先に書き、Tier1〜3の書き心地を実装前に検証する~~
   → README.md作成済み（実装後になったが完了）
 - ~~neon/fire/iceボーダーエフェクトの重複整理~~ → `borderGlow.ts`/`borderConicRing.ts`に統合済み
-- StrokePath（lightning/shatterのヒビの統合）、useContainerModifier（Tier3フック化）、
+- StrokePath（lightningの稲光・checkmarkの統合）、useContainerModifier（Tier3フック化）、
   CelebrateProviderの`container`prop（rain等のローカルスコープ化）も完了

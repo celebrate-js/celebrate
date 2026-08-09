@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, RefObject } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useCelebrate, ParticleField } from "../../../src/react";
+import { useCelebrate, ParticleField, SnapshotShatter } from "../../../src/react";
 import {
   fallMotion,
   orbitTwinkleMotion,
@@ -543,6 +543,99 @@ function IceFloeStage({ config, backTo }: { config: PopItTileConfig; backTo: str
   );
 }
 
+// 💥 ひび割れは、既存の全画面「ガラスのひび」ではなく、舞台をCanvasとして描き、
+// その一枚をSnapshotShatterへ渡すTier 3の例。ボタンを押した瞬間に見えていた画素が
+// そのまま三角形の破片になって落ちる。
+function SnapshotShatterStage({ config, backTo }: { config: PopItTileConfig; backTo: string }) {
+  const { lang } = useLang();
+  const t = useT(STAGE_TEXT);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [tapCount, setTapCount] = useState(0);
+  const [shatterKey, setShatterKey] = useState<number | null>(null);
+  const hint = lang === "en" ? "Tap to break this exact snapshot" : "タップした瞬間の舞台を割る";
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const draw = () => {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const pixelRatio = window.devicePixelRatio || 1;
+      canvas.width = Math.round(rect.width * pixelRatio);
+      canvas.height = Math.round(rect.height * pixelRatio);
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      const gradient = context.createLinearGradient(0, 0, 0, rect.height);
+      gradient.addColorStop(0, "#635a78");
+      gradient.addColorStop(1, "#1c1826");
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, rect.width, rect.height);
+      const glow = context.createRadialGradient(
+        rect.width * 0.48,
+        rect.height * 0.38,
+        2,
+        rect.width * 0.48,
+        rect.height * 0.38,
+        rect.width * 0.48
+      );
+      glow.addColorStop(0, "rgba(221, 203, 255, 0.3)");
+      glow.addColorStop(1, "rgba(221, 203, 255, 0)");
+      context.fillStyle = glow;
+      context.fillRect(0, 0, rect.width, rect.height);
+      context.strokeStyle = "rgba(236, 223, 255, 0.24)";
+      context.lineWidth = 1;
+      for (let index = 0; index < 6; index++) {
+        const x = (rect.width * (index + 1)) / 7;
+        context.beginPath();
+        context.moveTo(x, rect.height * 0.13);
+        context.lineTo(x + (index % 2 === 0 ? 13 : -13), rect.height * 0.87);
+        context.stroke();
+      }
+      context.fillStyle = "rgba(255, 255, 255, 0.88)";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.font = `700 ${Math.min(20, Math.max(14, rect.width / 18))}px system-ui, sans-serif`;
+      context.fillText(hint, rect.width / 2, rect.height / 2);
+      context.font = `700 ${Math.min(38, Math.max(28, rect.width / 10))}px system-ui, sans-serif`;
+      context.fillText("✦", rect.width / 2, rect.height * 0.28);
+    };
+    draw();
+    const observer = new ResizeObserver(draw);
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [hint]);
+
+  return (
+    <section className="doc-section">
+      <StageHeader config={config} backTo={backTo} />
+      <button
+        type="button"
+        className="popit-stage-surface popit-stage-surface--snapshot-shatter"
+        onClick={() => {
+          if (shatterKey !== null) return;
+          setTapCount((count) => count + 1);
+          setShatterKey((key) => (key ?? 0) + 1);
+        }}
+        aria-label={hint}
+      >
+        <canvas ref={canvasRef} className="popit-snapshot-shatter-canvas" aria-hidden="true" />
+      </button>
+      {shatterKey !== null && (
+        <SnapshotShatter
+          key={shatterKey}
+          sourceRef={canvasRef}
+          seed={shatterKey}
+          onComplete={() => setShatterKey(null)}
+        />
+      )}
+      <p className="section-hint">
+        {t.tapCount}: {tapCount}
+      </p>
+    </section>
+  );
+}
+
 // ==== 🥎ポン専用：ミニゲーム（/examples/game）と同じ「出てくるターゲットをタップする」
 // 仕組みを流用した専用ページ。ただしスコアやタイマーによる終了は無く、ポップイットらしく
 // 制限無くずっとタップし続けられる（当たるたびに次のターゲットがすぐ出てくる）。
@@ -681,6 +774,8 @@ export function PopItStage({ backTo }: { backTo: string }) {
     <BallStage config={config} backTo={backTo} />
   ) : config.id === "ice-floe" ? (
     <IceFloeStage config={config} backTo={backTo} />
+  ) : config.id === "shatter" ? (
+    <SnapshotShatterStage config={config} backTo={backTo} />
   ) : (
     <GenericStage config={config} backTo={backTo} />
   );

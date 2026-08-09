@@ -528,9 +528,8 @@ html.celebrate-vignette-active::before {
   animation: celebrate-lightning-flicker 0.5s ease-out forwards;
 }
 
-/* ==== StrokePath（経路を描き下ろす構造テンプレート。lightningの稲光・shatterの
-   ヒビはどちらもstroke-dasharray/dashoffsetを0まで動かす同じ仕組みで、太さ・色・
-   duration・グローの強さが違うだけだった。RadialBurstと同じ「layers配列」の形）。 ==== */
+/* ==== StrokePath（経路を描き下ろす構造テンプレート。stroke-dasharray/dashoffsetを
+   0まで動かし、太さ・色・duration・グローを呼び出し側から与える）。 ==== */
 
 .celebrate-stroke-path-svg {
   position: absolute;
@@ -878,9 +877,7 @@ html.celebrate-vignette-active::before {
   }
 }
 
-/* ==== shatter（画面ひび割れ崩壊：⑤段階エフェクト・時間軸型） ====
-   ①ヒビが入る→②広がる→③バキバキ（シェイク）→④破片が崩れ落ちる、の4局面。
-   実体を持つ全画面コンテンツなので celebrate-fullscreen-layer 直下に描画される。 */
+/* ==== shatter（現在のviewportをCanvasへ撮影し、三角形メッシュとして崩す） ==== */
 
 .celebrate-shatter {
   position: absolute;
@@ -889,61 +886,14 @@ html.celebrate-vignette-active::before {
   overflow: hidden;
 }
 
-.celebrate-shatter-shake-layer {
-  position: absolute;
+.celebrate-shatter-snapshot-source {
+  position: fixed;
   inset: 0;
-  /* ③バキバキ：ヒビが伸び終わる頃（0.3s前後）に短く激しく揺れる。 */
-  animation: celebrate-shatter-shake 0.32s 0.28s ease-in-out;
-}
-
-@keyframes celebrate-shatter-shake {
-  10%,
-  90% {
-    transform: translate3d(-2px, 0, 0);
-  }
-  20%,
-  80% {
-    transform: translate3d(3px, -1px, 0);
-  }
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-5px, 1px, 0);
-  }
-  40%,
-  60% {
-    transform: translate3d(5px, -1px, 0);
-  }
-}
-
-/* ①②：ヒビが中心から伸びていく（StrokePath共通実装。celebrate-stroke-path参照）。 */
-
-/* ④：グリッド状の破片が、下段から少し遅れて重力方向へ崩れ落ちる。 */
-.celebrate-shatter-shard {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(10, 10, 20, 0.3));
+  display: block;
+  width: 100vw;
+  height: 100vh;
   opacity: 0;
-  animation: celebrate-shatter-fall 0.95s cubic-bezier(0.5, 0, 0.75, 0) forwards;
-}
-
-@keyframes celebrate-shatter-fall {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-    opacity: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  55% {
-    transform: translate(0, 0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--celebrate-shatter-fall-x), var(--celebrate-shatter-fall-y))
-      rotate(var(--celebrate-shatter-rotate));
-    opacity: 0;
-  }
+  pointer-events: none;
 }
 
 /* ==== popup（テキストチャネル：「+1」のような浮遊表示） ==== */
@@ -1049,14 +999,6 @@ html.celebrate-vignette-active::before {
 
   .celebrate-firework-flash {
     animation-duration: 0.15s;
-  }
-
-  .celebrate-shatter-shake-layer {
-    animation: none;
-  }
-
-  .celebrate-shatter-shard {
-    animation-duration: 0.2s;
   }
 
   .celebrate-clip-reveal {

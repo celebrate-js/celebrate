@@ -16,6 +16,7 @@ import {
 } from "./recipes";
 import { activateContainerModifier } from "./containerModifier";
 import { intensityToScale } from "./intensity";
+import { SHATTER_DURATION_MS } from "./shatter";
 
 // アプリのルートに1回だけ置く Provider 兼オーバーレイ容器。
 //
@@ -41,12 +42,13 @@ export interface CelebrateProviderProps {
   /** アプリ既定の意匠。個々の呼び出しで theme を渡せば上書きできる。 */
   theme?: CelebrateTheme;
   /**
-   * 画面全体エフェクト（rain/lightning/shatter等）や中央寄せの基準を、viewport全体
+   * 画面全体エフェクト（rain/lightning等）や中央寄せの基準を、viewport全体
    * ではなくこの要素の内側に閉じ込める。「このカードの中だけ雨を降らせる」のような
    * ローカルなスコープが必要な場合に渡す。渡す場合、この要素自身に
    * `position: relative`（か absolute/fixed）を呼び出し側で設定しておくこと
    * （celebrate 側はこの要素いっぱいに絶対配置で重ねるだけで、位置の基準は作らない）。
-   * 省略時は従来通り document.body へ portal し、viewport全体を使う。
+   * 省略時は document.body へ portal し、viewport全体を使う。shatterは常にviewportを
+   * 撮影するため、この指定の対象外。
    */
   container?: RefObject<HTMLElement | null>;
 }
@@ -97,7 +99,12 @@ export function CelebrateProvider({ children, theme, container }: CelebrateProvi
           }
         : null;
       const id = nextId.current++;
-      const durationMs = durationForCelebration(content, variantOptions);
+      // shatterは画面の撮影を完了してから破片を動かす。撮影中に通常の自動片付けが走らないよう、
+      // 文字列として直接発火した場合も最低保持時間を保証する。
+      const durationMs =
+        content === "shatter"
+          ? Math.max(durationForCelebration(content, variantOptions), SHATTER_DURATION_MS)
+          : durationForCelebration(content, variantOptions);
 
       playSoundsForCelebration(content, variantOptions);
       playHapticsForCelebration(content, variantOptions);

@@ -68,6 +68,15 @@ export {
   SHATTER_DURATION_MS,
 } from "./shatter";
 export type { ShatterScene, CrackLine, Shard } from "./shatter";
+export {
+  createSnapshotShatterScene,
+  createSeededSnapshotShatterRandom,
+  SNAPSHOT_SHATTER_COLUMNS,
+  SNAPSHOT_SHATTER_ROWS,
+  SNAPSHOT_SHATTER_SHARD_COUNT,
+  SNAPSHOT_SHATTER_DURATION_MS,
+} from "./snapshotShatterScene";
+export type { SnapshotPoint, SnapshotShard, SnapshotCrack, SnapshotShatterScene } from "./snapshotShatterScene";
 export { RADIAL_BURST_PRESETS } from "./radialLayers";
 export type { RadialBurstShape, RadialLayer, RadialBurstPreset, RadialBurstPresetName } from "./radialLayers";
 export { ballisticPositionAt } from "./ballistic";

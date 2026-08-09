@@ -56,6 +56,8 @@ export { FireworkBurst } from "./FireworkBurst";
 export type { FireworkBurstProps } from "./FireworkBurst";
 export { ShatterScreen } from "./ShatterScreen";
 export type { ShatterScreenProps } from "./ShatterScreen";
+export { SnapshotShatter } from "./SnapshotShatter";
+export type { SnapshotShatterProps, SnapshotShatterSource } from "./SnapshotShatter";
 export { useCelebrateBorder } from "./useCelebrateBorder";
 export type {
   UseCelebrateBorderResult,

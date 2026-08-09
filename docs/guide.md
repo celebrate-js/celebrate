@@ -116,7 +116,7 @@ props・optionsの全フィールドは[API リファレンス](./api-reference.
 
 ## `<StrokePath>` — 経路を描き下ろす構造テンプレート
 
-`lightning`の稲光・`shatter`のヒビはこれのプリセット。
+`lightning`の稲光はこれのプリセット。`shatter`は画面のスナップショットをCanvas破片として崩す。
 
 ## `useCelebrateBorder()` — 既存コンポーネントの境界線を装飾する
 

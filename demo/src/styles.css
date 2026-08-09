@@ -853,6 +853,19 @@ a {
   overflow: hidden;
 }
 
+.popit-stage-surface--snapshot-shatter {
+  overflow: hidden;
+  padding: 0;
+  background: #1c1826;
+}
+
+.popit-snapshot-shatter-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
 .popit-ice-floe-hint {
   position: relative;
   z-index: 2;

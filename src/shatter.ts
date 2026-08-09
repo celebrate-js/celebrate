@@ -1,13 +1,7 @@
 import { createSeededRandom, type RandomFn } from "./random";
 
-// 画面ひび割れ崩壊（⑤段階エフェクト・時間軸型）。
-// 「①中心にヒビが入る→②ヒビが画面全体に広がる→③バキバキ（シェイク）→④破片が崩れ落ちる」
-// という4局面を1つの variant で表現する。isFullScreenContentVariant("shatter") が
-// true のため、rain/lightning と同じく変換されていない画面全体の入れ物に描画される。
-//
-// 破片（shard）は画面をグリッドで分割し、内部の頂点だけをランダムにずらして
-// 「ひび割れたガラス」らしい不規則な多角形タイルを作る（辺の頂点は動かさないことで
-// 画面端に隙間ができないようにする＝タイル同士が必ず隙間なく画面全体を覆う）。
+// 互換性のために公開している、CSS clip-path用の破片形状生成ユーティリティ。
+// 標準のshatter演出はShatterScreen/SnapshotShatterが画面の撮影画素を描画する。
 
 export interface CrackLine {
   /** SVG polyline の points（0〜100 の相対座標）。 */
@@ -35,7 +29,9 @@ const CRACK_COUNT = 7;
 
 export const SHATTER_SHARD_COUNT = GRID * GRID;
 export const SHATTER_CRACK_COUNT = CRACK_COUNT;
-export const SHATTER_DURATION_MS = 1800;
+// DOMのviewport撮影（html2canvas）に要する時間を含める。撮影後に2200msの破片アニメーションを
+// 最後まで表示できるよう、カタログ側の自動片付けは余裕を持たせる。
+export const SHATTER_DURATION_MS = 10000;
 
 interface Vertex {
   x: number;
@@ -66,7 +62,7 @@ function fmt(v: Vertex): string {
   return `${v.x.toFixed(1)}% ${v.y.toFixed(1)}%`;
 }
 
-/** ①②：中心から画面外へ向かう、ジグザグなヒビを複数本生成する。 */
+/** 中心から画面外へ向かう、ジグザグなヒビを複数本生成する。 */
 function createCracks(random: RandomFn): readonly CrackLine[] {
   return Array.from({ length: CRACK_COUNT }, (_, id) => {
     const angle = (Math.PI * 2 * id) / CRACK_COUNT + (random() - 0.5) * 0.4;
@@ -87,7 +83,7 @@ function createCracks(random: RandomFn): readonly CrackLine[] {
   });
 }
 
-/** ④：グリッドタイルを、崩れ落ちる破片（shard）に変換する。 */
+/** グリッドタイルを、崩れ落ちる破片（shard）に変換する。 */
 function createShards(random: RandomFn, vertices: readonly Vertex[]): readonly Shard[] {
   const shards: Shard[] = [];
   let id = 0;
@@ -114,7 +110,7 @@ function createShards(random: RandomFn, vertices: readonly Vertex[]): readonly S
   return shards;
 }
 
-/** ひび割れ〜崩壊の一連の場面をまとめて生成する。 */
+/** CSS clip-pathで使える破片形状を生成する。 */
 export function createShatterScene(random: RandomFn = Math.random): ShatterScene {
   const vertices = createVertexGrid(random);
   return {

@@ -3,3 +3,7 @@ dist/
 coverage/
 *.log
 .DS_Store
+
+# Local Codex/agent settings and scratch notes are never repository assets.
+.claude/
+scratchpad/

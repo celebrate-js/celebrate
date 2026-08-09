@@ -4,10 +4,10 @@
 
 ## `CelebrateProviderProps`
 
-| prop        | type                             | 既定値               | 説明                                                                                                                                                                                        |
-| ----------- | -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `theme`     | `CelebrateTheme`                 | 組み込みの既定テーマ | 意匠（色・角丸・書体）。個々の`celebrate()`呼び出しで上書き可能。                                                                                                                           |
-| `container` | `RefObject<HTMLElement \| null>` | -                    | 指定すると、rain/lightning/shatterのような画面全体エフェクトをviewport全体ではなくこの要素の内側に閉じ込める（`position: relative`をこの要素に設定しておくこと）。省略時は`document.body`。 |
+| prop        | type                             | 既定値               | 説明                                                                                                                                                                                                                       |
+| ----------- | -------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `theme`     | `CelebrateTheme`                 | 組み込みの既定テーマ | 意匠（色・角丸・書体）。個々の`celebrate()`呼び出しで上書き可能。                                                                                                                                                          |
+| `container` | `RefObject<HTMLElement \| null>` | -                    | 指定すると、rain/lightningのような画面全体エフェクトをviewport全体ではなくこの要素の内側に閉じ込める（`position: relative`をこの要素に設定しておくこと）。省略時は`document.body`。`shatter`は常にviewport全体を撮影する。 |
 
 ## `CelebrateOptions`（`celebrate(content, options)`の第二引数）
 
@@ -102,6 +102,30 @@ Tier1カタログ名にも紐付いていない、Tier3の生プリミティブ�
 | `delayMs`    | `number`                                             | `0`        | 発火からの遅延。                                                                                                                                                                          |
 | `color`      | `string`                                             | `"#000"`   | カーテン自体の色。                                                                                                                                                                        |
 | `children`   | `ReactNode`                                          | -          | カーテンの下に見える内容。省略時は単色のカーテンだけを描く。                                                                                                                              |
+
+## `SnapshotShatter` props
+
+Canvasまたは`<img>`をその瞬間の画素のまま撮影し、三角形の破片としてCanvas上で崩すプリミティブ。
+任意のDOM撮影は、外部画像・フォント・CORS・CSSの再現性を偽らないため意図的に扱わない。
+
+```tsx
+const boardRef = useRef<HTMLCanvasElement>(null);
+const [shattering, setShattering] = useState(false);
+
+<canvas ref={boardRef} />;
+{
+  shattering && <SnapshotShatter sourceRef={boardRef} onComplete={() => setShattering(false)} />;
+}
+```
+
+| prop         | type                                                       | 既定値   | 説明                                                    |
+| ------------ | ---------------------------------------------------------- | -------- | ------------------------------------------------------- |
+| `sourceRef`  | `RefObject<HTMLCanvasElement \| HTMLImageElement \| null>` | -        | 撮影して割る対象。                                      |
+| `seed`       | `number`                                                   | ランダム | 破片メッシュを再現可能にする。                          |
+| `durationMs` | `number`                                                   | `1150`   | ひびから破片が消えるまでの長さ。                        |
+| `columns`    | `number`                                                   | `4`      | 横方向のメッシュ分割数。画面全体なら6〜8程度が目安。    |
+| `rows`       | `number`                                                   | `3`      | 縦方向のメッシュ分割数。画面全体なら4〜6程度が目安。    |
+| `onComplete` | `() => void`                                               | -        | 終了時の通知。通常はここでコンポーネントをunmountする。 |
 
 ## `Sequence` props
 
