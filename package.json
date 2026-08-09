@@ -53,6 +53,9 @@
   },
   "scripts": {
     "build": "tsup && node -e \"require('fs').copyFileSync('src/celebrate.css','dist/celebrate.css')\"",
+    "docs:build": "vite build --config docs-site/vite.config.ts",
+    "docs:dev": "vite --config docs-site/vite.config.ts",
+    "docs:typecheck": "tsc -p docs-site/tsconfig.json",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -87,6 +90,7 @@
     "@eslint/js": "^9.39.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^5.2.0",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
@@ -96,12 +100,14 @@
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
     "lint-staged": "^16.4.0",
+    "marked": "^18.0.9",
     "prettier": "^3.9.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tsup": "^8.5.1",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.66.0",
+    "vite": "^6.4.3",
     "vitest": "^4.1.10"
   },
   "dependencies": {
