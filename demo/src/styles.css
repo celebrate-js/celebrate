@@ -347,7 +347,6 @@ a {
 }
 
 .catalog-card-trigger {
-  align-self: flex-start;
   border-radius: 0.5rem;
   border: 1px solid var(--accent);
   background: #fff;
@@ -356,6 +355,21 @@ a {
   font-size: 0.82rem;
   padding: 0.35rem 0.9rem;
   cursor: pointer;
+}
+
+/* カタログの演出は、操作中のボタンを覆わないようボタンの上から発生させる。 */
+.catalog-card-action {
+  position: relative;
+  align-self: flex-start;
+}
+
+.catalog-card-effect-anchor {
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
 }
 
 .catalog-card-trigger:hover {
