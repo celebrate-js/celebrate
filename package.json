@@ -10,11 +10,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sato0825/celebrate-js.git"
+    "url": "git+https://github.com/celebrate-js/celebrate.git"
   },
-  "homepage": "https://github.com/sato0825/celebrate-js#readme",
+  "homepage": "https://celebrate-js-docs.pages.dev",
   "bugs": {
-    "url": "https://github.com/sato0825/celebrate-js/issues"
+    "url": "https://github.com/celebrate-js/celebrate/issues"
   },
   "keywords": [
     "react",

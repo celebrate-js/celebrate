@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/sato0825/celebrate-js/security/advisories/new
+    url: https://github.com/celebrate-js/celebrate/security/advisories/new
     about: 脆弱性は公開Issueではなく、非公開の脆弱性報告を使ってください。

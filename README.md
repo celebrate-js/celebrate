@@ -6,7 +6,7 @@ English | [日本語](#japanese)
 
 A React library for “moment” effects — stamp seals, confetti, fireworks, lightning, glowing borders, and more. Add clear visual feedback to UI interactions out of the box.
 
-> This repository contains the package itself (`src/`) and a local sandbox (`demo/`) for development checks. The `demo/` directory is not included in the published npm package (see `files` in `package.json`). If a public documentation site becomes necessary, it should live in a separate repository or directory.
+> This repository contains the package itself (`src/`) and a local sandbox (`demo/`) for development checks. The `demo/` directory is not included in the published npm package (see `files` in `package.json`). The public documentation site and interactive catalog are available at [celebrate-js-docs.pages.dev](https://celebrate-js-docs.pages.dev).
 
 ## Install
 
@@ -41,6 +41,7 @@ function SubmitButton() {
 
 ## Documentation
 
+- [Online documentation and interactive catalog](https://celebrate-js-docs.pages.dev) — guides, API reference, and all 25 effects to try in the browser
 - [Guide](docs/guide.md) — the 3-tier design philosophy, catalog, and component usage
 - [API reference](docs/api-reference.md) — prop/option types and defaults
 - [Catalog rationale](docs/catalog-rationale.md) — why the catalog contains 25 variants, with theory and sources
@@ -69,7 +70,7 @@ npm --prefix demo run dev
 
 React向けの「決まった瞬間」の演出ライブラリ。印影スタンプ・紙吹雪・花火・稲光・ボーダーの発光など、UI操作への視覚的フィードバックをまとめて提供します。
 
-> このリポジトリはパッケージ本体（`src/`）と、開発時に手元で動作確認するためのローカルサンドボックス（`demo/`）で構成されています。`demo/`はnpm公開物には含まれません（`package.json`の`files`参照）。公式ドキュメントサイトが必要になった場合は、別リポジトリまたは別ディレクトリとして切り出します。
+> このリポジトリはパッケージ本体（`src/`）と、開発時に手元で動作確認するためのローカルサンドボックス（`demo/`）で構成されています。`demo/`はnpm公開物には含まれません（`package.json`の`files`参照）。公開ドキュメントサイトと試せるカタログは[celebrate-js-docs.pages.dev](https://celebrate-js-docs.pages.dev)で公開しています。
 
 ## インストール
 
@@ -104,6 +105,7 @@ function SubmitButton() {
 
 ## ドキュメント
 
+- [公開ドキュメント・試せるカタログ](https://celebrate-js-docs.pages.dev) — ガイド、APIリファレンス、25種類のエフェクトをブラウザで試せます
 - [ガイド](docs/guide.md) — 3層の設計思想・カタログ・各コンポーネントの使い方
 - [API リファレンス](docs/api-reference.md) — props・optionsの型と既定値の一覧
 - [カタログ妥当性根拠](docs/catalog-rationale.md) — 25 variantがなぜ入っているかの理論的根拠・出典

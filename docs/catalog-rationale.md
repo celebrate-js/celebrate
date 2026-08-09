@@ -1,13 +1,13 @@
 # カタログ（Tier1・25 variant）の妥当性根拠
 
-このドキュメントは「なぜこの25個が入っていて、なぜこの並び順（[recipes.tsx](https://github.com/sato0825/celebrate-js/blob/main/src/recipes.tsx)の
+このドキュメントは「なぜこの25個が入っていて、なぜこの並び順（[recipes.tsx](https://github.com/celebrate-js/celebrate/blob/main/src/recipes.tsx)の
 8カテゴリ）なのか」に、実証（実際に使われていた）と理論（学術・実務のフレームワーク）の
 両方から根拠を与える。カタログに追加・削除の判断をする際はここを更新すること。
 
 ## 実証されている4つ
 
 `git log`で遡ると、`stamp` / `confetti` / `record` / `sparkle`の4つだけが
-break_even_toolsからの実際の抽出元（[初回コミット](https://github.com/sato0825/celebrate-js/blob/main/CHANGELOG.md)）を持つ。
+break_even_toolsからの実際の抽出元（[初回コミット](https://github.com/celebrate-js/celebrate/blob/main/CHANGELOG.md)）を持つ。
 残り21 variantは本ライブラリの開発過程で追加された、理論に基づく先取り実装である。
 「実証されている＝優れている」わけではなく、「実証されていない＝根拠がない」わけでもない
 （後述の通り理論的根拠は別途ある）が、この違い自体は事実として記録しておく。
@@ -91,4 +91,4 @@ CCI（教育アプリ文脈）だけでは⑥環境演出を支持しきれな�
 | ⑧テキストチャネル         | popup                                        | Microinteractions（Feedback）                         |
 
 関連：[構造分解メモ](./effect-structure-taxonomy.md)（実装の構造的な分類）、
-[recipes.tsx](https://github.com/sato0825/celebrate-js/blob/main/src/recipes.tsx)（このカテゴリ分けの実装本体）。
+[recipes.tsx](https://github.com/celebrate-js/celebrate/blob/main/src/recipes.tsx)（このカテゴリ分けの実装本体）。
