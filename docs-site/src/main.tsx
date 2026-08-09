@@ -1,15 +1,17 @@
 import { marked } from "marked";
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { createRoot } from "react-dom/client";
 import {
   CelebrateProvider,
+  CELEBRATE_VARIANT_NAMES,
   hasSoundForCelebration,
   isFullScreenContent,
   useCelebrate,
+  type CelebrateStampShape,
   type CelebrateVariant,
   type CelebrateVariantOptions,
 } from "../../src/react";
-import type { FireworkStyle } from "../../src";
+import { DEFAULT_CELEBRATE_THEME, type FireworkStyle } from "../../src";
 import "../../src/celebrate.css";
 import "./site.css";
 
@@ -381,6 +383,236 @@ function CatalogCard({ spec }: { spec: CatalogVariantSpec }) {
   );
 }
 
+const CATALOG_PLAYGROUND_VARIANTS = CELEBRATE_VARIANT_NAMES;
+const CATALOG_PLAYGROUND_DEFAULT_COLOR = "#d64545";
+const CATALOG_PLAYGROUND_TEXT_VARIANTS = new Set<CelebrateVariant>(["stamp", "record", "bounce", "medal", "popup"]);
+const CATALOG_PLAYGROUND_NOTE_VARIANTS = new Set<CelebrateVariant>(["record"]);
+const CATALOG_PLAYGROUND_SIZE_VARIANTS = new Set<CelebrateVariant>(["firework", "pop", "ripple", "ring", "flash"]);
+const CATALOG_PLAYGROUND_ROTATE_VARIANTS = new Set<CelebrateVariant>(["stamp"]);
+const CATALOG_PLAYGROUND_SHAPE_VARIANTS = new Set<CelebrateVariant>(["stamp"]);
+const CATALOG_PLAYGROUND_PALETTE_VARIANTS = new Set<CelebrateVariant>([
+  "confetti",
+  "sparkle",
+  "cracker",
+  "rain",
+  "firework",
+]);
+const CATALOG_PLAYGROUND_STAMP_SHAPES: readonly CelebrateStampShape[] = ["rounded", "circle", "square", "star"];
+
+function catalogPlaygroundOptionsSnippet(
+  options: CelebrateVariantOptions,
+  withList: readonly CelebrateVariant[]
+): string {
+  const lines: string[] = [];
+  if (withList.length > 0) lines.push(`  with: [${withList.map((variant) => `"${variant}"`).join(", ")}],`);
+  if (options.text) lines.push(`  text: "${options.text}",`);
+  if (options.note) lines.push(`  note: "${options.note}",`);
+  if (options.intensity !== undefined) lines.push(`  intensity: ${options.intensity},`);
+  if (options.sizeRem !== undefined) lines.push(`  sizeRem: ${options.sizeRem},`);
+  if (options.rotateDeg !== undefined) lines.push(`  rotateDeg: ${options.rotateDeg},`);
+  if (options.shape !== undefined) lines.push(`  shape: "${options.shape}",`);
+  if (options.colors) lines.push(`  colors: [${options.colors.map((color) => `"${color}"`).join(", ")}],`);
+  if (options.theme) {
+    lines.push(`  theme: { ...DEFAULT_CELEBRATE_THEME, stampColor: "${options.theme.stampColor}" },`);
+  }
+  return lines.length > 0 ? `, {\n${lines.join("\n")}\n}` : "";
+}
+
+function CatalogPlayground() {
+  const celebrate = useCelebrate();
+  const [variant, setVariant] = useState<CelebrateVariant>("confetti");
+  const [withList, setWithList] = useState<CelebrateVariant[]>([]);
+  const [intensity, setIntensity] = useState(1);
+  const [text, setText] = useState("");
+  const [note, setNote] = useState("");
+  const [color, setColor] = useState(CATALOG_PLAYGROUND_DEFAULT_COLOR);
+  const [sizeRem, setSizeRem] = useState<number | null>(null);
+  const [rotateDeg, setRotateDeg] = useState<number | null>(null);
+  const [shape, setShape] = useState<CelebrateStampShape | null>(null);
+  const effectAnchorRef = useRef<HTMLSpanElement | null>(null);
+  const supportsText = CATALOG_PLAYGROUND_TEXT_VARIANTS.has(variant);
+  const supportsNote = CATALOG_PLAYGROUND_NOTE_VARIANTS.has(variant);
+  const supportsSize = CATALOG_PLAYGROUND_SIZE_VARIANTS.has(variant);
+  const supportsRotate = CATALOG_PLAYGROUND_ROTATE_VARIANTS.has(variant);
+  const supportsShape = CATALOG_PLAYGROUND_SHAPE_VARIANTS.has(variant);
+  const usesPalette = CATALOG_PLAYGROUND_PALETTE_VARIANTS.has(variant);
+
+  const toggleWith = (target: CelebrateVariant) => {
+    setWithList((previous) =>
+      previous.includes(target) ? previous.filter((item) => item !== target) : [...previous, target]
+    );
+  };
+
+  const options = useMemo<CelebrateVariantOptions>(() => {
+    const next: CelebrateVariantOptions = {};
+    if (withList.length > 0) next.with = withList;
+    if (supportsText && text) next.text = text;
+    if (supportsNote && note) next.note = note;
+    if (intensity !== 1) next.intensity = intensity;
+    if (supportsSize && sizeRem !== null) next.sizeRem = sizeRem;
+    if (supportsRotate && rotateDeg !== null) next.rotateDeg = rotateDeg;
+    if (supportsShape && shape !== null) next.shape = shape;
+    if (color !== CATALOG_PLAYGROUND_DEFAULT_COLOR) {
+      if (usesPalette) next.colors = [color];
+      else next.theme = { ...DEFAULT_CELEBRATE_THEME, stampColor: color };
+    }
+    return next;
+  }, [
+    color,
+    intensity,
+    note,
+    rotateDeg,
+    shape,
+    sizeRem,
+    supportsNote,
+    supportsRotate,
+    supportsShape,
+    supportsSize,
+    supportsText,
+    text,
+    usesPalette,
+    withList,
+  ]);
+
+  const code = `celebrate("${variant}"${catalogPlaygroundOptionsSnippet(options, withList)});`;
+  const fire = () => {
+    if (isFullScreenContent(variant)) celebrate(variant, options);
+    else celebrate(variant, { ...options, anchor: effectAnchorRef });
+  };
+
+  return (
+    <section className="catalog-playground" aria-labelledby="catalog-playground-title">
+      <div>
+        <p className="eyebrow">CUSTOM PLAYGROUND</p>
+        <h2 id="catalog-playground-title">カスタムして試す</h2>
+        <p>名前だけのカードではなく、optionsを変えながら実際の呼び出しと見た目を確認できます。</p>
+      </div>
+      <div className="catalog-playground-grid">
+        <div className="catalog-playground-controls">
+          <label>
+            variant
+            <select
+              value={variant}
+              onChange={(event) => {
+                const nextVariant = event.target.value as CelebrateVariant;
+                setVariant(nextVariant);
+                setWithList((previous) => previous.filter((item) => item !== nextVariant));
+              }}
+            >
+              {CATALOG_PLAYGROUND_VARIANTS.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <fieldset>
+            <legend>with（重ねる演出）</legend>
+            <div className="catalog-playground-with-list">
+              {CATALOG_PLAYGROUND_VARIANTS.filter((item) => item !== variant).map((item) => (
+                <label key={item}>
+                  <input type="checkbox" checked={withList.includes(item)} onChange={() => toggleWith(item)} />
+                  {item}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label>
+            intensity: {intensity.toFixed(2)}
+            <input
+              type="range"
+              min="0.25"
+              max="4"
+              step="0.25"
+              value={intensity}
+              onChange={(event) => setIntensity(Number(event.target.value))}
+            />
+          </label>
+          {supportsSize && (
+            <label>
+              sizeRem: {sizeRem?.toFixed(1) ?? "既定"}
+              <input
+                type="range"
+                min="0.5"
+                max="12"
+                step="0.5"
+                value={sizeRem ?? 5}
+                onChange={(event) => setSizeRem(Number(event.target.value))}
+              />
+            </label>
+          )}
+          {supportsRotate && (
+            <label>
+              rotateDeg: {rotateDeg ?? 0}deg
+              <input
+                type="range"
+                min="-45"
+                max="45"
+                step="1"
+                value={rotateDeg ?? 0}
+                onChange={(event) => setRotateDeg(Number(event.target.value))}
+              />
+            </label>
+          )}
+          {supportsShape && (
+            <label>
+              shape
+              <select
+                value={shape ?? ""}
+                onChange={(event) =>
+                  setShape(event.target.value === "" ? null : (event.target.value as CelebrateStampShape))
+                }
+              >
+                <option value="">既定（rounded）</option>
+                {CATALOG_PLAYGROUND_STAMP_SHAPES.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {supportsText && (
+            <label>
+              text
+              <input
+                type="text"
+                value={text}
+                placeholder="例：合格"
+                onChange={(event) => setText(event.target.value)}
+              />
+            </label>
+          )}
+          {supportsNote && (
+            <label>
+              note
+              <input
+                type="text"
+                value={note}
+                placeholder="例：れんぞく 7問"
+                onChange={(event) => setNote(event.target.value)}
+              />
+            </label>
+          )}
+          <label>
+            color
+            <input type="color" value={color} onChange={(event) => setColor(event.target.value)} />
+          </label>
+        </div>
+        <pre className="catalog-playground-code">
+          <code>{code}</code>
+        </pre>
+      </div>
+      <div className="catalog-playground-action">
+        <span ref={effectAnchorRef} aria-hidden="true" className="catalog-card-effect-anchor" />
+        <button type="button" onClick={fire}>
+          カスタム設定で発火
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function CatalogPage() {
   return (
     <section className="catalog-page">
@@ -389,6 +621,7 @@ function CatalogPage() {
       <p className="catalog-lead">
         カードの「試す」を押すと、その場でエフェクトが発火します。画面全体を使う演出も含みます。
       </p>
+      <CatalogPlayground />
       {catalogCategories.map((category) => (
         <section className="catalog-category" key={category.title}>
           <h2>{category.title}</h2>
