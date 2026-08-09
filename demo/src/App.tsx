@@ -2248,7 +2248,7 @@ function DocsHeader() {
       <div className="docs-badges">
         <span className="docs-badge">
           <span>npm</span>
-          <span>v0.1.1</span>
+          <span>v1.0.0</span>
         </span>
         <span className="docs-badge">
           <span>variants</span>
