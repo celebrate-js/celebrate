@@ -1,6 +1,6 @@
 {
   "name": "@celebrate-js/celebrate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "React effects for memorable UI moments — stamps, confetti, fireworks, glowing borders, and more.",
   "license": "MIT",
